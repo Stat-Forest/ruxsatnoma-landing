@@ -10,6 +10,16 @@ on:
       upload-dist:
         type: boolean
         default: false
+      api-base-url:
+        # Baked into the bundle at BUILD time — Vite substitutes `import.meta.env`
+        # literally, so there is no runtime override and a wrong value here ships a
+        # site that calls the wrong host. Empty on a plain PR run (the artifact is
+        # thrown away); the deploy workflow passes its environment's real API origin.
+        # Without this the fallback in `src/api/client.ts` — `http://localhost:8000`
+        # — went out to the dev server, where every public call was blocked by the
+        # browser and the tariff calculator simply reported itself unavailable.
+        type: string
+        default: ''
 
 jobs:
   check:
@@ -23,6 +33,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn build
+        env:
+          VITE_API_BASE_URL: ${{ inputs.api-base-url }}
       - name: Upload the bundle
         if: ${{ inputs.upload-dist }}
         uses: actions/upload-artifact@v4
