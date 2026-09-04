@@ -1965,6 +1965,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/refs/activity-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Activity Types */
+        get: operations["public_activity_types_api_v1_public_refs_activity_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/refs/livestock-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Livestock Types */
+        get: operations["public_livestock_types_api_v1_public_refs_livestock_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/calculations/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Public Estimate */
+        post: operations["public_estimate_api_v1_public_calculations_estimate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/certificates": {
         parameters: {
             query?: never;
@@ -5923,6 +5974,30 @@ export interface components {
             calculation: components["schemas"]["PrecheckCalculationOut"] | null;
         };
         /**
+         * PublicActivityTypeOut
+         * @description A narrowed `admin.schemas.ActivityTypeOut` for `GET
+         *     /public/refs/activity-types`: only what a dropdown needs — `id`, `code`
+         *     (the front-end's own hook for "this is grazing", so it can decide whether
+         *     to render herd inputs) and `name`. Never `quantity_unit`/`status`, which
+         *     the general, authenticated `/refs/*` router already answers and this
+         *     anonymous surface has no reason to repeat. `name` carries whatever
+         *     languages the row has — `en`/`uz_cyrl` today (`tz/12` #31: no Latin-script
+         *     Uzbek yet) — returned as-is, never invented.
+         */
+        PublicActivityTypeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Name */
+            name: {
+                [key: string]: unknown;
+            };
+        };
+        /**
          * PublicCheckCard
          * @description `GET /public/permits/check` — what a citizen or an inspector sees.
          *
@@ -5981,6 +6056,102 @@ export interface components {
              * @constant
              */
             found: false;
+        };
+        /**
+         * PublicEstimateIn
+         * @description `POST /public/calculations/estimate`'s request: the activity, the
+         *     declared quantity or — for grazing — per-group head counts shaped exactly
+         *     like `LivestockItemIn`, and the period. No `contour_id` (a random visitor
+         *     names no parcel), no `application_id` and no `benefit_code` (an anonymous
+         *     claim would be unverifiable and is refused by design, not merely unasked).
+         */
+        PublicEstimateIn: {
+            /**
+             * Activity Type Id
+             * Format: uuid
+             */
+            activity_type_id: string;
+            /**
+             * Period From
+             * Format: date
+             */
+            period_from: string;
+            /**
+             * Period To
+             * Format: date
+             */
+            period_to: string;
+            /** Quantity */
+            quantity?: number | string | null;
+            /** Items */
+            items?: components["schemas"]["LivestockItemIn"][];
+        };
+        /**
+         * PublicEstimateOut
+         * @description Deliberately NOT `CalculationOut`: nothing here is stored (`calculations`
+         *     is append-only and belongs to a real application), and `approximate=True`
+         *     is a FIELD, not just this docstring — the contract that keeps a front-end
+         *     from rendering the figure as a bill.
+         */
+        PublicEstimateOut: {
+            /**
+             * Approximate
+             * @default true
+             * @constant
+             */
+            approximate: true;
+            /**
+             * Disclaimer
+             * @default Approximate estimate only — not a binding calculation. No parcel was selected, so the norm, season, rotation, fire-ban and occupancy-limit checks did not run, and no benefit was applied. The final amount is set once a real parcel is chosen inside an application.
+             */
+            disclaimer: string;
+            /** Checks Skipped */
+            checks_skipped?: string[];
+            /**
+             * Activity Type Id
+             * Format: uuid
+             */
+            activity_type_id: string;
+            /**
+             * Period From
+             * Format: date
+             */
+            period_from: string;
+            /**
+             * Period To
+             * Format: date
+             */
+            period_to: string;
+            /** Quantity */
+            quantity: string | null;
+            /** Items */
+            items: components["schemas"]["LivestockItemIn"][];
+            /** Amount */
+            amount: string;
+            /** Used Sb */
+            used_sb: string | null;
+            /** Rule Code Version */
+            rule_code_version: string;
+            /** Breakdown */
+            breakdown: unknown;
+        };
+        /**
+         * PublicLivestockTypeOut
+         * @description Same narrowing as `PublicActivityTypeOut`, for `GET
+         *     /public/refs/livestock-types`.
+         */
+        PublicLivestockTypeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Name */
+            name: {
+                [key: string]: unknown;
+            };
         };
         /**
          * PublishImportOut
@@ -11243,6 +11414,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CalculationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_activity_types_api_v1_public_refs_activity_types_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicActivityTypeOut"][];
+                };
+            };
+        };
+    };
+    public_livestock_types_api_v1_public_refs_livestock_types_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicLivestockTypeOut"][];
+                };
+            };
+        };
+    };
+    public_estimate_api_v1_public_calculations_estimate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicEstimateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicEstimateOut"];
                 };
             };
             /** @description Validation Error */
