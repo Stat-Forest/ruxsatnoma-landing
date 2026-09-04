@@ -1,0 +1,111 @@
+# .github/workflows/deploy.yml
+name: Deploy — dev
+
+# Ships the landing to dev.ruxsatnoma-urmon.uz. The bundle is built once, by the same gate
+# that guards every push, and travels as an artifact. What lands on the server is dist/
+# plus deploy/ plus the compose file; anything else already there is untouched.
+#
+# Required secrets on the `dev` environment:
+#   DEPLOY_SSH_KEY — private half of a deploy key registered on the server's
+#                    ~/.ssh/authorized_keys for DEPLOY_USER (no passphrase; the
+#                    workflow cannot supply one)
+#   DEPLOY_HOST    — the server's hostname or IP
+#   DEPLOY_PORT    — 2213 (this server's sshd does not listen on 22)
+#   DEPLOY_USER    — jahongir
+#   DEPLOY_PATH    — /home/jahongir/ruxsatnoma-landing (sudo on this server needs an
+#                    interactive password, so the stack lives under the deploy user's
+#                    own home rather than /opt)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-landing-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Gate
+    uses: ./.github/workflows/checks.yml
+    with:
+      upload-dist: true
+
+  deploy:
+    name: Ship to dev
+    needs: gate
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      # Checkout first — it wipes the workspace, which would delete an artifact downloaded
+      # before it.
+      - uses: actions/checkout@v4
+
+      - name: Download the bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Load the SSH key
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust the server host key
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Ship dist, deploy/ and the compose file
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # The old dist/ is removed first: tar would merge into it, leaving assets from
+          # previous builds that the new index.html never references.
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "rm -rf '$DEPLOY_PATH/dist'"
+          tar -czf - dist deploy docker-compose.deploy.yml \
+            | ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+                "tar -xzf - -C '$DEPLOY_PATH'"
+
+      - name: Rebuild and roll
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          docker compose -f docker-compose.deploy.yml build
+          docker compose -f docker-compose.deploy.yml up -d
+          docker image prune -f
+          docker compose -f docker-compose.deploy.yml ps
+          REMOTE
+
+      - name: Verify the public endpoint
+        # Behind a Kerio gateway that terminates TLS with an expired certificate and does
+        # not yet publish this hostname — -k skirts the cert, but a failure here may still
+        # be unrelated to the deploy, so it must not fail the workflow.
+        continue-on-error: true
+        run: |
+          for i in $(seq 1 5); do
+            if curl -kfs https://dev.ruxsatnoma-urmon.uz/healthz >/dev/null; then
+              echo "public endpoint reachable"; exit 0
+            fi
+            echo "retry $i/5…"; sleep 5
+          done
+          echo "public endpoint unreachable"; exit 1
