@@ -1,91 +1,139 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   Search,
   QrCode,
   CheckCircle2,
-  Download,
   MapPin,
   Calendar,
-  UserCheck,
   Building,
+  UserCheck,
   FileCheck,
   Lock,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/FormControls';
+import { Input, FormField } from '../../components/ui/FormControls';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Alert } from '../../components/ui/Feedback';
+import { api } from '../../api/client';
+import { apiError } from '../../api/errors';
+import type { components } from '../../api/schema';
 
-export interface VerifyPageProps {
-  initialQuery?: string;
+type CheckCard = components['schemas']['PublicCheckCard'];
+type CheckResult = CheckCard | components['schemas']['PublicCheckMiss'];
+
+/** `PublicStatus` (`permits/schemas.py`) mapped to this page's existing
+ * `StatusBadge` variants — the four words the backend actually returns,
+ * never invented labels. */
+const STATUS_BADGE: Record<CheckCard['status'], 'approved' | 'warning' | 'rejected'> = {
+  амалда: 'approved',
+  тўхтатилган: 'warning',
+  'муддати тугаган': 'rejected',
+  'бекор қилинган': 'rejected',
+};
+
+/** Splits a loose permit-number string (the home page's single quick-search
+ * box, e.g. "А № 000123" or "A-123") into `series`+`number` — the two halves
+ * `GET /public/permits/check` actually takes (`permits/service.py`'s
+ * `_permit_number`: `f"{series} № {number:06d}"`). Best-effort only: a
+ * string with no digits cannot name a permit, so the caller falls back to a
+ * plain "not found" instead of guessing further. */
+function splitPermitNumber(raw: string): { series: string; number: string } | null {
+  const match = raw.trim().match(/^(.*?)\D*(\d+)\D*$/);
+  if (!match) return null;
+  const series = match[1].replace(/[№#]/g, '').trim();
+  const number = match[2];
+  if (!series || !number) return null;
+  return { series, number };
 }
 
-export interface VerificationResult {
-  isValid: boolean;
-  permitNo: string;
-  applicantMasked: string; // e.g. "Abdullayev A. N."
-  forestZone: string;
-  activityType: string;
-  livestockCount: string;
-  issueDate: string;
-  expiryDate: string;
-  status: 'approved' | 'warning' | 'rejected';
-  eImzoStatus: string;
-  certSerialNumber: string;
-  qrHash: string;
+type Query = { qr: string } | { series: string; number: string };
+
+/** Reads the page's own contract out of the URL, in priority order: `?qr=`
+ * (a scanned QR — A7's whole reason to exist), then `?series=&number=` (a
+ * bookmarkable manual lookup), then the home page's free-text `?q=`. */
+function queryFromParams(params: URLSearchParams): Query | null {
+  const qr = params.get('qr');
+  if (qr) return { qr };
+  const series = params.get('series');
+  const number = params.get('number');
+  if (series && number) return { series, number };
+  const q = params.get('q');
+  if (q) {
+    const split = splitPermitNumber(q);
+    if (split) return split;
+  }
+  return null;
 }
 
-export const VerifyPage: React.FC<VerifyPageProps> = ({ initialQuery = 'RX-2026-0089' }) => {
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [hasSearched, setHasSearched] = useState(true);
-  const [isScanning, setIsScanning] = useState(false);
+type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
 
-  // Mock lookup database
-  const mockDatabase: Record<string, VerificationResult> = {
-    'RX-2026-0089': {
-      isValid: true,
-      permitNo: 'RX-2026-0089',
-      applicantMasked: 'Abdullayev A. N.',
-      forestZone: 'Burchmulla oʻrmon xoʻjaligi, 4-boʻlim, 12-kvartal (Kontur #42)',
-      activityType: 'Chorva mollarini boqish',
-      livestockCount: '45 bosh qoramol',
-      issueDate: '10.08.2026',
-      expiryDate: '10.08.2027',
-      status: 'approved',
-      eImzoStatus: 'Raqamli muhr haqiqiy (E-IMZO OʻzDSt 1135)',
-      certSerialNumber: '7A-89-FC-12-00-99',
-      qrHash: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    },
-    'RX-2026-0091': {
-      isValid: true,
-      permitNo: 'RX-2026-0091',
-      applicantMasked: 'Karimov J. O.',
-      forestZone: 'Kitob baland togʻ boʻlimi',
-      activityType: 'Chorva mollarini boqish',
-      livestockCount: '80 bosh qoʻy-echki',
-      issueDate: '05.08.2025',
-      expiryDate: '15.08.2026',
-      status: 'warning',
-      eImzoStatus: 'Raqamli muhr haqiqiy (Muddati 5 kun qoldi)',
-      certSerialNumber: '3F-11-AA-44-00-12',
-      qrHash: 'sha256:d853e301297e2f2e5429188e7b952b1e',
-    },
-  };
+export const VerifyPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [seriesInput, setSeriesInput] = useState(searchParams.get('series') ?? '');
+  const [numberInput, setNumberInput] = useState(searchParams.get('number') ?? '');
+  const [status, setStatus] = useState<Status>('idle');
+  const [result, setResult] = useState<CheckCard | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const result = mockDatabase[searchQuery.trim().toUpperCase()] || null;
+  const query = queryFromParams(searchParams);
 
-  const handleSearch = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!query) {
+      setStatus('idle');
+      return;
+    }
+    const activeQuery = query;
+    let cancelled = false;
+    setStatus('loading');
+    setErrorMessage(null);
+
+    async function run(q: Query) {
+      try {
+        const { data, error } = await api.GET('/api/v1/public/permits/check', {
+          params: { query: 'qr' in q ? { qr: q.qr } : { series: q.series, number: Number(q.number) } },
+        });
+        if (cancelled) return;
+        if (error) {
+          const e = apiError(error);
+          setStatus('error');
+          setErrorMessage(`${e.message} (${e.code})`);
+          return;
+        }
+        const body = data as CheckResult;
+        if (body.found) {
+          setResult(body);
+          setStatus('found');
+        } else {
+          setResult(null);
+          setStatus('miss');
+        }
+      } catch {
+        if (cancelled) return;
+        // Network failure (backend unreachable) — never a blank crash.
+        setStatus('error');
+        setErrorMessage('Tekshiruv xizmatiga ulanib boʻlmadi. Internet aloqasini tekshirib, qaytadan urinib koʻring.');
+      }
+    }
+
+    void run(activeQuery);
+    return () => {
+      cancelled = true;
+    };
+    // `query` is derived fresh from `searchParams` every render; comparing its
+    // JSON form keeps the effect from refiring on unrelated re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
+
+  const handleManualSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setHasSearched(true);
-  };
-
-  const handleSimulateScan = () => {
-    setIsScanning(true);
-    setTimeout(() => {
-      setSearchQuery('RX-2026-0089');
-      setHasSearched(true);
-      setIsScanning(false);
-    }, 1500);
+    const next = new URLSearchParams();
+    if (seriesInput.trim() && numberInput.trim()) {
+      next.set('series', seriesInput.trim());
+      next.set('number', numberInput.trim());
+    }
+    setSearchParams(next);
   };
 
   return (
@@ -105,31 +153,40 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialQuery = 'RX-2026-
 
       {/* Search Input Card */}
       <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <Input
-              placeholder="Masalan: RX-2026-0089"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              leftIcon={<Search className="w-4 h-4" />}
-              touchSize
-            />
+        <form onSubmit={handleManualSearch} className="flex flex-col sm:flex-row gap-3 items-end">
+          <div className="w-full sm:w-1/3">
+            <FormField label="Seriya">
+              <Input
+                placeholder="Masalan: А"
+                value={seriesInput}
+                onChange={(e) => setSeriesInput(e.target.value)}
+                leftIcon={<Search className="w-4 h-4" />}
+                touchSize
+              />
+            </FormField>
+          </div>
+          <div className="w-full sm:w-1/3">
+            <FormField label="Raqam">
+              <Input
+                placeholder="Masalan: 000123"
+                value={numberInput}
+                onChange={(e) => setNumberInput(e.target.value)}
+                inputMode="numeric"
+                touchSize
+              />
+            </FormField>
           </div>
           <Button type="submit" variant="primary" size="lg" className="whitespace-nowrap">
             Tekshirish
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="lg"
-            leftIcon={<QrCode className="w-4 h-4" />}
-            onClick={handleSimulateScan}
-            isLoading={isScanning}
-            className="whitespace-nowrap"
-          >
-            QR Skaner
-          </Button>
         </form>
+
+        <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">
+          <QrCode className="w-4 h-4 text-[#2E7D4F] shrink-0" />
+          <span>
+            Ruxsatnoma qogʻozidagi <b>QR-kodni</b> telefon kamerasi bilan skanerlaganda ushbu sahifa avtomatik ravishda ochiladi va natija darhol koʻrsatiladi.
+          </span>
+        </div>
 
         <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">
           <Lock className="w-4 h-4 text-[#2E7D4F] shrink-0" />
@@ -139,104 +196,104 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialQuery = 'RX-2026-
         </div>
       </div>
 
-      {/* Verification Result Section */}
-      {hasSearched && (
+      {/* Result Section */}
+      {status === 'loading' && (
+        <div className="flex items-center justify-center gap-3 text-[#5A646D] py-8">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm font-medium">Tekshirilmoqda…</span>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <Alert variant="danger" title="Xizmat vaqtincha ishlamayapti">
+          {errorMessage}
+        </Alert>
+      )}
+
+      {status === 'miss' && (
+        <Alert variant="danger" title="Ruxsatnoma Topilmadi">
+          Kiritilgan maʼlumotlar boʻyicha tizimda faol ruxsatnoma mavjud emas. Seriya va raqamni qaytadan tekshiring.
+        </Alert>
+      )}
+
+      {status === 'found' && result && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {result ? (
-            <div className="bg-white border border-[#E4E7EA] rounded-2xl shadow-md overflow-hidden">
-              {/* Top Banner Result Status */}
-              <div
-                className={`p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                  result.status === 'approved'
-                    ? 'bg-[#F0F7F1] border-[#D9EBDC] text-[#123522]'
-                    : result.status === 'warning'
-                    ? 'bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]'
-                    : 'bg-[#FEF2F2] border-[#FCA5A5] text-[#991B1B]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white rounded-xl shadow-xs shrink-0">
-                    <CheckCircle2 className="w-8 h-8 text-[#15803D]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold font-mono">{result.permitNo}</span>
-                      <StatusBadge status={result.status} size="sm" />
-                    </div>
-                    <p className="text-xs mt-0.5 font-medium opacity-90">
-                      Ushbu ruxsatnoma davlat reyestridan muvaffaqiyatli oʻtdi va haqiqiy hisoblanadi.
-                    </p>
-                  </div>
+          <div className="bg-white border border-[#E4E7EA] rounded-2xl shadow-md overflow-hidden">
+            {/* Top Banner Result Status */}
+            <div
+              className={`p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                STATUS_BADGE[result.status] === 'approved'
+                  ? 'bg-[#F0F7F1] border-[#D9EBDC] text-[#123522]'
+                  : STATUS_BADGE[result.status] === 'warning'
+                  ? 'bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]'
+                  : 'bg-[#FEF2F2] border-[#FCA5A5] text-[#991B1B]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white rounded-xl shadow-xs shrink-0">
+                  <CheckCircle2 className="w-8 h-8 text-[#15803D]" />
                 </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  leftIcon={<Download className="w-4 h-4" />}
-                  className="bg-white text-[#1A1F24] border-gray-300 shadow-xs hover:bg-gray-50 self-start sm:self-center"
-                >
-                  PDF Koʻrish
-                </Button>
-              </div>
-
-              {/* Detail Breakdown Grid */}
-              <div className="p-6 sm:p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                  {/* Field 1 */}
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
-                    <UserCheck className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-xs text-[#5A646D] uppercase font-semibold block">Arizachi (Maskalangan)</span>
-                      <span className="font-bold text-[#1A1F24] text-base">{result.applicantMasked}</span>
-                    </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold font-mono">{result.status}</span>
+                    <StatusBadge status={STATUS_BADGE[result.status]} size="sm" />
                   </div>
-
-                  {/* Field 2 */}
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
-                    <Building className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-xs text-[#5A646D] uppercase font-semibold block">Faoliyat Turi va Qamrov</span>
-                      <span className="font-bold text-[#1A1F24] text-base">{result.activityType} ({result.livestockCount})</span>
-                    </div>
-                  </div>
-
-                  {/* Field 3 */}
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
-                    <MapPin className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-xs text-[#5A646D] uppercase font-semibold block">Oʻrmon Hududi</span>
-                      <span className="font-bold text-[#1A1F24]">{result.forestZone}</span>
-                    </div>
-                  </div>
-
-                  {/* Field 4 */}
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
-                    <Calendar className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-xs text-[#5A646D] uppercase font-semibold block">Amal Qilish Muddati</span>
-                      <span className="font-bold text-[#1A1F24] font-mono">{result.issueDate} — {result.expiryDate}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* E-IMZO Security Certificate Block */}
-                <div className="p-4 bg-[#F0F7F1] border border-[#D9EBDC] rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#123522]">
-                    <FileCheck className="w-4 h-4 text-[#15803D]" />
-                    <span>{result.eImzoStatus}</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-[#5A646D]">
-                    <div>Sertifikat №: <b className="text-[#1A1F24]">{result.certSerialNumber}</b></div>
-                    <div className="truncate">Hash: <b className="text-[#1A1F24]">{result.qrHash}</b></div>
-                  </div>
+                  <p className="text-xs mt-0.5 font-medium opacity-90">
+                    Ushbu ruxsatnoma davlat reyestridan muvaffaqiyatli oʻtdi.
+                  </p>
                 </div>
               </div>
             </div>
-          ) : (
-            <Alert variant="danger" title="Ruxsatnoma Topilmadi">
-              Kiritilgan seriya yoki raqam ({searchQuery}) boʻyicha tizimda faol ruxsatnoma mavjud emas. Maʼlumotlarni qaytadan tekshiring.
-            </Alert>
-          )}
+
+            {/* Detail Breakdown Grid */}
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
+                  <UserCheck className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Arizachi (Maskalangan)</span>
+                    <span className="font-bold text-[#1A1F24] text-base">{result.holder}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
+                  <Building className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Faoliyat Turi</span>
+                    <span className="font-bold text-[#1A1F24] text-base">{result.activity_type}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
+                  <MapPin className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Oʻrmon Xoʻjaligi</span>
+                    <span className="font-bold text-[#1A1F24]">{result.organization}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
+                  <Calendar className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Amal Qilish Muddati</span>
+                    <span className="font-bold text-[#1A1F24] font-mono">{result.valid_from} — {result.valid_to}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* E-IMZO Security Certificate Block */}
+              <div className="p-4 bg-[#F0F7F1] border border-[#D9EBDC] rounded-xl space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#123522]">
+                  <FileCheck className="w-4 h-4 text-[#15803D]" />
+                  <span>
+                    {result.signatures_valid
+                      ? 'Raqamli imzolar haqiqiy (E-IMZO)'
+                      : 'Raqamli imzolar hali toʻliq tasdiqlanmagan'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
