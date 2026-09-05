@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, Inbox, Loader2 } from 'lucide-react';
 import { Pagination } from './Navigation';
+import { useT } from '../../i18n/useT';
 
 export interface Column<T> {
   key: string;
@@ -32,14 +33,17 @@ export function DataTable<T extends { id: string | number }>({
   columns,
   data,
   isLoading = false,
-  emptyTitle = 'Maʼlumot topilmadi',
-  emptyDescription = 'Hozircha jadvalda koʻrsatish uchun hech qanday yozuv yoʻq',
+  emptyTitle,
+  emptyDescription,
   selectable = false,
   onSelectionChange,
   actions,
   pagination,
   className = '',
 }: DataTableProps<T>) {
+  const t = useT();
+  const resolvedEmptyTitle = emptyTitle ?? t('ui.table.emptyTitle');
+  const resolvedEmptyDescription = emptyDescription ?? t('ui.table.emptyDescription');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
@@ -133,7 +137,7 @@ export function DataTable<T extends { id: string | number }>({
                   )}
                 </th>
               ))}
-              {actions && <th className="p-3.5 text-right w-16">Harakatlar</th>}
+              {actions && <th className="p-3.5 text-right w-16">{t('ui.table.actions')}</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E4E7EA]">
@@ -145,7 +149,7 @@ export function DataTable<T extends { id: string | number }>({
                 >
                   <div className="inline-flex items-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin text-[#2E7D4F]" />
-                    <span>Yuklanmoqda...</span>
+                    <span>{t('ui.table.loading')}</span>
                   </div>
                 </td>
               </tr>
@@ -157,8 +161,8 @@ export function DataTable<T extends { id: string | number }>({
                 >
                   <div className="flex flex-col items-center justify-center">
                     <Inbox className="w-8 h-8 text-[#9AA3AB] mb-2" />
-                    <span className="font-semibold text-[#1A1F24]">{emptyTitle}</span>
-                    <span className="text-xs text-[#5A646D] mt-0.5">{emptyDescription}</span>
+                    <span className="font-semibold text-[#1A1F24]">{resolvedEmptyTitle}</span>
+                    <span className="text-xs text-[#5A646D] mt-0.5">{resolvedEmptyDescription}</span>
                   </div>
                 </td>
               </tr>

@@ -18,12 +18,14 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
+import { useT } from '../../i18n/useT';
 
 export interface HomePageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+  const t = useT();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [selectedRating, setSelectedRating] = useState<string>('');
   const [ratingSubmitted, setRatingSubmitted] = useState<boolean>(false);
@@ -36,78 +38,78 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   const stats = [
-    { label: 'Jami berilgan ruxsatnomalar', value: '42,850+', icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />, change: '+12% ushbu oyda' },
-    { label: 'Faol oʻrmon xujaliklari', value: '84 ta', icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />, change: 'Respublika boʻyicha 100%' },
-    { label: 'Biriktirilgan chorva mollari', value: '185,400', icon: <Users className="w-6 h-6 text-[#2E7D4F]" />, change: 'Ushbu mavsumda' },
-    { label: 'Avtomatik tasdiqlangan', value: '94.8%', icon: <TrendingUp className="w-6 h-6 text-[#2E7D4F]" />, change: 'OneID & E-IMZO integratsiya' },
+    { label: t('home.stats.totalPermits.label'), value: '42,850+', icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.totalPermits.change') },
+    { label: t('home.stats.activeForestries.label'), value: t('home.stats.activeForestries.value'), icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.activeForestries.change') },
+    { label: t('home.stats.livestock.label'), value: '185,400', icon: <Users className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.livestock.change') },
+    { label: t('home.stats.autoApproved.label'), value: '94.8%', icon: <TrendingUp className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.autoApproved.change') },
   ];
 
   const activities = [
     {
       id: 'grazing',
-      title: 'Chorva mollarini boqish',
-      desc: 'Yaylov konturlarida belgilangan normalarga muvofiq qoramol, qoʻy va echkilarni boqish uchun rasmiy ruxsatnoma.',
-      badge: 'Eng koʻp talab qilingan',
+      title: t('home.activities.grazing.title'),
+      desc: t('home.activities.grazing.desc'),
+      badge: t('home.activities.grazing.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: '85,000 bosh',
+      limit: t('home.activities.grazing.limit'),
     },
     {
       id: 'haymaking',
-      title: 'Pichan oʻrish va Somon yigʻish',
-      desc: 'Oʻrmon fondi yerlarida pichan oʻrish maydonlaridan mavsumiy foydalanish.',
-      badge: 'Mavsumiy',
+      title: t('home.activities.haymaking.title'),
+      desc: t('home.activities.haymaking.desc'),
+      badge: t('home.activities.haymaking.badge'),
       icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: '14,200 gektar',
+      limit: t('home.activities.haymaking.limit'),
     },
     {
       id: 'beekeeping',
-      title: 'Asalarichilik va In qoʻyish',
-      desc: 'Asalari oilalarini oʻrmon hududlariga joylashtirish va asal yigʻish faoliyati.',
-      badge: 'Imtiyozli tarif',
+      title: t('home.activities.beekeeping.title'),
+      desc: t('home.activities.beekeeping.desc'),
+      badge: t('home.activities.beekeeping.badge'),
       icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: '42,000 ari oilasi',
+      limit: t('home.activities.beekeeping.limit'),
     },
     {
       id: 'wild_plants',
-      title: 'Yovvoyi oʻsimliklarni yigʻish',
-      desc: 'Mevalar, yongʻoqlar, rezavorlar va oziq-ovqat maqsadlaridagi oʻsimlik xomashyosi.',
-      badge: 'Kvota boʻyicha',
+      title: t('home.activities.wild_plants.title'),
+      desc: t('home.activities.wild_plants.desc'),
+      badge: t('home.activities.wild_plants.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: '350 tonna',
+      limit: t('home.activities.wild_plants.limit'),
     },
     {
       id: 'medicinal_herbs',
-      title: 'Shifobaxsh dorivor oʻsimliklar',
-      desc: 'Sanoat va farmatsevtika maqsadlarida dorivor oʻsimliklarni terish.',
-      badge: 'Maxsus ruxsatnoma',
+      title: t('home.activities.medicinal_herbs.title'),
+      desc: t('home.activities.medicinal_herbs.desc'),
+      badge: t('home.activities.medicinal_herbs.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: '120 tonna',
+      limit: t('home.activities.medicinal_herbs.limit'),
     },
     {
       id: 'recreation',
-      title: 'Rekreatsiya va Turizm',
-      desc: 'Ekologik turizm, vaqtinchalik yengil inshootlar va dam olish maskanlari tashkil etish.',
-      badge: 'Uzoq muddatli',
+      title: t('home.activities.recreation.title'),
+      desc: t('home.activities.recreation.desc'),
+      badge: t('home.activities.recreation.badge'),
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: 'Auksion boʻyicha',
+      limit: t('home.activities.recreation.limit'),
     },
   ];
 
   const newsList = [
     {
-      date: '10 Avgust 2026',
-      title: '2026-2027 yillar yaylov mavsumi uchun elektron arizalar qabuli boshlandi',
-      desc: 'Barcha tuman oʻrmon xoʻjaliklarida yangi GIS chegaralari va elektron kvotalar belgilandi.',
+      date: t('home.news.seasonalApplications.date'),
+      title: t('home.news.seasonalApplications.title'),
+      desc: t('home.news.seasonalApplications.desc'),
     },
     {
-      date: '05 Avgust 2026',
-      title: 'Prokuratura va Raqamli Nazorat tizimi bilan oʻzaro integratsiya yakunlandi',
-      desc: 'Ruxsatnomalarning haqiqiyligi va risk-indikatorlar avtomatik monitoring qilinadi.',
+      date: t('home.news.prosecutorIntegration.date'),
+      title: t('home.news.prosecutorIntegration.title'),
+      desc: t('home.news.prosecutorIntegration.desc'),
     },
     {
-      date: '01 Avgust 2026',
-      title: 'Oʻrmon xoʻjaligi hududlarida chorva boqish toʻlov stavkalari yangilandi',
-      desc: 'Vazirlar Mahkamasi qaroriga muvofiq BHM koeffitsientlari tasdiqlandi.',
+      date: t('home.news.grazingRates.date'),
+      title: t('home.news.grazingRates.title'),
+      desc: t('home.news.grazingRates.desc'),
     },
   ];
 
@@ -125,13 +127,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-              Real-Vaqt Monitoringi
+              {t('home.dashboard.badge')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-2">
-              Davlat Portali Statistikasi va Hujjat Tekshiruvi
+              {t('home.dashboard.title')}
             </h2>
             <p className="text-sm text-[#5A646D]">
-              Oʻrmon fondi yerlaridan foydalanish koʻrsatkichlari hamda ruxsatnoma haqiqiyligini tekshirish paneli
+              {t('home.dashboard.subtitle')}
             </p>
           </div>
         </div>
@@ -164,11 +166,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-sm space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-[#1A1F24]">Ruxsatnomalar Taqsimoti Diagrammasi</h3>
-                  <p className="text-xs text-[#5A646D]">Faoliyat turlari va avtomatik tasdiqlash ulushi</p>
+                  <h3 className="text-base font-bold text-[#1A1F24]">{t('home.chart.title')}</h3>
+                  <p className="text-xs text-[#5A646D]">{t('home.chart.subtitle')}</p>
                 </div>
                 <span className="text-xs font-semibold text-[#2E7D4F] bg-[#F0F7F1] px-2.5 py-1 rounded-lg border border-[#D9EBDC]">
-                  2026 Mavsum
+                  {t('home.chart.season')}
                 </span>
               </div>
 
@@ -178,9 +180,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
                     <span className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D4F]" />
-                      Chorva mollarini boqish
+                      {t('home.chart.grazingLabel')}
                     </span>
-                    <span>68% (29,138 ta)</span>
+                    <span>{t('home.chart.grazingValue')}</span>
                   </div>
                   <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
                     <div className="bg-[#2E7D4F] h-full rounded-full transition-all duration-500" style={{ width: '68%' }} />
@@ -191,9 +193,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
                     <span className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#15803D]" />
-                      Pichan oʻrish va Somon yigʻish
+                      {t('home.chart.haymakingLabel')}
                     </span>
-                    <span>18% (7,713 ta)</span>
+                    <span>{t('home.chart.haymakingValue')}</span>
                   </div>
                   <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
                     <div className="bg-[#15803D] h-full rounded-full transition-all duration-500" style={{ width: '18%' }} />
@@ -204,9 +206,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
                     <span className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#7FB98A]" />
-                      Asalarichilik va In qoʻyish
+                      {t('home.chart.beekeepingLabel')}
                     </span>
-                    <span>10% (4,285 ta)</span>
+                    <span>{t('home.chart.beekeepingValue')}</span>
                   </div>
                   <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
                     <div className="bg-[#7FB98A] h-full rounded-full transition-all duration-500" style={{ width: '10%' }} />
@@ -217,9 +219,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
                     <span className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#A8D5B1]" />
-                      Dorivor oʻsimliklar & Turizm
+                      {t('home.chart.otherLabel')}
                     </span>
-                    <span>4% (1,714 ta)</span>
+                    <span>{t('home.chart.otherValue')}</span>
                   </div>
                   <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
                     <div className="bg-[#A8D5B1] h-full rounded-full transition-all duration-500" style={{ width: '4%' }} />
@@ -228,9 +230,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </div>
 
               <div className="pt-3 border-t border-[#E4E7EA] flex flex-wrap items-center justify-between text-xs text-[#5A646D] gap-2">
-                <span>Barcha arizalar OneID orqali autentifikatsiya qilingan</span>
+                <span>{t('home.chart.footnoteAuth')}</span>
                 <span className="font-semibold text-[#2E7D4F] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" /> Real vaqtda yangilanadi
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" /> {t('home.chart.footnoteLive')}
                 </span>
               </div>
             </div>
@@ -247,42 +249,42 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <QrCode className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-[#1A1F24]">Ruxsatnomani Tekshirish</h3>
-                  <p className="text-xs text-[#5A646D]">QR-kod yoki ruxsatnoma raqami boʻyicha</p>
+                  <h3 className="font-bold text-lg text-[#1A1F24]">{t('home.verify.title')}</h3>
+                  <p className="text-xs text-[#5A646D]">{t('home.verify.subtitle')}</p>
                 </div>
               </div>
 
               <p className="text-xs text-[#5A646D] leading-relaxed">
-                Davlat oʻrmon xizmati tomonidan berilgan ruxsatnomaning haqiqiyligini tekshirish uchun seriya va raqamni kiriting.
+                {t('home.verify.description')}
               </p>
 
               <div className="space-y-3">
                 <Input
-                  placeholder="Masalan: RX-2026-0089"
+                  placeholder={t('home.verify.placeholder')}
                   value={quickSearchInput}
                   onChange={(e) => setQuickSearchInput(e.target.value)}
                   leftIcon={<Search className="w-4 h-4" />}
                   touchSize
                 />
                 <Button type="submit" variant="success" fullWidth size="lg" className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F]">
-                  Haqiqiyligini Tekshirish
+                  {t('home.verify.submitButton')}
                 </Button>
               </div>
 
               <div className="bg-[#F8F9FA] p-4 rounded-xl border border-[#E4E7EA] space-y-2 text-xs text-[#5A646D]">
                 <div className="flex items-center gap-2 font-semibold text-[#1A1F24]">
                   <CheckCircle2 className="w-4 h-4 text-[#15803D]" />
-                  Tekshirish tartibi:
+                  {t('home.verify.instructionsTitle')}
                 </div>
                 <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                  <li>Hujjat seriyasi (masalan: RX-2026) va raqamini kiriting</li>
-                  <li>QR-kod burchagini skanerlash ham mumkin</li>
-                  <li>Maʼlumotlar rasmiy GIS bazasi bilan solishtiriladi</li>
+                  <li>{t('home.verify.step1')}</li>
+                  <li>{t('home.verify.step2')}</li>
+                  <li>{t('home.verify.step3')}</li>
                 </ul>
               </div>
 
               <p className="text-[11px] text-[#767F87] text-center pt-1">
-                * Tekshiruv davlat reyestri maʼlumotlar bazasiga muvofiq onlayn tarzda amalga oshiriladi.
+                {t('home.verify.footnote')}
               </p>
             </form>
           </div>
@@ -293,9 +295,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">Xizmat Turlari</span>
-            <h2 className="text-2xl font-bold text-[#1A1F24] mt-1">Oʻrmon Fondidan Foydalanish Yoʻnalishlari</h2>
-            <p className="text-sm text-[#5A646D]">Oʻzbekiston Respublikasi Oʻrmon Kodeksiga muvofiq beriladigan rasmiy ruxsatnomalar</p>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
+            <h2 className="text-2xl font-bold text-[#1A1F24] mt-1">{t('home.activities.sectionTitle')}</h2>
+            <p className="text-sm text-[#5A646D]">{t('home.activities.sectionSubtitle')}</p>
           </div>
           <Button
             variant="outline"
@@ -303,7 +305,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             rightIcon={<ChevronRight className="w-4 h-4" />}
             onClick={() => onNavigate?.('activities')}
           >
-            Barcha turlarni koʻrish
+            {t('home.activities.viewAllButton')}
           </Button>
         </div>
 
@@ -329,12 +331,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </div>
 
               <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-                <span className="text-[#767F87]">Yillik kvota: <b className="text-[#1A1F24]">{act.limit}</b></span>
+                <span className="text-[#767F87]">{t('home.activities.quotaLabel')} <b className="text-[#1A1F24]">{act.limit}</b></span>
                 <button
                   onClick={() => onNavigate?.('auth_login', { activity: act.id })}
                   className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
                 >
-                  Ariza yozish <ArrowRight className="w-3.5 h-3.5" />
+                  {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -345,17 +347,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* ── 4. HOW IT WORKS TIMELINE ───────────────────────────────── */}
       <section className="bg-white border border-[#E4E7EA] rounded-2xl p-8 shadow-xs space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">Qulay va Ishonchli</span>
-          <h2 className="text-2xl font-bold text-[#1A1F24]">Ruxsatnoma Olish Bosqichlari</h2>
-          <p className="text-sm text-[#5A646D]">Arizadan boshlab tayyor elektron hujjatgacha boʻlgan 4 ta oddiy qadam</p>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
+          <h2 className="text-2xl font-bold text-[#1A1F24]">{t('home.steps.sectionTitle')}</h2>
+          <p className="text-sm text-[#5A646D]">{t('home.steps.sectionSubtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
           {[
-            { step: '01', title: 'OneID Autentifikatsiya', desc: 'OneID yoki E-IMZO orqali shaxsiy kabinetga kiring.' },
-            { step: '02', title: 'Hudud va Parametr', desc: 'GIS xaritasidan oʻrmon konturini va chorva sonini tanlang.' },
-            { step: '03', title: 'Avto-Hisob & Toʻlov', desc: 'Narx avtomatik hisoblanadi va Click/Payme orqali toʻlanadi.' },
-            { step: '04', title: 'QR Ruxsatnoma', desc: 'E-IMZO muhrlangan rasmiy PDF ruxsatnomani yuklab oling.' },
+            { step: '01', title: t('home.steps.01.title'), desc: t('home.steps.01.desc') },
+            { step: '02', title: t('home.steps.02.title'), desc: t('home.steps.02.desc') },
+            { step: '03', title: t('home.steps.03.title'), desc: t('home.steps.03.desc') },
+            { step: '04', title: t('home.steps.04.title'), desc: t('home.steps.04.desc') },
           ].map((st, idx) => (
             <div key={idx} className="relative space-y-3 p-4 bg-[#F8F9FA] border border-[#E4E7EA] rounded-xl">
               <span className="text-2xl font-black font-mono text-[#2E7D4F]">{st.step}</span>
@@ -370,9 +372,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-[#E4E7EA] pb-4">
-            <h3 className="text-lg font-bold text-[#1A1F24]">Yangiliklar va Eʼlonlar</h3>
+            <h3 className="text-lg font-bold text-[#1A1F24]">{t('home.news.sectionTitle')}</h3>
             <a href="#" className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1">
-              Barchasi <ExternalLink className="w-3.5 h-3.5" />
+              {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
 
@@ -397,15 +399,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <PhoneCall className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h4 className="font-bold text-base">Ishonch Telefoni</h4>
-                <p className="text-xs text-gray-300">24/7 Texnik qoʻllab-quvvatlash</p>
+                <h4 className="font-bold text-base">{t('home.contact.title')}</h4>
+                <p className="text-xs text-gray-300">{t('home.contact.subtitle')}</p>
               </div>
             </div>
 
             <div className="text-2xl font-bold font-mono text-[#7FB98A]">+998 (71) 207-88-77</div>
 
             <p className="text-xs text-gray-300 leading-relaxed">
-              Tizimdan foydalanish boʻyicha savollaringiz boʻlsa, operatorlarimizga murojaat qiling.
+              {t('home.contact.description')}
             </p>
 
             <Button
@@ -414,7 +416,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               className="border-white/30 text-white hover:bg-white/10"
               onClick={() => onNavigate?.('feedback')}
             >
-              Murojaat yuborish
+              {t('home.contact.button')}
             </Button>
           </div>
         </div>
@@ -427,13 +429,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="w-14 h-14 bg-[#F0F7F1] text-[#2E7D4F] rounded-full flex items-center justify-center mx-auto shadow-inner">
               <CheckCircle2 className="w-8 h-8 text-[#15803D]" />
             </div>
-            <h3 className="text-xl font-bold text-[#1A1F24]">Bahoingiz muvaffaqiyatli qabul qilindi!</h3>
+            <h3 className="text-xl font-bold text-[#1A1F24]">{t('home.rating.thankYouTitle')}</h3>
             <p className="text-sm text-[#5A646D] max-w-md mx-auto">
-              Portal xizmati sifatini baholaganlingiz va fikr-mulohazangiz uchun tashakkur bildiranamiz.
+              {t('home.rating.thankYouDesc')}
             </p>
             <div className="pt-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F0F7F1] text-[#2E7D4F] text-xs font-bold rounded-full border border-[#D9EBDC]">
-                <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> Berilgan baho: {selectedRating} ball
+                <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> {t('home.rating.resultLabel')} {selectedRating} {t('home.rating.resultUnit')}
               </span>
             </div>
           </div>
@@ -442,13 +444,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4E7EA] pb-5">
               <div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F0F7F1] text-[#2E7D4F] text-xs font-bold uppercase tracking-wider rounded-full border border-[#D9EBDC] mb-2">
-                  <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> Portal Xizmati Sifati
+                  <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> {t('home.rating.badge')}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-[#1A1F24]">
-                  Portal orqali koʻrsatilgan xizmat sifatini baholang
+                  {t('home.rating.formTitle')}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#5A646D] mt-0.5">
-                  Sizning bahoingiz davlat elektron xizmatlarini yanada takomillashtirishga xizmat qiladi.
+                  {t('home.rating.formSubtitle')}
                 </p>
               </div>
             </div>
@@ -456,10 +458,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             {/* Interactive Rating Options Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { value: '5', title: '5 - Aʼlo', desc: 'Juda qulay, tez va tushunarli', stars: 5 },
-                { value: '4', title: '4 - Yaxshi', desc: 'Yaxshi, lekin ayrim takliflarim bor', stars: 4 },
-                { value: '3', title: '3 - Qoniqarli', desc: 'Oʻrtacha, tushunish qiyinroq', stars: 3 },
-                { value: '2', title: '2 - Qoniqarsiz', desc: 'Kamchiliklar mavjud', stars: 2 },
+                { value: '5', title: t('home.rating.options.5.title'), desc: t('home.rating.options.5.desc'), stars: 5 },
+                { value: '4', title: t('home.rating.options.4.title'), desc: t('home.rating.options.4.desc'), stars: 4 },
+                { value: '3', title: t('home.rating.options.3.title'), desc: t('home.rating.options.3.desc'), stars: 3 },
+                { value: '2', title: t('home.rating.options.2.title'), desc: t('home.rating.options.2.desc'), stars: 2 },
               ].map((item) => {
                 const isSelected = selectedRating === item.value;
                 return (
@@ -507,7 +509,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 rightIcon={<Send className="w-4 h-4" />}
                 className="bg-[#2E7D4F] hover:bg-[#23653F] text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-transform active:scale-95 disabled:opacity-50"
               >
-                Baho Yuborish
+                {t('home.rating.submitButton')}
               </Button>
             </div>
           </form>
