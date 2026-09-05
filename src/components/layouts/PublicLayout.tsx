@@ -48,7 +48,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           ? 'bg-[#17331B]/90 border-b border-white/15 text-white shadow-lg'
           : 'bg-[#17331B] border-b border-white/15 text-white shadow-md'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+        {/* `xl:grid` with three columns is what stops the nav from sliding when
+            the language changes: under plain `justify-between` its position followed
+            the logo, and the Russian tagline makes the logo 71px wider than the
+            Uzbek one. Below `xl` the tagline is hidden, so every language leaves
+            the logo the same width and flex is enough there — and grid at that
+            size squeezes the logo onto two lines instead. */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 xl:grid xl:grid-cols-[1fr_auto_1fr]">
           {/* Logo */}
           <button
             onClick={() => onNavigate?.('home')}
@@ -61,7 +67,11 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
               <span className="block text-base font-bold text-white leading-tight tracking-tight">
                 {t('brand.name')}
               </span>
-              <span className="block text-[11px] text-gray-200">
+              {/* Hidden only between `lg` and `xl`: that is the band where the nav
+                  appears but the header is still narrow, and the Russian tagline
+                  is what pushes the row past the viewport. Below `lg` the nav is
+                  gone and there is room; from `xl` up the row fits with it. */}
+              <span className="block lg:hidden xl:block text-[11px] text-gray-200">
                 {t('brand.tagline')}
               </span>
             </div>
@@ -75,7 +85,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 <button
                   key={link.id}
                   onClick={() => handleNavClick(link.page)}
-                  className={`px-3 xl:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                  className={`px-2 xl:px-3 py-2 rounded-xl text-[13px] xl:text-sm font-semibold whitespace-nowrap transition-colors ${
                     isActive
                       ? 'text-white bg-[#237443] border border-white/30 shadow-sm'
                       : 'text-gray-200 hover:bg-white/15 hover:text-white'
@@ -88,7 +98,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           </nav>
 
           {/* Language Switcher & Auth Buttons */}
-          <div className="flex items-center gap-2 xl:gap-3 shrink-0">
+          <div className="flex items-center gap-2 xl:gap-3 shrink-0 xl:justify-self-end">
             <LanguageMenu value={language} label={t('action.language')} onSelect={setLanguage} />
 
             {/* Wrapped rather than given `hidden` directly: `Button`'s own base
@@ -131,7 +141,11 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#0A1C0E]/70 via-[#0A1C0E]/35 to-transparent" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-            <div className="max-w-3xl space-y-6">
+            {/* 4xl, not 3xl: at 768px the Russian h1 wraps onto a fourth line while
+                the Uzbek one keeps three, and the hero is vertically centred — so
+                that single extra line moved the whole banner on every language
+                switch. Russian fits in three lines from 832px on. */}
+            <div className="max-w-4xl space-y-6">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-black/40 backdrop-blur-md text-white font-semibold text-xs rounded-full border border-white/30 shadow-lg">
                 <Trees className="w-4 h-4 text-[#7FB98A]" />
                 {t('hero.badge')}
@@ -167,7 +181,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
               </div>
 
               {/* Trust Badges */}
-              <div className="flex flex-wrap items-center gap-6 pt-6 text-xs sm:text-sm text-gray-200 font-medium border-t border-white/20 max-w-2xl">
+              {/* Widened for the same reason: at 2xl the three Russian labels wrap
+                  onto a second row (45px -> 89px) and the centred hero moved by
+                  half of that. */}
+              <div className="flex flex-wrap items-center gap-6 pt-6 text-xs sm:text-sm text-gray-200 font-medium border-t border-white/20 max-w-4xl">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#64D88C] animate-pulse" />
                   <span>{t('hero.trust.fast')}</span>
