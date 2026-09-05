@@ -5,6 +5,7 @@ import { Input, Select, FormField } from '../../components/ui/FormControls';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
+import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 import { pickName } from '../../lib/localized';
 import { useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
@@ -285,7 +286,7 @@ function TariffsCalculator({
               </div>
             )}
           </div>
-          <Button variant="primary" size="lg" onClick={() => window.open('https://id.egov.uz', '_blank')}>
+          <Button variant="primary" size="lg" onClick={() => goToCabinet(CABINET_PATHS.wizard)}>
             {t('tariffs.calculator.submitCta')}
           </Button>
         </div>

@@ -20,6 +20,15 @@ on:
         # browser and the tariff calculator simply reported itself unavailable.
         type: string
         default: ''
+      admin-base-url:
+        # Same property as api-base-url: baked into the bundle at BUILD time, so
+        # there is no runtime override. Empty on a plain PR run (the artifact is
+        # thrown away); the deploy workflow passes its environment's real adminka
+        # origin. An unset value does not fail the build — `src/lib/cabinet.ts`
+        # throws only when a sign-in link is actually clicked, loud rather than a
+        # silent dead link — but a deploy must never ship with this empty.
+        type: string
+        default: ''
 
 jobs:
   check:
@@ -35,6 +44,8 @@ jobs:
       - run: yarn build
         env:
           VITE_API_BASE_URL: ${{ inputs.api-base-url }}
+          VITE_ADMIN_BASE_URL: ${{ inputs.admin-base-url }}
+      - run: yarn run test
       - name: Upload the bundle
         if: ${{ inputs.upload-dist }}
         uses: actions/upload-artifact@v4

@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router';
 import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
+import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
 import {
   HomePage,
   ServicesPage,
@@ -37,21 +38,31 @@ const PATH_TO_PAGE: Record<string, string> = Object.fromEntries(
     .map(([page, path]) => [path, page]),
 );
 
-/** Opens the OneID / E-IMZO login, exactly like the old build did for
- * `auth_login`/`auth_register`. `applicant_wizard` (submit an application)
- * joins it here too: since decision #60.4 the wizard lives in the adminka
- * cabinet, behind the same login — `landing` never renders it. */
-function openLogin() {
-  window.open('https://id.egov.uz', '_blank');
-}
+/**
+ * The three page ids that mean "leave the public site". `auth_login` and
+ * `auth_register` open the cabinet's front door; `applicant_wizard` goes
+ * straight to the application form, which since decision #60.4 lives in the
+ * adminka behind the same login — `landing` never renders it.
+ *
+ * The activity type a visitor picked on the services page is NOT carried
+ * over: the wizard reads only `?draft=`, and its first step is choosing the
+ * activity from the classifier. Passing one in would mean this site knowing
+ * real `activity_type_id` values.
+ */
+const CABINET_ENTRIES: Record<string, string> = {
+  auth_login: CABINET_PATHS.login,
+  auth_register: CABINET_PATHS.login,
+  applicant_wizard: CABINET_PATHS.wizard,
+};
 
 function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const onNavigate: NavigateFn = (page, params) => {
-    if (page === 'auth_login' || page === 'auth_register' || page === 'applicant_wizard') {
-      openLogin();
+    const cabinetPath = CABINET_ENTRIES[page];
+    if (cabinetPath) {
+      goToCabinet(cabinetPath);
       return;
     }
     if (page === 'verify') {

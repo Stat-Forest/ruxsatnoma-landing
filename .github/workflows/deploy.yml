@@ -35,6 +35,7 @@ jobs:
     with:
       upload-dist: true
       api-base-url: https://dev-api.ruxsatnoma-urmon.uz
+      admin-base-url: https://dev-admin.ruxsatnoma-urmon.uz
 
   deploy:
     name: Ship to dev

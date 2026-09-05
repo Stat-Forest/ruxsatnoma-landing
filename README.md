@@ -42,3 +42,16 @@ yarn dev
 # Loyihani yigʻish (Build)
 npm run build
 ```
+
+## 🔧 Muhit oʻzgaruvchilari
+
+`.env.example` faylidan nusxa oling (`.env`) va quyidagilarni toʻldiring:
+
+- `VITE_API_BASE_URL` — backend manzili, oxirida `/` boʻlmasin. Masalan: `http://localhost:8000`
+- `VITE_ADMIN_BASE_URL` — kabinet (adminka) manzili. Saytdagi barcha "Kirish" va "Ariza
+  topshirish" havolalari shu manzilga oʻtadi — foydalanuvchi tizimga kirganmi yoki yoʻqmi,
+  buni adminka oʻzi hal qiladi. Majburiy: qiymatsiz build muvaffaqiyatli oʻtadi, lekin
+  sahifadagi hech bir havola hech qayerga olib bormaydi.
+
+Ikkalasi ham Vite tomonidan BUILD vaqtida ichiga qadaladi (`import.meta.env`), shuning
+uchun ishlab chiqarishga chiqarishdan oldin toʻgʻri qiymat bilan yigʻish kerak.

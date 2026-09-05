@@ -18,3 +18,6 @@ migration/dumps/
 .idea/
 .vscode/
 node_modules
+
+# Per-session git worktrees
+.claude/worktrees/
