@@ -34,6 +34,7 @@ jobs:
     uses: ./.github/workflows/checks.yml
     with:
       upload-dist: true
+      api-base-url: https://dev-api.ruxsatnoma-urmon.uz
 
   deploy:
     name: Ship to dev
