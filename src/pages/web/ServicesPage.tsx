@@ -54,7 +54,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="text-center max-w-2xl mx-auto space-y-2">
+      {/* 3xl, not 2xl: at 672px the Russian h1 wraps onto a second line while
+          the Uzbek one keeps to one, and this heading sits above everything
+          else on the page — so the whole page slid 36px on a language switch.
+          Russian fits on one line from 768px on. */}
+      <div className="text-center max-w-3xl mx-auto space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('services.badge')}
         </span>

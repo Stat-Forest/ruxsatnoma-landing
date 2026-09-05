@@ -148,7 +148,10 @@ export const VerifyPage: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">
           {t('verify.header.title')}
         </h1>
-        <p className="text-sm text-[#5A646D] max-w-lg mx-auto">
+        {/* xl, not lg: the Russian subtitle needs 576px to stay on one line,
+            and a second line here pushes the search card and everything under
+            it down by 20px whenever the language changes. */}
+        <p className="text-sm text-[#5A646D] max-w-xl mx-auto">
           {t('verify.header.subtitle')}
         </p>
       </div>
