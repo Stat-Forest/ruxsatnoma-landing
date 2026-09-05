@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Input } from '../../components/ui/FormControls';
+import { useT } from '../../i18n/useT';
 
 export interface FaqPageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
 export const FaqPage: React.FC<FaqPageProps> = () => {
+  const t = useT();
   const [openIdx, setOpenIdx] = useState<number | null>(0);
   const [search, setSearch] = useState('');
 
   const faqs = [
     {
-      q: 'Oʻrmon xoʻjaligida chorva mollarini boqish uchun ruxsatnoma qanday olinadi?',
-      a: 'Ariza topshirish uchun OneID yoki E-IMZO orqali portalga kirasiz, oʻrmon xoʻjaligi konturini va chorva sonini tanlab arizani yuborasiz. Arizangiz 3 ish kunida koʻrib chiqiladi.',
+      q: t('faq.item1.question'),
+      a: t('faq.item1.answer'),
     },
     {
-      q: 'Toʻlov summasi qanday hisoblanadi?',
-      a: 'Toʻlov summasi chorva turining koeffitsienti, chorva soni, foydalanish oylari hamda amaldagi BHM (Bazaviy Hisoblash Miqdori) miqdoriga koʻra avtomatik formulalar asosida hisoblanadi.',
+      q: t('faq.item2.question'),
+      a: t('faq.item2.answer'),
     },
     {
-      q: 'Ruxsatnoma haqiqiyligini qanday tekshirsa boʻladi?',
-      a: 'Portalning bosh sahifasidagi "Ruxsatnomani tekshirish" boʻlimida ruxsatnoma seriyasi va raqamini kiritib yoki PDF hujjatdagi QR-kodni skanerlab haqiqiyligini tezkor tekshirishingiz mumkin.',
+      q: t('faq.item3.question'),
+      a: t('faq.item3.answer'),
     },
     {
-      q: 'Ruxsatnoma muddati tugaganda uni uzaytirish mumkinmi?',
-      a: 'Ha, ruxsatnoma muddati tugashiga 10 kun qolganda shaxsiy kabinet orqali ruxsatnomani onlayn uzaytirish arizasini topshirishingiz mumkin.',
+      q: t('faq.item4.question'),
+      a: t('faq.item4.answer'),
     },
   ];
 
@@ -33,17 +35,17 @@ export const FaqPage: React.FC<FaqPageProps> = () => {
     <div className="space-y-8 font-sans max-w-4xl mx-auto">
       <div className="text-center space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Savollar va Javoblar
+          {t('faq.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">Koʻp Beriladigan Savollar (FAQ)</h1>
+        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('faq.title')}</h1>
         <p className="text-sm text-[#5A646D]">
-          Ruxsatnoma olish, toʻlov qilish va QR-kod tekshirish boʻyicha eng koʻp uchraydigan savollarga javoblar.
+          {t('faq.subtitle')}
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
         <Input
-          placeholder="Savolni qidirish..."
+          placeholder={t('faq.search.placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           leftIcon={<Search className="w-4 h-4" />}

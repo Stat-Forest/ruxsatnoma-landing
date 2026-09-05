@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useT } from '../../i18n/useT';
 
 // ── 1. Modal Component ──────────────────────────────────────────────────────
 export interface ModalProps {
@@ -21,6 +22,7 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = 'md',
 }) => {
+  const t = useT();
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -68,7 +70,7 @@ export const Modal: React.FC<ModalProps> = ({
           <button
             onClick={onClose}
             className="p-1 rounded-md text-[#767F87] hover:text-[#1A1F24] hover:bg-[#F8F9FA] transition-colors"
-            aria-label="Yopish"
+            aria-label={t('ui.modal.close')}
           >
             <X className="w-5 h-5" />
           </button>

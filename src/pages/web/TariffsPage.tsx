@@ -7,6 +7,7 @@ import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 import { pickName } from '../../lib/localized';
+import { useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
 
 type ActivityType = components['schemas']['PublicActivityTypeOut'];
@@ -27,10 +28,13 @@ function todayIso(): string {
 
 type RefsState =
   | { status: 'loading' }
-  | { status: 'error'; message: string }
+  // `message` is the server's own text; `messageKey` is one of ours, kept as a
+  // key so a language switch after the failure re-renders it translated.
+  | { status: 'error'; message?: string; messageKey?: string }
   | { status: 'ready'; activityTypes: ActivityType[]; livestockTypes: LivestockType[] };
 
 export const TariffsPage: React.FC = () => {
+  const t = useT();
   const [refs, setRefs] = useState<RefsState>({ status: 'loading' });
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export const TariffsPage: React.FC = () => {
         });
       } catch {
         if (cancelled) return;
-        setRefs({ status: 'error', message: 'Maʼlumotlar xizmatiga ulanib boʻlmadi.' });
+        setRefs({ status: 'error', messageKey: 'tariffs.error.connectionFailed' });
       }
     }
     void loadRefs();
@@ -76,8 +80,8 @@ export const TariffsPage: React.FC = () => {
   if (refs.status === 'error') {
     return (
       <div className="max-w-3xl mx-auto font-sans">
-        <Alert variant="danger" title="Kalkulyator vaqtincha ishlamayapti">
-          Faoliyat turlari roʻyxatini yuklab boʻlmadi: {refs.message}
+        <Alert variant="danger" title={t('tariffs.error.title')}>
+          {t('tariffs.error.loadFailedPrefix')} {refs.message ?? (refs.messageKey ? t(refs.messageKey) : null)}
         </Alert>
       </div>
     );
@@ -93,6 +97,7 @@ function TariffsCalculator({
   activityTypes: ActivityType[];
   livestockTypes: LivestockType[];
 }) {
+  const t = useT();
   const [activityId, setActivityId] = useState(activityTypes[0]?.id ?? '');
   const [durationMonths, setDurationMonths] = useState(6);
   const [headCounts, setHeadCounts] = useState<Record<string, number>>({});
@@ -100,7 +105,13 @@ function TariffsCalculator({
 
   const [estimateStatus, setEstimateStatus] = useState<'idle' | 'loading' | 'ready' | 'refused'>('idle');
   const [estimateResult, setEstimateResult] = useState<EstimateResult | null>(null);
-  const [estimateMessage, setEstimateMessage] = useState<string | null>(null);
+  // A refusal is either the server's own text (already in the caller's
+  // language, and not ours to translate) or one of our own messages. The
+  // second is stored as a KEY, not as rendered text: a message frozen at the
+  // moment of the failure would keep the old language after a switch.
+  const [estimateMessage, setEstimateMessage] = useState<
+    { kind: 'server'; text: string } | { kind: 'key'; key: string } | null
+  >(null);
 
   const selectedActivity = activityTypes.find((a) => a.id === activityId) ?? null;
   const isGrazing = selectedActivity?.code === GRAZING_CODE;
@@ -137,7 +148,7 @@ function TariffsCalculator({
           if (error) {
             const e = apiError(error);
             setEstimateStatus('refused');
-            setEstimateMessage(`${e.message} (${e.code})`);
+            setEstimateMessage({ kind: 'server', text: `${e.message} (${e.code})` });
             return;
           }
           setEstimateResult(data ?? null);
@@ -145,7 +156,7 @@ function TariffsCalculator({
         } catch (err) {
           if ((err as { name?: string })?.name === 'AbortError') return;
           setEstimateStatus('refused');
-          setEstimateMessage('Hisoblash xizmatiga ulanib boʻlmadi.');
+          setEstimateMessage({ kind: 'key', key: 'tariffs.calculator.estimateFailed' });
         }
       })();
     }, 400);
@@ -161,13 +172,13 @@ function TariffsCalculator({
       {/* Header */}
       <div className="text-center space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Rasmiy Tariflar va Stavkalar
+          {t('tariffs.header.badge')}
         </span>
         <h1 className="text-2xl sm:text-4xl font-bold text-[#1A1F24]">
-          Toʻlov Stavkalari va Kalkulyator
+          {t('tariffs.header.title')}
         </h1>
         <p className="text-sm text-[#5A646D] max-w-xl mx-auto">
-          Vazirlar Mahkamasi qarorlariga muvofiq belgilangan oʻrmon fondidan foydalanish koeffitsientlari.
+          {t('tariffs.header.subtitle')}
         </p>
       </div>
 
@@ -178,13 +189,13 @@ function TariffsCalculator({
             <Calculator className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-[#1A1F24]">Onlayn Narx Kalkulyatori</h2>
-            <p className="text-xs text-[#5A646D]">Faoliyat turi, miqdor va muddatni kiriting — taxminiy summa tizimning oʻzida hisoblanadi</p>
+            <h2 className="text-lg font-bold text-[#1A1F24]">{t('tariffs.calculator.heading')}</h2>
+            <p className="text-xs text-[#5A646D]">{t('tariffs.calculator.description')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FormField label="Faoliyat turi">
+          <FormField label={t('tariffs.calculator.activityLabel')}>
             <Select
               value={activityId}
               onChange={(e) => setActivityId(e.target.value)}
@@ -208,7 +219,7 @@ function TariffsCalculator({
               </FormField>
             ))
           ) : (
-            <FormField label="Miqdor">
+            <FormField label={t('tariffs.calculator.quantityLabel')}>
               <Input
                 type="number"
                 min={0}
@@ -219,14 +230,14 @@ function TariffsCalculator({
             </FormField>
           )}
 
-          <FormField label="Foydalanish muddati (Oy)">
+          <FormField label={t('tariffs.calculator.durationLabel')}>
             <Select
               value={durationMonths.toString()}
               onChange={(e) => setDurationMonths(Number(e.target.value))}
               options={[
-                { value: '3', label: '3 oy (Mavsumiy)' },
-                { value: '6', label: '6 oy (Yarim yillik)' },
-                { value: '12', label: '12 oy (Bir yillik)' },
+                { value: '3', label: t('tariffs.calculator.duration.months3') },
+                { value: '6', label: t('tariffs.calculator.duration.months6') },
+                { value: '12', label: t('tariffs.calculator.duration.months12') },
               ]}
               touchSize
             />
@@ -238,7 +249,7 @@ function TariffsCalculator({
             cannot be honoured), not merely "not yet wired". */}
         <label className="flex items-center gap-2 text-xs font-semibold text-[#9AA3AB] bg-[#F8F9FA] p-3 rounded-xl border border-[#E4E7EA] cursor-not-allowed">
           <input type="checkbox" disabled className="w-4 h-4" />
-          <span>Imtiyoz (anonim taxminda hisobga olinmaydi — imtiyoz faqat ariza toʻldirish jarayonida qoʻllanadi)</span>
+          <span>{t('tariffs.calculator.privilegeNote')}</span>
         </label>
 
         {/* Dynamic Calculation Result Box */}
@@ -246,17 +257,17 @@ function TariffsCalculator({
           <div className="flex-1">
             {estimateStatus === 'idle' && (
               <p className="text-sm text-[#5A646D]">
-                {isGrazing ? 'Hisoblash uchun kamida bitta chorva turi sonini kiriting.' : 'Hisoblash uchun miqdorni kiriting.'}
+                {isGrazing ? t('tariffs.calculator.idle.grazing') : t('tariffs.calculator.idle.default')}
               </p>
             )}
             {estimateStatus === 'loading' && (
               <div className="flex items-center gap-2 text-[#5A646D] text-sm">
-                <Loader2 className="w-4 h-4 animate-spin" /> Hisoblanmoqda…
+                <Loader2 className="w-4 h-4 animate-spin" /> {t('tariffs.calculator.loading')}
               </div>
             )}
             {estimateStatus === 'ready' && estimateResult && (
               <div>
-                <span className="text-xs text-[#5A646D] uppercase font-semibold block">Taxminiy summa:</span>
+                <span className="text-xs text-[#5A646D] uppercase font-semibold block">{t('tariffs.calculator.resultLabel')}</span>
                 <div className="text-3xl font-bold font-mono text-[#2E7D4F]">
                   {Number(estimateResult.amount).toLocaleString()} UZS
                 </div>
@@ -265,12 +276,18 @@ function TariffsCalculator({
             {estimateStatus === 'refused' && (
               <div className="flex items-start gap-2 text-sm text-[#92400E]">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{estimateMessage}</span>
+                <span>
+                  {estimateMessage?.kind === 'server'
+                    ? estimateMessage.text
+                    : estimateMessage
+                      ? t(estimateMessage.key)
+                      : null}
+                </span>
               </div>
             )}
           </div>
           <Button variant="primary" size="lg" onClick={() => goToCabinet(CABINET_PATHS.wizard)}>
-            Shu boʻyicha ariza topshirish
+            {t('tariffs.calculator.submitCta')}
           </Button>
         </div>
 

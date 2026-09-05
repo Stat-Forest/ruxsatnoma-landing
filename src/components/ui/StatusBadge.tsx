@@ -1,5 +1,6 @@
 import React from 'react';
 import { Clock, CheckCircle2, XCircle, AlertTriangle, FileText } from 'lucide-react';
+import { useT } from '../../i18n/useT';
 
 export type StatusType = 'draft' | 'pending' | 'approved' | 'rejected' | 'warning' | 'info';
 
@@ -18,53 +19,48 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   size = 'md',
   className = '',
 }) => {
+  const t = useT();
   const defaultConfig: Record<
     StatusType,
-    { textUz: string; textRu: string; bg: string; text: string; dot: string; icon: React.ReactNode }
+    { defaultLabel: string; bg: string; text: string; dot: string; icon: React.ReactNode }
   > = {
     draft: {
-      textUz: 'Qoralama',
-      textRu: 'Черновик',
+      defaultLabel: t('ui.statusBadge.draft'),
       bg: 'bg-[#F8F9FA] border border-[#E4E7EA]',
       text: 'text-[#5A646D]',
       dot: 'bg-[#9AA3AB]',
       icon: <FileText className="w-3.5 h-3.5" />,
     },
     pending: {
-      textUz: 'Kutilmoqda',
-      textRu: 'В обработке',
+      defaultLabel: t('ui.statusBadge.pending'),
       bg: 'bg-[#E0F2FE] border border-[#BAE6FD]',
       text: 'text-[#0369A1]',
       dot: 'bg-[#0284C7]',
       icon: <Clock className="w-3.5 h-3.5" />,
     },
     approved: {
-      textUz: 'Tasdiqlandi',
-      textRu: 'Одобрено',
+      defaultLabel: t('ui.statusBadge.approved'),
       bg: 'bg-[#F0F7F1] border border-[#D9EBDC]',
       text: 'text-[#123522]',
       dot: 'bg-[#15803D]',
       icon: <CheckCircle2 className="w-3.5 h-3.5" />,
     },
     rejected: {
-      textUz: 'Rad etildi',
-      textRu: 'Отклонено',
+      defaultLabel: t('ui.statusBadge.rejected'),
       bg: 'bg-[#FEF2F2] border border-[#FCA5A5]',
       text: 'text-[#991B1B]',
       dot: 'bg-[#B91C1C]',
       icon: <XCircle className="w-3.5 h-3.5" />,
     },
     warning: {
-      textUz: 'Muddati tugamoqda',
-      textRu: 'Срок истекает',
+      defaultLabel: t('ui.statusBadge.warning'),
       bg: 'bg-[#FFFBEB] border border-[#FDE68A]',
       text: 'text-[#92400E]',
       dot: 'bg-[#B45309]',
       icon: <AlertTriangle className="w-3.5 h-3.5" />,
     },
     info: {
-      textUz: 'Maʼlumot',
-      textRu: 'Информация',
+      defaultLabel: t('ui.statusBadge.info'),
       bg: 'bg-[#F0F9FF] border border-[#E0F2FE]',
       text: 'text-[#0369A1]',
       dot: 'bg-[#0369A1]',
@@ -73,7 +69,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   };
 
   const conf = defaultConfig[status] || defaultConfig.draft;
-  const displayText = label || conf.textUz;
+  const displayText = label || conf.defaultLabel;
 
   const sizeClasses =
     size === 'sm' ? 'px-2 py-0.5 text-xs gap-1' : 'px-2.5 py-1 text-sm gap-1.5 font-medium';
