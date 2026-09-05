@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TariffsPage } from './TariffsPage';
 import { CABINET_PATHS, cabinetUrl, navigation } from '../../lib/cabinet';
+import { I18nProvider } from '../../i18n';
 
 // TariffsPage calls goToCabinet directly from its own onClick — it takes no
 // onNavigate prop and bypasses routes.tsx's onNavigate/CABINET_ENTRIES table
@@ -28,7 +29,11 @@ describe('TariffsPage calculator CTA', () => {
   it('sends "Shu boʻyicha ariza topshirish" to the cabinet wizard, never id.egov.uz', async () => {
     const assign = vi.spyOn(navigation, 'assign').mockImplementation(() => {});
     const open = vi.spyOn(window, 'open');
-    render(<TariffsPage />);
+    render(
+      <I18nProvider>
+        <TariffsPage />
+      </I18nProvider>,
+    );
 
     const button = await screen.findByText('Shu boʻyicha ariza topshirish');
     await userEvent.click(button);
