@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight, Check } from 'lucide-react';
+import { useT } from '../../i18n/useT';
 
 // ── 1. Breadcrumbs ─────────────────────────────────────────────────────────
 export interface BreadcrumbItem {
@@ -14,8 +15,9 @@ export interface BreadcrumbsProps {
 }
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' }) => {
+  const t = useT();
   return (
-    <nav aria-label="Breadcrumb" className={`flex items-center text-sm ${className}`}>
+    <nav aria-label={t('ui.breadcrumbs.ariaLabel')} className={`flex items-center text-sm ${className}`}>
       <ol className="flex items-center space-x-2">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
@@ -72,9 +74,10 @@ export const Tabs: React.FC<TabsProps> = ({
   onChange,
   className = '',
 }) => {
+  const t = useT();
   return (
     <div className={`border-b border-[#E4E7EA] ${className}`}>
-      <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+      <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label={t('ui.tabs.ariaLabel')}>
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
           return (
@@ -126,20 +129,21 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalRecords,
   className = '',
 }) => {
+  const t = useT();
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-3 text-sm text-[#5A646D] ${className}`}>
       {totalRecords && (
         <div>
-          Jami <span className="font-semibold text-[#1A1F24]">{totalRecords}</span> ta yozuv
+          {t('ui.pagination.totalBefore')} <span className="font-semibold text-[#1A1F24]">{totalRecords}</span> {t('ui.pagination.totalAfter')}
         </div>
       )}
 
       <div className="flex items-center gap-2">
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 mr-4">
-            <span className="text-xs">Qatolar:</span>
+            <span className="text-xs">{t('ui.pagination.pageSizeLabel')}</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -158,7 +162,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             disabled={currentPage <= 1}
             className="h-8 px-2.5 rounded border border-[#767F87] hover:bg-[#F8F9FA] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Oldingi
+            {t('ui.pagination.prev')}
           </button>
           {pages.map((p) => (
             <button
@@ -178,7 +182,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             disabled={currentPage >= totalPages}
             className="h-8 px-2.5 rounded border border-[#767F87] hover:bg-[#F8F9FA] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Keyingi
+            {t('ui.pagination.next')}
           </button>
         </div>
       </div>

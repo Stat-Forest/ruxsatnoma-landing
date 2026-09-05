@@ -1,36 +1,39 @@
 import React from 'react';
 import { FileText, Download } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useT } from '../../i18n/useT';
 
 export interface DocumentsPageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
 export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
+  const t = useT();
+
   const docs = [
     {
-      title: 'Oʻzbekiston Respublikasining Oʻrmon Kodeksi',
+      title: t('documents.doc1.title'),
       number: 'ZRU-475',
       date: '16.04.2018',
-      desc: 'Oʻrmonlarni muhofaza qilish, himoya qilish, koʻpaytirish va ulardan oqilona foydalanish sohasidagi munosabatlarni tartibga soladi.',
+      desc: t('documents.doc1.desc'),
     },
     {
-      title: 'Oʻrmon fondi yerlarida chorva mollarini boqish tartibi toʻgʻrisida Nizom',
+      title: t('documents.doc2.title'),
       number: 'VMQ-342',
       date: '12.05.2021',
-      desc: 'Yaylov sigʻimi normalari va chorva mollarini boqish uchun ruxsatnomalar berish tartibini belgilaydi.',
+      desc: t('documents.doc2.desc'),
     },
     {
-      title: '2026-yil uchun Bazaviy Hisoblash Miqdori (BHM) va toʻlov stavkalari',
+      title: t('documents.doc3.title'),
       number: 'PF-108',
       date: '01.01.2026',
-      desc: 'Ruxsatnomalar rasmiylashtirish uchun toʻlanadigan toʻlov koeffitsientlari yigʻindisi.',
+      desc: t('documents.doc3.desc'),
     },
     {
-      title: 'Geobotanik tadqiqotlar va yaylov sigʻimi meʼyorlari qoʻllanmasi',
+      title: t('documents.doc4.title'),
       number: 'ST-04',
       date: '10.02.2025',
-      desc: '1 gektar yaylov maydoniga toʻgʻri keluvchi shartli chorva mollari birligi (MaxSB).',
+      desc: t('documents.doc4.desc'),
     },
   ];
 
@@ -38,11 +41,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
     <div className="space-y-8 font-sans max-w-4xl mx-auto">
       <div className="text-center space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Hujjatlar va Qonunchilik
+          {t('documents.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">Normativ-Huquqiy Hujjatlar</h1>
+        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('documents.title')}</h1>
         <p className="text-sm text-[#5A646D]">
-          Oʻrmon xoʻjaligi sohasi boʻyicha amaldagi qonunlar, qarorlar va meʼyoriy normativlar.
+          {t('documents.subtitle')}
         </p>
       </div>
 
@@ -74,7 +77,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
               leftIcon={<Download className="w-4 h-4 text-[#2E7D4F]" />}
               className="shrink-0"
             >
-              PDF Yuklab olish
+              {t('documents.download')}
             </Button>
           </div>
         ))}

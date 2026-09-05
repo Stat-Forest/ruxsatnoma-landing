@@ -19,6 +19,7 @@ import { Alert } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import type { components } from '../../api/schema';
+import { useT } from '../../i18n/useT';
 
 type CheckCard = components['schemas']['PublicCheckCard'];
 type CheckResult = CheckCard | components['schemas']['PublicCheckMiss'];
@@ -70,6 +71,7 @@ function queryFromParams(params: URLSearchParams): Query | null {
 type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
 
 export const VerifyPage: React.FC = () => {
+  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const [seriesInput, setSeriesInput] = useState(searchParams.get('series') ?? '');
   const [numberInput, setNumberInput] = useState(searchParams.get('number') ?? '');
@@ -113,7 +115,7 @@ export const VerifyPage: React.FC = () => {
         if (cancelled) return;
         // Network failure (backend unreachable) — never a blank crash.
         setStatus('error');
-        setErrorMessage('Tekshiruv xizmatiga ulanib boʻlmadi. Internet aloqasini tekshirib, qaytadan urinib koʻring.');
+        setErrorMessage(t('verify.status.networkError'));
       }
     }
 
@@ -141,13 +143,13 @@ export const VerifyPage: React.FC = () => {
       {/* Page Header */}
       <div className="text-center space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Rasmiy Tekshiruv Xizmati
+          {t('verify.header.badge')}
         </span>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">
-          Ruxsatnoma Haqiqiyligini Tekshirish
+          {t('verify.header.title')}
         </h1>
         <p className="text-sm text-[#5A646D] max-w-lg mx-auto">
-          Ruxsatnoma seriyasi va raqamini kiriting yoki QR-kod skaneridan foydalaning.
+          {t('verify.header.subtitle')}
         </p>
       </div>
 
@@ -155,9 +157,9 @@ export const VerifyPage: React.FC = () => {
       <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
         <form onSubmit={handleManualSearch} className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="w-full sm:w-1/3">
-            <FormField label="Seriya">
+            <FormField label={t('verify.form.seriesLabel')}>
               <Input
-                placeholder="Masalan: А"
+                placeholder={t('verify.form.seriesPlaceholder')}
                 value={seriesInput}
                 onChange={(e) => setSeriesInput(e.target.value)}
                 leftIcon={<Search className="w-4 h-4" />}
@@ -166,9 +168,9 @@ export const VerifyPage: React.FC = () => {
             </FormField>
           </div>
           <div className="w-full sm:w-1/3">
-            <FormField label="Raqam">
+            <FormField label={t('verify.form.numberLabel')}>
               <Input
-                placeholder="Masalan: 000123"
+                placeholder={t('verify.form.numberPlaceholder')}
                 value={numberInput}
                 onChange={(e) => setNumberInput(e.target.value)}
                 inputMode="numeric"
@@ -177,21 +179,21 @@ export const VerifyPage: React.FC = () => {
             </FormField>
           </div>
           <Button type="submit" variant="primary" size="lg" className="whitespace-nowrap">
-            Tekshirish
+            {t('verify.form.submit')}
           </Button>
         </form>
 
         <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">
           <QrCode className="w-4 h-4 text-[#2E7D4F] shrink-0" />
           <span>
-            Ruxsatnoma qogʻozidagi <b>QR-kodni</b> telefon kamerasi bilan skanerlaganda ushbu sahifa avtomatik ravishda ochiladi va natija darhol koʻrsatiladi.
+            {t('verify.qrInfo.before')} <b>{t('verify.qrInfo.bold')}</b> {t('verify.qrInfo.after')}
           </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">
           <Lock className="w-4 h-4 text-[#2E7D4F] shrink-0" />
           <span>
-            <b>Shaxsiy maʼlumotlar daxlsizligi (PII Masking):</b> Qonunchilikka muvofiq arizachining F.I.SH. va shaxsiy maʼlumotlari ochiq qidiruvda qisqartirilgan shaklda koʻrsatiladi.
+            <b>{t('verify.pii.bold')}</b> {t('verify.pii.after')}
           </span>
         </div>
       </div>
@@ -200,19 +202,19 @@ export const VerifyPage: React.FC = () => {
       {status === 'loading' && (
         <div className="flex items-center justify-center gap-3 text-[#5A646D] py-8">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="text-sm font-medium">Tekshirilmoqda…</span>
+          <span className="text-sm font-medium">{t('verify.status.loading')}</span>
         </div>
       )}
 
       {status === 'error' && (
-        <Alert variant="danger" title="Xizmat vaqtincha ishlamayapti">
+        <Alert variant="danger" title={t('verify.status.errorTitle')}>
           {errorMessage}
         </Alert>
       )}
 
       {status === 'miss' && (
-        <Alert variant="danger" title="Ruxsatnoma Topilmadi">
-          Kiritilgan maʼlumotlar boʻyicha tizimda faol ruxsatnoma mavjud emas. Seriya va raqamni qaytadan tekshiring.
+        <Alert variant="danger" title={t('verify.status.missTitle')}>
+          {t('verify.status.missMessage')}
         </Alert>
       )}
 
@@ -239,7 +241,7 @@ export const VerifyPage: React.FC = () => {
                     <StatusBadge status={STATUS_BADGE[result.status]} size="sm" />
                   </div>
                   <p className="text-xs mt-0.5 font-medium opacity-90">
-                    Ushbu ruxsatnoma davlat reyestridan muvaffaqiyatli oʻtdi.
+                    {t('verify.result.registryNote')}
                   </p>
                 </div>
               </div>
@@ -251,7 +253,7 @@ export const VerifyPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <UserCheck className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Arizachi (Maskalangan)</span>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">{t('verify.result.holderLabel')}</span>
                     <span className="font-bold text-[#1A1F24] text-base">{result.holder}</span>
                   </div>
                 </div>
@@ -259,7 +261,7 @@ export const VerifyPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <Building className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Faoliyat Turi</span>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">{t('verify.result.activityLabel')}</span>
                     <span className="font-bold text-[#1A1F24] text-base">{result.activity_type}</span>
                   </div>
                 </div>
@@ -267,7 +269,7 @@ export const VerifyPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <MapPin className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Oʻrmon Xoʻjaligi</span>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">{t('verify.result.organizationLabel')}</span>
                     <span className="font-bold text-[#1A1F24]">{result.organization}</span>
                   </div>
                 </div>
@@ -275,7 +277,7 @@ export const VerifyPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <Calendar className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">Amal Qilish Muddati</span>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">{t('verify.result.validityLabel')}</span>
                     <span className="font-bold text-[#1A1F24] font-mono">{result.valid_from} — {result.valid_to}</span>
                   </div>
                 </div>
@@ -287,8 +289,8 @@ export const VerifyPage: React.FC = () => {
                   <FileCheck className="w-4 h-4 text-[#15803D]" />
                   <span>
                     {result.signatures_valid
-                      ? 'Raqamli imzolar haqiqiy (E-IMZO)'
-                      : 'Raqamli imzolar hali toʻliq tasdiqlanmagan'}
+                      ? t('verify.result.signaturesValid')
+                      : t('verify.result.signaturesPending')}
                   </span>
                 </div>
               </div>

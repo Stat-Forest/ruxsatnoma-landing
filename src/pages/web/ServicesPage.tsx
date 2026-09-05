@@ -1,51 +1,53 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight, FileCheck2, Trees, MapPin } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useT } from '../../i18n/useT';
 
 export interface ServicesPageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
 export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
+  const t = useT();
   const servicesList = [
     {
       id: 'grazing',
-      title: 'Chorva mollarini boqish boʻyicha ruxsatnoma',
-      category: 'Yaylovlardan foydalanish',
-      desc: 'Oʻrmon fondi yaylov hududlarida belgilangan normaga muvofiq qoramol, qoʻy va echkilarni boqish uchun elektron ruxsatnoma.',
-      term: '3 oy - 12 oy',
+      title: t('services.items.grazing.title'),
+      category: t('services.items.grazing.category'),
+      desc: t('services.items.grazing.desc'),
+      term: t('services.items.grazing.term'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
     },
     {
       id: 'haymaking',
-      title: 'Pichan oʻrish va somon yigʻish ruxsatnomasi',
-      category: 'Pichanchilik',
-      desc: 'Mavsumiy pichan oʻrish maydonlaridan foydalanish va chorva uchun oziq-ovqat zaxirasini gʻamlash.',
-      term: 'Mavsumiy (1-6 oy)',
+      title: t('services.items.haymaking.title'),
+      category: t('services.items.haymaking.category'),
+      desc: t('services.items.haymaking.desc'),
+      term: t('services.items.haymaking.term'),
       icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
     },
     {
       id: 'beekeeping',
-      title: 'Asalarichilik va in qoʻyish huquqi',
-      category: 'Asalarichilik',
-      desc: 'Asalari oilalarini oʻrmon oʻsimliklari gullash davrida oʻrmon yerlariga vaqtinchalik joylashtirish.',
-      term: 'Mavsumiy',
+      title: t('services.items.beekeeping.title'),
+      category: t('services.items.beekeeping.category'),
+      desc: t('services.items.beekeeping.desc'),
+      term: t('services.items.beekeeping.term'),
       icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
     },
     {
       id: 'wild_plants',
-      title: 'Yovvoyi va dorivor oʻsimliklarni yigʻish',
-      category: 'Oʻsimlik xomashyosi',
-      desc: 'Tabiiy mevalar, yongʻoqlar, dorivor va oziq-ovqat maqsadlaridagi oʻsimliklarni belgilangan kvota boʻyicha terish.',
-      term: 'Kvota muddati boʻyicha',
+      title: t('services.items.wildPlants.title'),
+      category: t('services.items.wildPlants.category'),
+      desc: t('services.items.wildPlants.desc'),
+      term: t('services.items.wildPlants.term'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
     },
     {
       id: 'recreation',
-      title: 'Rekreatsiya va ekologik turizm',
-      category: 'Turizm va Dam olish',
-      desc: 'Vaqtinchalik yengil inshootlar qurish va ekologik turizm yoʻnalishida xizmatlar koʻrsatish.',
-      term: 'Auksion shartnomasi boʻyicha',
+      title: t('services.items.recreation.title'),
+      category: t('services.items.recreation.category'),
+      desc: t('services.items.recreation.desc'),
+      term: t('services.items.recreation.term'),
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
     },
   ];
@@ -54,11 +56,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
     <div className="space-y-8 font-sans">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Davlat Xizmatlari Reyestri
+          {t('services.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">Oʻrmon Fondidan Foydalanish Xizmatlari</h1>
+        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('services.title')}</h1>
         <p className="text-sm text-[#5A646D]">
-          Yagona interaktiv portal orqali barcha turdagi ruxsatnomalarga ariza topshirishingiz mumkin.
+          {t('services.subtitle')}
         </p>
       </div>
 
@@ -80,14 +82,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
             </div>
 
             <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-              <span className="text-[#767F87]">Muddati: <b className="text-[#1A1F24]">{svc.term}</b></span>
+              <span className="text-[#767F87]">{t('services.card.termLabel')} <b className="text-[#1A1F24]">{svc.term}</b></span>
               <Button
                 variant="primary"
                 size="sm"
                 rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                 onClick={() => onNavigate?.('applicant_wizard', { activity: svc.id })}
               >
-                Ariza berish
+                {t('services.card.apply')}
               </Button>
             </div>
           </div>

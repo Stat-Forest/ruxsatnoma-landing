@@ -1,33 +1,36 @@
 import React from 'react';
 import { Database, Download } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useT } from '../../i18n/useT';
 
 export interface OpenDataPageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
 export const OpenDataPage: React.FC<OpenDataPageProps> = () => {
+  const t = useT();
+
   const datasets = [
     {
-      title: 'Respublika boʻyicha ruxsatnomalar reyestri',
+      title: t('opendata.dataset1.title'),
       format: 'JSON / CSV',
       updatedAt: '10.08.2026',
       size: '4.2 MB',
-      desc: 'Berilgan va bekor qilingan ruxsatnomalarining anonimlashtirilgan statistikasi.',
+      desc: t('opendata.dataset1.desc'),
     },
     {
-      title: 'Oʻrmon xoʻjaliklari GIS chegaralari va konturlari',
+      title: t('opendata.dataset2.title'),
       format: 'GeoJSON / SHP',
       updatedAt: '01.08.2026',
       size: '18.5 MB',
-      desc: 'Oʻrmon xoʻjaliklari yer maydonlarining elektron fazoviy chegaralari.',
+      desc: t('opendata.dataset2.desc'),
     },
     {
-      title: 'Yaylov sigʻimi va geobotanik meʼyorlar bazasi',
+      title: t('opendata.dataset3.title'),
       format: 'XLSX / CSV',
       updatedAt: '05.08.2026',
       size: '1.8 MB',
-      desc: 'Boʻlimlar kesimida chorva mollari sigʻimi (MaxSB) koʻrsatkichlari.',
+      desc: t('opendata.dataset3.desc'),
     },
   ];
 
@@ -35,26 +38,26 @@ export const OpenDataPage: React.FC<OpenDataPageProps> = () => {
     <div className="space-y-8 font-sans max-w-4xl mx-auto">
       <div className="text-center space-y-2">
         <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Ochiq Maʼlumotlar Portali
+          {t('opendata.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">Ochiq Statistika va Fayllar</h1>
+        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('opendata.title')}</h1>
         <p className="text-sm text-[#5A646D]">
-          Oʻrmon xoʻjaligi sohasidagi davlat maʼlumotlarining shaffof statistik toʻplamlari.
+          {t('opendata.subtitle')}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white border border-[#E4E7EA] p-5 rounded-2xl text-center space-y-1">
           <div className="text-2xl font-bold text-[#2E7D4F]">42,850+</div>
-          <div className="text-xs text-[#5A646D]">Jami berilgan ruxsatnomalar</div>
+          <div className="text-xs text-[#5A646D]">{t('opendata.stats.total.label')}</div>
         </div>
         <div className="bg-white border border-[#E4E7EA] p-5 rounded-2xl text-center space-y-1">
-          <div className="text-2xl font-bold text-[#2E7D4F]">84 ta</div>
-          <div className="text-xs text-[#5A646D]">Oʻrmon xoʻjaliklari bazasi</div>
+          <div className="text-2xl font-bold text-[#2E7D4F]">{t('opendata.stats.forestries.value')}</div>
+          <div className="text-xs text-[#5A646D]">{t('opendata.stats.forestries.label')}</div>
         </div>
         <div className="bg-white border border-[#E4E7EA] p-5 rounded-2xl text-center space-y-1">
           <div className="text-2xl font-bold text-[#2E7D4F]">100%</div>
-          <div className="text-xs text-[#5A646D]">Raqamli ochiqlik indeksi</div>
+          <div className="text-xs text-[#5A646D]">{t('opendata.stats.openness.label')}</div>
         </div>
       </div>
 
@@ -86,7 +89,7 @@ export const OpenDataPage: React.FC<OpenDataPageProps> = () => {
               leftIcon={<Download className="w-4 h-4 text-[#2E7D4F]" />}
               className="shrink-0"
             >
-              Yuklab olish
+              {t('opendata.download')}
             </Button>
           </div>
         ))}

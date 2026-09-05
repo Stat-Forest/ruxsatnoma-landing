@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertCircle, CheckCircle2, Info, AlertTriangle, X, Inbox } from 'lucide-react';
+import { useT } from '../../i18n/useT';
 
 // ── 1. Alert Banner ──────────────────────────────────────────────────────────
 export type AlertVariant = 'info' | 'success' | 'warning' | 'danger';
@@ -23,6 +24,7 @@ export const Alert: React.FC<AlertProps> = ({
   onAction,
   className = '',
 }) => {
+  const t = useT();
   const variantStyles: Record<
     AlertVariant,
     { bg: string; border: string; text: string; icon: React.ReactNode }
@@ -78,7 +80,7 @@ export const Alert: React.FC<AlertProps> = ({
           <button
             onClick={onClose}
             className="p-1 rounded hover:bg-black/5 text-gray-500 hover:text-gray-700 transition-colors"
-            aria-label="Yopish"
+            aria-label={t('ui.alert.close')}
           >
             <X className="w-4 h-4" />
           </button>
