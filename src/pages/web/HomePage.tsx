@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Search,
   QrCode,
@@ -7,7 +7,6 @@ import {
   FileCheck2,
   CheckCircle2,
   Users,
-  TrendingUp,
   Trees,
   ChevronRight,
   PhoneCall,
@@ -19,6 +18,20 @@ import {
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
 import { useT } from '../../i18n/useT';
+import { api } from '../../api/client';
+import type { components } from '../../api/schema';
+
+type OpenDataStats = components['schemas']['OpenDataStatsOut'];
+
+type StatsState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; data: OpenDataStats };
+
+/** Shown instead of a figure until the aggregates endpoint has answered — an
+ *  em dash is a statement that the number is not known yet, which is the
+ *  honest one. Never a placeholder digit. */
+const DASH = '—';
 
 export interface HomePageProps {
   onNavigate?: (page: string, params?: any) => void;
@@ -27,6 +40,31 @@ export interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
   const [quickSearchInput, setQuickSearchInput] = useState('');
+  const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
+
+  // The figures on this page used to be constants — 42,850 permits, 185,400
+  // head of livestock, 94.8 % auto-approved — printed under a banner reading
+  // "real-time monitoring" while the system held two active permits (stage 7.3
+  // walkthrough, finding F7). A government portal may not state a number it
+  // cannot produce, so every tile below now comes from the one endpoint that
+  // publishes these aggregates, and shows an em dash while it has not answered.
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const { data, error } = await api.GET('/api/v1/public/open-data/stats');
+        if (cancelled) return;
+        setStatsState(error || !data ? { status: 'error' } : { status: 'ready', data });
+      } catch {
+        if (!cancelled) setStatsState({ status: 'error' });
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [selectedRating, setSelectedRating] = useState<string>('');
   const [ratingSubmitted, setRatingSubmitted] = useState<boolean>(false);
 
@@ -38,10 +76,33 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   const stats = [
-    { label: t('home.stats.totalPermits.label'), value: '42,850+', icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.totalPermits.change') },
-    { label: t('home.stats.activeForestries.label'), value: t('home.stats.activeForestries.value'), icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.activeForestries.change') },
-    { label: t('home.stats.livestock.label'), value: '185,400', icon: <Users className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.livestock.change') },
-    { label: t('home.stats.autoApproved.label'), value: '94.8%', icon: <TrendingUp className="w-6 h-6 text-[#2E7D4F]" />, change: t('home.stats.autoApproved.change') },
+    {
+      label: t('home.stats.activePermits.label'),
+      value: statsState.status === 'ready' ? Number(statsState.data.total_active_permits).toLocaleString() : DASH,
+      icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
+      note: t('home.stats.activePermits.note'),
+    },
+    {
+      label: t('home.stats.activeArea.label'),
+      value:
+        statsState.status === 'ready'
+          ? `${Number(statsState.data.total_active_area_ha).toLocaleString()} ${t('home.stats.activeArea.unit')}`
+          : DASH,
+      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
+      note: t('home.stats.activeArea.note'),
+    },
+    {
+      label: t('home.stats.organizations.label'),
+      value: statsState.status === 'ready' ? String(statsState.data.by_organization.length || 0) : DASH,
+      icon: <Users className="w-6 h-6 text-[#2E7D4F]" />,
+      note: t('home.stats.organizations.note'),
+    },
+    {
+      label: t('home.stats.regions.label'),
+      value: statsState.status === 'ready' ? String(statsState.data.by_region.length || 0) : DASH,
+      icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
+      note: t('home.stats.regions.note'),
+    },
   ];
 
   const activities = [
@@ -51,7 +112,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.grazing.desc'),
       badge: t('home.activities.grazing.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.grazing.limit'),
     },
     {
       id: 'haymaking',
@@ -59,7 +119,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.haymaking.desc'),
       badge: t('home.activities.haymaking.badge'),
       icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.haymaking.limit'),
     },
     {
       id: 'beekeeping',
@@ -67,7 +126,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.beekeeping.desc'),
       badge: t('home.activities.beekeeping.badge'),
       icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.beekeeping.limit'),
     },
     {
       id: 'wild_plants',
@@ -75,7 +133,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.wild_plants.desc'),
       badge: t('home.activities.wild_plants.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.wild_plants.limit'),
     },
     {
       id: 'medicinal_herbs',
@@ -83,7 +140,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.medicinal_herbs.desc'),
       badge: t('home.activities.medicinal_herbs.badge'),
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.medicinal_herbs.limit'),
     },
     {
       id: 'recreation',
@@ -91,7 +147,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       desc: t('home.activities.recreation.desc'),
       badge: t('home.activities.recreation.badge'),
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
-      limit: t('home.activities.recreation.limit'),
     },
   ];
 
@@ -153,88 +208,42 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       {st.label}
                     </span>
                     <div className="text-2xl font-bold text-[#1A1F24]">{st.value}</div>
-                    <span className="text-xs text-[#15803D] font-medium flex items-center gap-1">
-                      <TrendingUp className="w-3.5 h-3.5" /> {st.change}
-                    </span>
+                    <span className="text-xs text-[#5A646D] font-medium">{st.note}</span>
                   </div>
                   <div className="p-3 bg-[#F0F7F1] rounded-xl shrink-0">{st.icon}</div>
                 </div>
               ))}
             </div>
 
-            {/* Visual Diagram Chart Card */}
-            <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-sm space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-[#1A1F24]">{t('home.chart.title')}</h3>
-                  <p className="text-xs text-[#5A646D]">{t('home.chart.subtitle')}</p>
-                </div>
-                <span className="text-xs font-semibold text-[#2E7D4F] bg-[#F0F7F1] px-2.5 py-1 rounded-lg border border-[#D9EBDC]">
-                  {t('home.chart.season')}
-                </span>
+            {/* Where the aggregates come from, and why some of them are blank.
+                This card replaced a four-bar "distribution diagram" whose every
+                percentage was a constant in the source (68 % grazing, 29,138
+                permits...) under a caption reading "updates in real time".
+                Nothing publishes an activity breakdown, so rather than invent
+                one again, this says where the real figures live and what hides
+                the small ones. */}
+            <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-[#1A1F24]">{t('home.opendata.title')}</h3>
+                <p className="text-xs text-[#5A646D]">{t('home.opendata.subtitle')}</p>
               </div>
-
-              {/* Progress Diagram Bars */}
-              <div className="space-y-4 pt-1">
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D4F]" />
-                      {t('home.chart.grazingLabel')}
-                    </span>
-                    <span>{t('home.chart.grazingValue')}</span>
-                  </div>
-                  <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
-                    <div className="bg-[#2E7D4F] h-full rounded-full transition-all duration-500" style={{ width: '68%' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#15803D]" />
-                      {t('home.chart.haymakingLabel')}
-                    </span>
-                    <span>{t('home.chart.haymakingValue')}</span>
-                  </div>
-                  <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
-                    <div className="bg-[#15803D] h-full rounded-full transition-all duration-500" style={{ width: '18%' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#7FB98A]" />
-                      {t('home.chart.beekeepingLabel')}
-                    </span>
-                    <span>{t('home.chart.beekeepingValue')}</span>
-                  </div>
-                  <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
-                    <div className="bg-[#7FB98A] h-full rounded-full transition-all duration-500" style={{ width: '10%' }} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold text-[#1A1F24] mb-1">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#A8D5B1]" />
-                      {t('home.chart.otherLabel')}
-                    </span>
-                    <span>{t('home.chart.otherValue')}</span>
-                  </div>
-                  <div className="w-full bg-[#E4E7EA] h-3 rounded-full overflow-hidden">
-                    <div className="bg-[#A8D5B1] h-full rounded-full transition-all duration-500" style={{ width: '4%' }} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-[#E4E7EA] flex flex-wrap items-center justify-between text-xs text-[#5A646D] gap-2">
-                <span>{t('home.chart.footnoteAuth')}</span>
-                <span className="font-semibold text-[#2E7D4F] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" /> {t('home.chart.footnoteLive')}
-                </span>
-              </div>
+              <p className="text-sm text-[#5A646D]">
+                {t('home.opendata.kAnonymity.before')}{' '}
+                <b className="text-[#1A1F24]">
+                  {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
+                </b>{' '}
+                {t('home.opendata.kAnonymity.after')}
+              </p>
+              {statsState.status === 'error' && (
+                <p className="text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
+              )}
+              <button
+                type="button"
+                onClick={() => onNavigate?.('opendata')}
+                className="text-sm font-semibold text-[#2E7D4F] inline-flex items-center gap-1 hover:underline"
+              >
+                {t('home.opendata.link')} <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -331,7 +340,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </div>
 
               <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-                <span className="text-[#767F87]">{t('home.activities.quotaLabel')} <b className="text-[#1A1F24]">{act.limit}</b></span>
+                {/* The annual-quota line was six invented constants (85,000 head,
+                    14,200 hectares, 42,000 bee colonies...) with no source
+                    anywhere in the system — stage 7.3 finding F7. Removed
+                    rather than replaced: nothing publishes a quota, and the
+                    tariff calculator below is what a citizen actually needs. */}
+                <span className="text-[#767F87]">{t('home.activities.tariffHint')}</span>
                 <button
                   onClick={() => onNavigate?.('auth_login', { activity: act.id })}
                   className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"

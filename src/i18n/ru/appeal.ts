@@ -2,10 +2,25 @@
  * `/check`'s layout and error handling, served by the anonymous,
  * rate-limited `GET /api/v1/public/appeals/check`. */
 export const appeal = {
-  'appeal.header.badge': 'Проверка статуса обращения',
-  'appeal.header.title': 'Проверьте статус вашего обращения',
+  'appeal.file.title': 'Подать обращение',
+  'appeal.file.subtitle': 'Обращение будет зарегистрировано, и вы получите номер — по нему потом смотрите статус.',
+  'appeal.file.nameLabel': 'Ф.И.О.',
+  'appeal.file.phoneLabel': 'Телефон',
+  'appeal.file.emailLabel': 'Электронная почта',
+  'appeal.file.subjectLabel': 'Тема',
+  'appeal.file.bodyLabel': 'Текст обращения',
+  'appeal.file.submit': 'Отправить',
+  'appeal.file.contactRequired': 'Укажите телефон или электронную почту — по ним вы потом проверите статус.',
+  'appeal.file.sentTitle': 'Обращение принято',
+  'appeal.file.sentBefore': 'Регистрационный номер —',
+  'appeal.file.sentAfter': 'Сохраните его: для проверки статуса понадобятся этот номер и указанные вами контактные данные.',
+  'appeal.file.errorTitle': 'Обращение не отправлено',
+  'appeal.check.title': 'Проверить статус обращения',
+  'appeal.check.subtitle': 'По регистрационному номеру и контактным данным, указанным при подаче.',
+  'appeal.header.badge': 'Обращения граждан',
+  'appeal.header.title': 'Подайте обращение или проверьте его статус',
   'appeal.header.subtitle':
-    'Введите номер обращения и телефон или электронную почту — статус будет показан здесь.',
+    'Обращение подаётся здесь же, вы получаете регистрационный номер, а затем по нему и своим контактным данным проверяете статус.',
 
   'appeal.form.numberLabel': 'Номер обращения',
   'appeal.form.numberPlaceholder': 'Например: MR-2026-000123',

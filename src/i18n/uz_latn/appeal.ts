@@ -2,10 +2,25 @@
  * `/check`'s layout and error handling, served by the anonymous,
  * rate-limited `GET /api/v1/public/appeals/check`. */
 export const appeal = {
-  'appeal.header.badge': 'Murojaat holatini tekshirish',
-  'appeal.header.title': 'Murojaatingiz holatini tekshiring',
+  'appeal.file.title': 'Murojaat yuborish',
+  'appeal.file.subtitle': 'Murojaatingiz roʻyxatdan oʻtkaziladi va sizga raqam beriladi — shu raqam boʻyicha holatini kuzatasiz.',
+  'appeal.file.nameLabel': 'F.I.SH.',
+  'appeal.file.phoneLabel': 'Telefon',
+  'appeal.file.emailLabel': 'Elektron pochta',
+  'appeal.file.subjectLabel': 'Mavzu',
+  'appeal.file.bodyLabel': 'Murojaat matni',
+  'appeal.file.submit': 'Yuborish',
+  'appeal.file.contactRequired': 'Telefon yoki elektron pochtadan kamida bittasini kiriting — keyinchalik holatni shu orqali tekshirasiz.',
+  'appeal.file.sentTitle': 'Murojaat qabul qilindi',
+  'appeal.file.sentBefore': 'Roʻyxatga olish raqami —',
+  'appeal.file.sentAfter': 'Uni saqlab qoʻying: holatni tekshirish uchun shu raqam va kiritgan aloqa maʼlumotingiz kerak boʻladi.',
+  'appeal.file.errorTitle': 'Murojaat yuborilmadi',
+  'appeal.check.title': 'Murojaat holatini tekshirish',
+  'appeal.check.subtitle': 'Roʻyxatga olish raqami va yuborishda kiritgan aloqa maʼlumotingiz boʻyicha.',
+  'appeal.header.badge': 'Fuqarolar murojaatlari',
+  'appeal.header.title': 'Murojaat yuboring yoki holatini tekshiring',
   'appeal.header.subtitle':
-    'Murojaat raqamini va telefon yoki elektron pochtangizni kiriting — holatini shu yerda koʻrasiz.',
+    'Murojaatni shu yerdan yuborasiz va roʻyxatga olish raqamini olasiz; keyin oʻsha raqam va aloqa maʼlumotingiz boʻyicha holatini tekshirasiz.',
 
   'appeal.form.numberLabel': 'Murojaat raqami',
   'appeal.form.numberPlaceholder': 'Masalan: MR-2026-000123',
