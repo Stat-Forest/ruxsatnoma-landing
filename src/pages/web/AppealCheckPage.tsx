@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Lock, Loader2, FileCheck } from 'lucide-react';
+import { Search, Lock, Loader2, FileCheck, Send } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { Input, FormField } from '../../components/ui/FormControls';
+import { Input, FormField, Textarea } from '../../components/ui/FormControls';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import type { StatusType } from '../../components/ui/StatusBadge';
 import { Alert } from '../../components/ui/Feedback';
@@ -46,6 +46,171 @@ function formatCheckError(t: TFunction, err: ApiError): string {
   }
   return `${err.message} (${err.code})`;
 }
+
+type FileState = 'idle' | 'sending' | 'sent' | 'error';
+
+export interface AppealFormProps {
+  /** Called with the registration number the backend assigns, so the check
+   *  form below can be filled in for the citizen: the number and the contact
+   *  they just used ARE the pair `GET /public/appeals/check` matches on, and
+   *  asking them to retype both immediately after filing is how a person
+   *  loses the number. */
+  onFiled?: (filed: { number: string; phone: string; email: string }) => void;
+}
+
+/**
+ * Screen: file a citizen's appeal (`POST /api/v1/public/appeals`, anonymous).
+ *
+ * It did not exist until the stage 7.3 walkthrough went looking for it
+ * (finding F8): the backend had the route, this site had the status-check
+ * page, the adminka had the four staff routes for answering — and
+ * `adminka/src/pages/support/appeals/api.ts` stated in a comment that the
+ * citizen's filing form "shipped on the public site". It had not. **A citizen
+ * could check the status of an appeal they had no way to file**, which is the
+ * half of С27 that carries the legal obligation.
+ *
+ * `AppealContact` requires at least one of phone/email — that pair is the
+ * shared secret proving the filer is the one asking later — so this form
+ * refuses locally rather than sending a body the API will reject.
+ */
+export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
+  const t = useT();
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [state, setState] = useState<FileState>('idle');
+  const [assignedNumber, setAssignedNumber] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [contactError, setContactError] = useState<string | null>(null);
+
+  const handleFile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedPhone = phone.trim();
+    const trimmedEmail = email.trim();
+    if (!trimmedPhone && !trimmedEmail) {
+      setContactError(t('appeal.file.contactRequired'));
+      return;
+    }
+    setContactError(null);
+    setError(null);
+    setState('sending');
+
+    void (async () => {
+      try {
+        const { data, error: apiErr } = await api.POST('/api/v1/public/appeals', {
+          body: {
+            applicant_name: name.trim(),
+            contact: { phone: trimmedPhone || null, email: trimmedEmail || null },
+            subject: subject.trim(),
+            body: body.trim(),
+          },
+        });
+        if (apiErr || !data) {
+          setState('error');
+          setError(formatCheckError(t, apiError(apiErr ?? {})));
+          return;
+        }
+        setAssignedNumber(data.number);
+        setState('sent');
+        onFiled?.({ number: data.number, phone: trimmedPhone, email: trimmedEmail });
+      } catch {
+        setState('error');
+        setError(t('appeal.status.networkError'));
+      }
+    })();
+  };
+
+  return (
+    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+      <div>
+        <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.file.title')}</h2>
+        <p className="text-xs text-[#5A646D]">{t('appeal.file.subtitle')}</p>
+      </div>
+
+      <form onSubmit={handleFile} className="space-y-4">
+        <FormField label={t('appeal.file.nameLabel')} htmlFor="appeal-file-name">
+          <Input
+            id="appeal-file-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            maxLength={255}
+            touchSize
+          />
+        </FormField>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            label={t('appeal.file.phoneLabel')}
+            htmlFor="appeal-file-phone"
+            error={contactError ?? undefined}
+          >
+            <Input
+              id="appeal-file-phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              maxLength={32}
+              touchSize
+            />
+          </FormField>
+          <FormField label={t('appeal.file.emailLabel')} htmlFor="appeal-file-email">
+            <Input
+              id="appeal-file-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              touchSize
+            />
+          </FormField>
+        </div>
+
+        <FormField label={t('appeal.file.subjectLabel')} htmlFor="appeal-file-subject">
+          <Input
+            id="appeal-file-subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            required
+            maxLength={255}
+            touchSize
+          />
+        </FormField>
+
+        <FormField label={t('appeal.file.bodyLabel')} htmlFor="appeal-file-body">
+          <Textarea
+            id="appeal-file-body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+            maxLength={5000}
+            rows={6}
+          />
+        </FormField>
+
+        <Button type="submit" variant="primary" size="lg" isLoading={state === 'sending'}>
+          <Send className="w-4 h-4" /> {t('appeal.file.submit')}
+        </Button>
+      </form>
+
+      {state === 'sent' && (
+        <Alert variant="success" title={t('appeal.file.sentTitle')}>
+          <span>
+            {t('appeal.file.sentBefore')}{' '}
+            <b className="font-mono text-[#1A1F24]">{assignedNumber}</b>{' '}
+            {t('appeal.file.sentAfter')}
+          </span>
+        </Alert>
+      )}
+
+      {state === 'error' && (
+        <Alert variant="danger" title={t('appeal.file.errorTitle')}>
+          {error}
+        </Alert>
+      )}
+    </div>
+  );
+};
 
 export const AppealCheckPage: React.FC = () => {
   const t = useT();
@@ -119,7 +284,19 @@ export const AppealCheckPage: React.FC = () => {
         <p className="text-sm text-[#5A646D] max-w-xl mx-auto">{t('appeal.header.subtitle')}</p>
       </div>
 
+      <AppealForm
+        onFiled={({ number: filedNumber, phone: filedPhone, email: filedEmail }) => {
+          setNumber(filedNumber);
+          if (filedPhone) setPhone(filedPhone);
+          if (filedEmail) setEmail(filedEmail);
+        }}
+      />
+
       <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+        <div>
+          <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.check.title')}</h2>
+          <p className="text-xs text-[#5A646D]">{t('appeal.check.subtitle')}</p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <FormField label={t('appeal.form.numberLabel')} htmlFor="appeal-number" error={validationError ?? undefined}>
