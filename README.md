@@ -15,9 +15,10 @@ Oʻzbekiston Respublikasi Oʻrmon xoʻjaligi agentligining oʻrmon fondi yerlari
 - **Xizmatlar (`/services`)**: Oʻrmon fondidan foydalanish yoʻnalishlari va muddatlari
 - **Tariflar (`/tariffs`)**: BHM koeffitsiyentlari va avtomatlashtirilgan narx kalkulyatori
 - **Hujjatlar (`/documents`)**: Oʻzbekiston Respublikasi qonunlari va normativ-huquqiy hujjatlar
-- **Ochiq maʼlumotlar (`/opendata`)**: Anonimlashtirilgan davlat statistikasi va yuklab olish (CSV, JSON, API)
+- **Ochiq maʼlumotlar (`/opendata`)**: Oʻrmon fondi GIS qatlamlari, viloyat/tashkilot kesimidagi anonimlashtirilgan statistika, obʼyektlarni xaritada koʻrish va GeoJSON formatida yuklab olish
 - **Savol-javob (`/faq`)**: Koʻp beriladigan savollar va toifalangan yoʻriqnomalar
-- **Haqiqiylikni tekshirish (`/verify`)**: Berilgan elektron ruxsatnoma va E-IMZO QR-kodini tekshirish
+- **Haqiqiylikni tekshirish (`/check`)**: Berilgan elektron ruxsatnoma va E-IMZO QR-kodini tekshirish
+- **Murojaat holatini tekshirish (`/appeal-check`)**: Murojaat raqami va telefon yoki elektron pochta boʻyicha holatni anonim tekshirish
 
 ## 🚀 Texnologiyalar
 
