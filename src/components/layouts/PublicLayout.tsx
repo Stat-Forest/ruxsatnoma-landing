@@ -242,6 +242,11 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigate?.('appeal_check')} className="hover:text-white transition-colors text-left">
+                  {t('footer.link.appealStatus')}
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigate?.('gis_editor')} className="hover:text-white transition-colors text-left">
                   {t('footer.link.gis')}
                 </button>

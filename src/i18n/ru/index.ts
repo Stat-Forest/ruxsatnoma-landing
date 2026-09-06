@@ -6,6 +6,7 @@ import { documents } from './documents';
 import { opendata } from './opendata';
 import { faq } from './faq';
 import { verify } from './verify';
+import { appeal } from './appeal';
 import { ui } from './ui';
 
 export const ru = {
@@ -17,5 +18,6 @@ export const ru = {
   ...opendata,
   ...faq,
   ...verify,
+  ...appeal,
   ...ui,
 };

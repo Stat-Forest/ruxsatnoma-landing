@@ -21,3 +21,7 @@ node_modules
 
 # Per-session git worktrees
 .claude/worktrees/
+
+# Scratch workspace for subagent-driven-development plans (briefs, reports,
+# review packages, ledger) — never a deliverable, always local to the session.
+.superpowers/

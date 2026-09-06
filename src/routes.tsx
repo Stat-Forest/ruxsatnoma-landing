@@ -10,6 +10,7 @@ import {
   OpenDataPage,
   FaqPage,
   VerifyPage,
+  AppealCheckPage,
 } from './pages/web';
 
 export type NavigateFn = (page: string, params?: Record<string, unknown>) => void;
@@ -26,6 +27,9 @@ const PAGE_TO_PATH: Record<string, string> = {
   opendata: '/opendata',
   faq: '/faq',
   verify: '/check',
+  // `appeal_check`, like `verify`, has no header-nav entry (decision: not one
+  // of the nine A1-A9 screens) — reachable only from the footer.
+  appeal_check: '/appeal-check',
   // Old special-cases inlined here instead of in the handler below, so the
   // whole page-id -> path mapping lives in one table.
   activities: '/services',
@@ -109,6 +113,7 @@ export const routeConfig: RouteObject[] = [
       { path: 'opendata', element: <OpenDataPage /> },
       { path: 'faq', element: <FaqPage /> },
       { path: 'check', element: <VerifyPage /> },
+      { path: 'appeal-check', element: <AppealCheckPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
