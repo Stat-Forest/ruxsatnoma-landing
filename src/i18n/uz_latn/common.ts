@@ -33,6 +33,7 @@ export const common = {
   'footer.link.howToApply': 'Ariza berish tartibi',
   'footer.link.verify': 'Ruxsatnoma tekshirish',
   'footer.link.tariffs': 'Toʻlov stavkalari va kalkulyator',
+  'footer.link.appealStatus': 'Murojaat holatini tekshirish',
   'footer.link.gis': 'Oʻrmon zonalari GIS kartasi',
   'footer.link.norms': 'Geobotanik normalar va qoidalar',
   'footer.link.prosecutor': 'Raqamli Nazorat (Prokuratura Portali)',

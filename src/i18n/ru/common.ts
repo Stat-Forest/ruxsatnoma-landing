@@ -33,6 +33,7 @@ export const common = {
   'footer.link.howToApply': 'Порядок подачи заявки',
   'footer.link.verify': 'Проверка разрешения',
   'footer.link.tariffs': 'Ставки оплаты и калькулятор',
+  'footer.link.appealStatus': 'Проверка статуса обращения',
   'footer.link.gis': 'ГИС-карта лесных зон',
   'footer.link.norms': 'Геоботанические нормы и правила',
   'footer.link.prosecutor': 'Цифровой надзор (портал прокуратуры)',
