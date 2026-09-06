@@ -9,6 +9,13 @@ vi.mock('../../api/client', () => ({
   BASE_URL: 'http://localhost:8000',
 }));
 
+// This page's own tests never touch `maplibre-gl` — that is `LayerMapView`'s
+// own test's job. Mocking the whole module keeps this file's suite from
+// needing a WebGL/canvas shim just to verify the toggle wiring.
+vi.mock('../../components/maps/LayerMapView', () => ({
+  default: () => <div data-testid="mock-map" />,
+}));
+
 import { api } from '../../api/client';
 
 const mockLayers = [
@@ -143,6 +150,26 @@ describe('OpenDataPage', () => {
 
     // Re-opening the same layer renders from the cache — no second network call.
     expect(countFeatureCalls()).toBe(1);
+  });
+
+  it('toggles the map view on and off once features are loaded', async () => {
+    mockHappyPath();
+    renderPage();
+    const user = userEvent.setup();
+
+    const viewButton = await screen.findByRole('button', { name: /Obʼyektlarni koʻrish/ });
+    await user.click(viewButton);
+    await screen.findByText('Uchastka 1');
+
+    expect(screen.queryByTestId('mock-map')).not.toBeInTheDocument();
+
+    const showMapButton = await screen.findByRole('button', { name: /Xaritada koʻrish/ });
+    await user.click(showMapButton);
+    expect(await screen.findByTestId('mock-map')).toBeInTheDocument();
+
+    const hideMapButton = await screen.findByRole('button', { name: /Xaritani yashirish/ });
+    await user.click(hideMapButton);
+    expect(screen.queryByTestId('mock-map')).not.toBeInTheDocument();
   });
 
   it('renders an error alert, not a crash, when the initial load fails', async () => {

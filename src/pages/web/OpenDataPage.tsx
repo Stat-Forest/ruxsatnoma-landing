@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, Check, Copy, Download, Loader2, MapPin } from 'lucide-react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Check, Copy, Download, Loader2, Map as MapIcon, MapPin } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { DataTable } from '../../components/ui/DataTable';
@@ -20,7 +20,7 @@ type OrgStat = components['schemas']['OpenDataOrgStatOut'];
 // it as `{[key: string]: unknown}`. The real shape, from
 // `backend/app/modules/gis/repo.py::features_geojson` (lines 696-776;
 // `FEATURE_COLLECTION_LIMIT = 2000` at line 529), is defined locally here.
-interface OpenDataFeature {
+export interface OpenDataFeature {
   type: 'Feature';
   id: string;
   geometry: { type: string; coordinates: unknown } | null;
@@ -32,7 +32,10 @@ interface OpenDataFeature {
   };
 }
 
-interface OpenDataFeatureCollection {
+// Exported so `LayerMapView` (Task 2, lazy-loaded) can type its props against
+// the exact same shape this page already fetched and cached — no separate
+// copy of the interface, no second network call to draw the map.
+export interface OpenDataFeatureCollection {
   type: 'FeatureCollection';
   truncated: boolean;
   features: OpenDataFeature[];
@@ -43,6 +46,11 @@ function isFeatureCollection(data: unknown): data is OpenDataFeatureCollection {
   const candidate = data as { type?: unknown; features?: unknown };
   return candidate.type === 'FeatureCollection' && Array.isArray(candidate.features);
 }
+
+// Module scope, not inside a component body — recreating the lazy component
+// on every render would remount MapLibre (and its network-free style/source
+// setup) on every re-render instead of once per toggle.
+const LazyLayerMapView = React.lazy(() => import('../../components/maps/LayerMapView'));
 
 type TFunction = ReturnType<typeof useT>;
 
@@ -358,6 +366,7 @@ const DETAIL_PAGE_SIZE = 25;
 function LayerDetailPanel({ code, state }: { code: string; state: LayerFeatureState | undefined }) {
   const t = useT();
   const [page, setPage] = useState(1);
+  const [showMap, setShowMap] = useState(false);
 
   // A fresh mount (switching layers, or hiding then re-viewing the same one)
   // already starts `page` at 1; this only guards the case a future change
@@ -445,7 +454,22 @@ function LayerDetailPanel({ code, state }: { code: string; state: LayerFeatureSt
 
       {collection.truncated && <Alert variant="warning">{t('opendata.layer.truncatedNotice')}</Alert>}
 
-      {/* Task 2 adds a "view on map" toggle + <LayerMapView collection={collection} /> here */}
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          leftIcon={<MapIcon className="w-4 h-4" />}
+          onClick={() => setShowMap((prev) => !prev)}
+        >
+          {showMap ? t('opendata.map.toggleHide') : t('opendata.map.toggleShow')}
+        </Button>
+      </div>
+
+      {showMap && (
+        <Suspense fallback={<Skeleton height="h-80" />}>
+          <LazyLayerMapView collection={collection} />
+        </Suspense>
+      )}
 
       <DataTable
         columns={columns}

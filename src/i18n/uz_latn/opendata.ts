@@ -60,4 +60,8 @@ export const opendata = {
   'opendata.layer.table.columns.validFrom': 'Boshlanish sanasi',
   'opendata.layer.table.columns.validTo': 'Tugash sanasi',
   'opendata.layer.table.columns.properties': 'Xususiyatlar',
+  'opendata.map.toggleShow': 'Xaritada koʻrish',
+  'opendata.map.toggleHide': 'Xaritani yashirish',
+  'opendata.map.disclaimer':
+    'Xarita hozircha asosiy (bazaviy) qatlamsiz koʻrsatilmoqda — faqat tanlangan qatlam obʼyektlari chiziladi.',
 } as const;

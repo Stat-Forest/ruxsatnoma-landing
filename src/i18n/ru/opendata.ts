@@ -60,4 +60,8 @@ export const opendata = {
   'opendata.layer.table.columns.validFrom': 'Действует с',
   'opendata.layer.table.columns.validTo': 'Действует по',
   'opendata.layer.table.columns.properties': 'Свойства',
+  'opendata.map.toggleShow': 'Показать на карте',
+  'opendata.map.toggleHide': 'Скрыть карту',
+  'opendata.map.disclaimer':
+    'Карта пока показана без базовой подложки — отображаются только объекты выбранного слоя.',
 } as const;
