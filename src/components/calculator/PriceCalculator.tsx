@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Calculator, AlertTriangle, Loader2, Info } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input, Select, FormField } from '../../components/ui/FormControls';
-import { Alert, Skeleton } from '../../components/ui/Feedback';
+import { Button } from '../ui/button';
+import { Input, Select, FormField } from '../ui/FormControls';
+import { Alert, Skeleton } from '../ui/Feedback';
 import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
@@ -33,7 +33,11 @@ type RefsState =
   | { status: 'error'; message?: string; messageKey?: string }
   | { status: 'ready'; activityTypes: ActivityType[]; livestockTypes: LivestockType[] };
 
-export const TariffsPage: React.FC = () => {
+/** The anchor `routes.tsx` sends the header CTA and the old `/tariffs`
+ *  URL to. Exported so neither of them can drift from the `id` below. */
+export const CALCULATOR_ANCHOR = 'calculator';
+
+export const PriceCalculator: React.FC = () => {
   const t = useT();
   const [refs, setRefs] = useState<RefsState>({ status: 'loading' });
 
@@ -70,7 +74,7 @@ export const TariffsPage: React.FC = () => {
 
   if (refs.status === 'loading') {
     return (
-      <div className="max-w-5xl mx-auto space-y-6 font-sans">
+      <div id={CALCULATOR_ANCHOR} className="max-w-5xl mx-auto space-y-6 font-sans">
         <Skeleton height="h-10" width="w-2/3" className="mx-auto" />
         <Skeleton height="h-48" />
       </div>
@@ -79,7 +83,7 @@ export const TariffsPage: React.FC = () => {
 
   if (refs.status === 'error') {
     return (
-      <div className="max-w-3xl mx-auto font-sans">
+      <div id={CALCULATOR_ANCHOR} className="max-w-3xl mx-auto font-sans">
         <Alert variant="danger" title={t('tariffs.error.title')}>
           {t('tariffs.error.loadFailedPrefix')} {refs.message ?? (refs.messageKey ? t(refs.messageKey) : null)}
         </Alert>
@@ -87,10 +91,10 @@ export const TariffsPage: React.FC = () => {
     );
   }
 
-  return <TariffsCalculator activityTypes={refs.activityTypes} livestockTypes={refs.livestockTypes} />;
+  return <CalculatorForm activityTypes={refs.activityTypes} livestockTypes={refs.livestockTypes} />;
 };
 
-function TariffsCalculator({
+function CalculatorForm({
   activityTypes,
   livestockTypes,
 }: {
@@ -168,20 +172,7 @@ function TariffsCalculator({
   }, [selectedActivity, isGrazing, durationMonths, quantity, headCounts]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 font-sans">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          {t('tariffs.header.badge')}
-        </span>
-        <h1 className="text-2xl sm:text-4xl font-bold text-[#1A1F24]">
-          {t('tariffs.header.title')}
-        </h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto">
-          {t('tariffs.header.subtitle')}
-        </p>
-      </div>
-
+    <div id={CALCULATOR_ANCHOR} className="max-w-5xl mx-auto space-y-10 font-sans scroll-mt-24">
       {/* Interactive Calculator Section */}
       <section className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
         <div className="flex items-center gap-3 border-b border-[#E4E7EA] pb-4">

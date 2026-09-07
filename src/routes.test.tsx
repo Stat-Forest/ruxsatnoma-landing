@@ -52,3 +52,19 @@ describe.each([
     expect(open).not.toHaveBeenCalled();
   });
 });
+
+/** The news register took the header slot `/tariffs` used to hold. The
+ *  redirect that keeps the old URL alive lives in `routes.redirect.test.tsx`,
+ *  which renders the real layout — the mock above has no `<Outlet/>`, so a
+ *  `<Navigate>` in the route tree would never mount here. */
+describe('the news register', () => {
+  it('routes /news and /news/:id to the register and to one announcement', () => {
+    const list = createMemoryRouter(routeConfig, { initialEntries: ['/news'] });
+    render(<RouterProvider router={list} />);
+    expect(list.state.location.pathname).toBe('/news');
+
+    const item = createMemoryRouter(routeConfig, { initialEntries: ['/news/abc'] });
+    render(<RouterProvider router={item} />);
+    expect(item.state.location.pathname).toBe('/news/abc');
+  });
+});

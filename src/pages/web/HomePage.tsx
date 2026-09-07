@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import {
   Search,
   QrCode,
@@ -17,8 +18,11 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
-import { useT } from '../../i18n/useT';
+import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
+import { useLanguage, useT } from '../../i18n/useT';
 import { api } from '../../api/client';
+import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
+import { pickLocalized } from '../../lib/localized';
 import type { components } from '../../api/schema';
 
 type OpenDataStats = components['schemas']['OpenDataStatsOut'];
@@ -27,6 +31,8 @@ type StatsState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; data: OpenDataStats };
+
+type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
 
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
@@ -39,6 +45,8 @@ export interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
+  const { language } = useLanguage();
+  const location = useLocation();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
 
@@ -60,6 +68,28 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       }
     }
     void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // The three news items used to be constants in the translation files — three
+  // announcements written once, dated August 2026, under a heading that says
+  // "news". They now come from the announcements module's anonymous route, and
+  // the section says plainly when there is nothing to show rather than
+  // inventing something (same posture as the statistics above).
+  const [newsState, setNewsState] = useState<NewsState>({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await fetchNews({ page: 1, pageSize: HOME_NEWS_COUNT });
+        if (!cancelled) setNewsState({ status: 'ready', items: data.items });
+      } catch {
+        if (!cancelled) setNewsState({ status: 'error' });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -150,23 +180,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     },
   ];
 
-  const newsList = [
-    {
-      date: t('home.news.seasonalApplications.date'),
-      title: t('home.news.seasonalApplications.title'),
-      desc: t('home.news.seasonalApplications.desc'),
-    },
-    {
-      date: t('home.news.prosecutorIntegration.date'),
-      title: t('home.news.prosecutorIntegration.title'),
-      desc: t('home.news.prosecutorIntegration.desc'),
-    },
-    {
-      date: t('home.news.grazingRates.date'),
-      title: t('home.news.grazingRates.title'),
-      desc: t('home.news.grazingRates.desc'),
-    },
-  ];
+
+  // `/#calculator` — the header CTA from another page, the footer link, and the
+  // old `/tariffs` bookmark all arrive here with that hash. React Router does
+  // not scroll to a hash on its own.
+  useEffect(() => {
+    if (location.hash !== `#${CALCULATOR_ANCHOR}`) return;
+    const target = document.getElementById(CALCULATOR_ANCHOR);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  }, [location.hash]);
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -382,26 +404,65 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
+      {/* ── 4b. PRICE CALCULATOR ───────────────────────────────────── */}
+      {/* Was its own `/tariffs` screen until the news register took that slot
+          in the header. It is one form over two anonymous endpoints, and a
+          visitor who wants a figure now gets it without leaving the page. */}
+      <section aria-labelledby="calculator-heading" className="space-y-6">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
+            {t('tariffs.header.badge')}
+          </span>
+          <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
+            {t('tariffs.header.title')}
+          </h2>
+          <p className="text-sm text-[#5A646D]">{t('tariffs.header.subtitle')}</p>
+        </div>
+        <PriceCalculator />
+      </section>
+
       {/* ── 5. NEWS & ANNOUNCEMENTS ───────────────────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-[#E4E7EA] pb-4">
             <h3 className="text-lg font-bold text-[#1A1F24]">{t('home.news.sectionTitle')}</h3>
-            <a href="#" className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1">
+            <Link
+              to="/news"
+              className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1"
+            >
               {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
 
-          <div className="space-y-4 divide-y divide-[#E4E7EA]">
-            {newsList.map((item, idx) => (
-              <div key={idx} className="pt-4 first:pt-0 space-y-1">
-                <span className="text-[11px] font-mono text-[#767F87]">{item.date}</span>
-                <h4 className="text-base font-bold text-[#1A1F24] hover:text-[#2E7D4F] cursor-pointer transition-colors">
-                  {item.title}
-                </h4>
-                <p className="text-xs text-[#5A646D] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+          <div className="space-y-4 divide-y divide-[#E4E7EA]" data-testid="home-news">
+            {newsState.status === 'loading' && (
+              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.loading')}</p>
+            )}
+            {newsState.status === 'error' && (
+              <p className="text-xs text-[#92400E] pt-4 first:pt-0">{t('home.news.failed')}</p>
+            )}
+            {newsState.status === 'ready' && newsState.items.length === 0 && (
+              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.empty')}</p>
+            )}
+            {newsState.status === 'ready' &&
+              newsState.items.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/news/${item.id}`}
+                  data-testid={`home-news-${item.id}`}
+                  className="block pt-4 first:pt-0 space-y-1 group"
+                >
+                  <span className="text-[11px] font-mono text-[#767F87]">
+                    {formatNewsDate(item.publish_from)}
+                  </span>
+                  <h4 className="text-base font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
+                    {pickLocalized(item.title, language)}
+                  </h4>
+                  <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">
+                    {pickLocalized(item.body, language)}
+                  </p>
+                </Link>
+              ))}
           </div>
         </div>
 
