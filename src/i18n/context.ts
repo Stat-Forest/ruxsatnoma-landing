@@ -10,22 +10,22 @@ import { createContext } from 'react';
 export type Language = 'uz_cyrl' | 'uz_latn' | 'ru' | 'kaa' | 'en';
 
 /** The languages a string map actually exists for. The rest fall back. */
-export type UiLanguage = 'uz_latn' | 'ru';
+export type UiLanguage = 'uz_latn' | 'uz_cyrl' | 'ru' | 'kaa' | 'en';
 
 export const LANGUAGES: { code: Language; label: string; title: string }[] = [
   { code: 'uz_cyrl', label: 'ЎЗ', title: 'Ўзбекча (кирилл)' },
   { code: 'uz_latn', label: 'UZ', title: 'Oʻzbekcha (lotin)' },
   { code: 'ru', label: 'RU', title: 'Русский' },
-  { code: 'kaa', label: 'ҚҚ', title: 'Qaraqalpaqsha' },
+  { code: 'kaa', label: 'KK', title: 'Qaraqalpaqsha' },
   { code: 'en', label: 'EN', title: 'English' },
 ];
 
 const LANGUAGE_MAP: Record<Language, UiLanguage> = {
-  uz_cyrl: 'uz_latn',
+  uz_cyrl: 'uz_cyrl',
   uz_latn: 'uz_latn',
   ru: 'ru',
-  kaa: 'uz_latn',
-  en: 'uz_latn',
+  kaa: 'kaa',
+  en: 'en',
 };
 
 /**

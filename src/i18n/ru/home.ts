@@ -3,7 +3,7 @@ export const home = {
   'home.stats.activePermits.label': 'Действующие разрешения',
   'home.stats.activePermits.note': 'Данные государственного реестра',
   'home.stats.activeArea.label': 'Выделенная площадь',
-  'home.stats.activeArea.unit': 'га',
+  'home.stats.activeArea.unit': 'гектар',
   'home.stats.activeArea.note': 'По действующим разрешениям',
   'home.stats.organizations.label': 'Лесхозы',
   'home.stats.organizations.note': 'Малые срезы скрываются',

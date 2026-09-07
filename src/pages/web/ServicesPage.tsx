@@ -47,26 +47,36 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-8 font-sans">
-      {/* 3xl, not 2xl: at 672px the Russian h1 wraps onto a second line while
-          the Uzbek one keeps to one, and this heading sits above everything
-          else on the page — so the whole page slid 36px on a language switch.
-          Russian fits on one line from 768px on. */}
-      <div className="text-center max-w-3xl mx-auto space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+      <div className="text-center max-w-3xl mx-auto space-y-3">
+        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('services.badge')}
         </span>
         <h1 className="text-3xl font-bold text-[#1A1F24]">{t('services.title')}</h1>
-        <p className="text-sm text-[#5A646D]">
+        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">
           {t('services.subtitle')}
         </p>
       </div>
 
       {state.status === 'loading' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="services-loading">
-          <Skeleton height="h-52" />
-          <Skeleton height="h-52" />
-          <Skeleton height="h-52" />
-          <Skeleton height="h-52" />
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <Skeleton height="h-12" width="w-12" className="rounded-xl" />
+                <Skeleton height="h-6" width="w-32" className="rounded-lg" />
+              </div>
+              <Skeleton height="h-6" width="w-3/4" />
+              <Skeleton height="h-4" width="w-full" />
+              <Skeleton height="h-4" width="w-4/5" />
+              <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+                <Skeleton height="h-4" width="w-24" />
+                <Skeleton height="h-8" width="w-28" className="rounded-md" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -136,7 +146,7 @@ function ServiceCard({
           variant="primary"
           size="sm"
           rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-          onClick={() => onNavigate?.('applicant_wizard', { activity: service.code })}
+          onClick={() => onNavigate?.('applicant_wizard', { activity: service.id })}
         >
           {t('services.card.apply')}
         </Button>

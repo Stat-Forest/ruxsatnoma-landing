@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link, useInRouterContext, useLocation } from 'react-router';
 import {
   Search,
   QrCode,
@@ -41,6 +41,34 @@ type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 're
  *  honest one. Never a placeholder digit. */
 const DASH = '—';
 
+function HashScroller() {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash !== `#${CALCULATOR_ANCHOR}`) return;
+    const target = document.getElementById(CALCULATOR_ANCHOR);
+    if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash]);
+  return null;
+}
+
+const SafeLink: React.FC<React.ComponentProps<typeof Link>> = ({ to, children, ...props }) => {
+  const inRouter = useInRouterContext();
+  if (!inRouter) {
+    return (
+      <a href={typeof to === 'string' ? to : '#'} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={to} {...props}>
+      {children}
+    </Link>
+  );
+};
+
 export interface HomePageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
@@ -48,7 +76,7 @@ export interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
   const { language } = useLanguage();
-  const location = useLocation();
+  const inRouter = useInRouterContext();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
 
@@ -87,7 +115,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     void (async () => {
       try {
         const data = await fetchNews({ page: 1, pageSize: HOME_NEWS_COUNT });
-        if (!cancelled) setNewsState({ status: 'ready', items: data.items });
+        if (!cancelled) {
+          if (data && Array.isArray(data.items)) {
+            setNewsState({ status: 'ready', items: data.items });
+          } else {
+            setNewsState({ status: 'error' });
+          }
+        }
       } catch {
         if (!cancelled) setNewsState({ status: 'error' });
       }
@@ -136,26 +170,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     },
     {
       label: t('home.stats.organizations.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_organization.length || 0) : DASH,
+      value: statsState.status === 'ready' ? String(statsState.data.by_organization?.length || 0) : DASH,
       icon: <Users className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.organizations.note'),
     },
     {
       label: t('home.stats.regions.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_region.length || 0) : DASH,
+      value: statsState.status === 'ready' ? String(statsState.data.by_region?.length || 0) : DASH,
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.regions.note'),
     },
   ];
-
-  // `/#calculator` — the header CTA from another page, the footer link, and the
-  // old `/tariffs` bookmark all arrive here with that hash. React Router does
-  // not scroll to a hash on its own.
-  useEffect(() => {
-    if (location.hash !== `#${CALCULATOR_ANCHOR}`) return;
-    const target = document.getElementById(CALCULATOR_ANCHOR);
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
-  }, [location.hash]);
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,17 +191,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-16 font-sans">
+      {inRouter && <HashScroller />}
       {/* ── 1. DASHBOARD & VERIFICATION SECTION ────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
               {t('home.dashboard.badge')}
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-3">
               {t('home.dashboard.title')}
             </h2>
-            <p className="text-sm text-[#5A646D]">
+            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">
               {t('home.dashboard.subtitle')}
             </p>
           </div>
@@ -293,9 +319,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
-            <h2 className="text-2xl font-bold text-[#1A1F24] mt-1">{t('home.activities.sectionTitle')}</h2>
-            <p className="text-sm text-[#5A646D]">{t('home.activities.sectionSubtitle')}</p>
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
+            <h2 className="text-2xl font-bold text-[#1A1F24] mt-2">{t('home.activities.sectionTitle')}</h2>
+            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">{t('home.activities.sectionSubtitle')}</p>
           </div>
           <Button
             variant="outline"
@@ -314,9 +340,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             a different set of services (`api/services.ts`). */}
         {servicesState.status === 'loading' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities-loading">
-            <Skeleton height="h-56" />
-            <Skeleton height="h-56" />
-            <Skeleton height="h-56" />
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <Skeleton height="h-11" width="w-11" className="rounded-xl" />
+                  <Skeleton height="h-6" width="w-24" className="rounded-full" />
+                </div>
+                <Skeleton height="h-6" width="w-3/4" />
+                <Skeleton height="h-4" width="w-full" />
+                <Skeleton height="h-4" width="w-5/6" />
+                <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+                  <Skeleton height="h-4" width="w-28" />
+                  <Skeleton height="h-4" width="w-20" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -341,10 +382,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
       {/* ── 4. HOW IT WORKS TIMELINE ───────────────────────────────── */}
       <section className="bg-white border border-[#E4E7EA] rounded-2xl p-8 shadow-xs space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
           <h2 className="text-2xl font-bold text-[#1A1F24]">{t('home.steps.sectionTitle')}</h2>
-          <p className="text-sm text-[#5A646D]">{t('home.steps.sectionSubtitle')}</p>
+          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('home.steps.sectionSubtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
@@ -368,14 +409,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           in the header. It is one form over two anonymous endpoints, and a
           visitor who wants a figure now gets it without leaving the page. */}
       <section aria-labelledby="calculator-heading" className="space-y-6">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
             {t('tariffs.header.badge')}
           </span>
           <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
             {t('tariffs.header.title')}
           </h2>
-          <p className="text-sm text-[#5A646D]">{t('tariffs.header.subtitle')}</p>
+          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('tariffs.header.subtitle')}</p>
         </div>
         <PriceCalculator />
       </section>
@@ -385,12 +426,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="lg:col-span-8 bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-[#E4E7EA] pb-4">
             <h3 className="text-lg font-bold text-[#1A1F24]">{t('home.news.sectionTitle')}</h3>
-            <Link
+            <SafeLink
               to="/news"
               className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1"
             >
               {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
+            </SafeLink>
           </div>
 
           <div className="space-y-4 divide-y divide-[#E4E7EA]" data-testid="home-news">
@@ -400,12 +441,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             {newsState.status === 'error' && (
               <p className="text-xs text-[#92400E] pt-4 first:pt-0">{t('home.news.failed')}</p>
             )}
-            {newsState.status === 'ready' && newsState.items.length === 0 && (
+            {newsState.status === 'ready' && (newsState.items ?? []).length === 0 && (
               <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.empty')}</p>
             )}
             {newsState.status === 'ready' &&
-              newsState.items.map((item) => (
-                <Link
+              (newsState.items ?? []).map((item) => (
+                <SafeLink
                   key={item.id}
                   to={`/news/${item.id}`}
                   data-testid={`home-news-${item.id}`}
@@ -420,7 +461,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">
                     {pickLocalized(item.body, language)}
                   </p>
-                </Link>
+                </SafeLink>
               ))}
           </div>
         </div>
@@ -503,7 +544,7 @@ function ActivityCard({
             tariff calculator below is what a citizen actually needs. */}
         <span className="text-[#767F87]">{t('home.activities.tariffHint')}</span>
         <button
-          onClick={() => onNavigate?.('auth_login', { activity: service.code })}
+          onClick={() => onNavigate?.('auth_login', { activity: service.id })}
           className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
         >
           {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />

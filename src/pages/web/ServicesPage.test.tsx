@@ -1,6 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
+import userEvent from '@testing-library/user-event';
 import { ServicesPage } from './ServicesPage';
 import { I18nProvider } from '../../i18n';
 
@@ -52,6 +53,19 @@ const DEADWOOD = {
   processing_days: 15,
 };
 
+const mockActivities = [
+  GRAZING,
+  BEEKEEPING,
+  DEADWOOD,
+  {
+    id: '0198f100-0001-7000-8000-000000000004',
+    code: 'recreation',
+    name: { uz_latn: 'Dam olish va turizm' },
+    description: null,
+    processing_days: 15,
+  },
+];
+
 function answer(items: unknown[]) {
   return { data: items, error: undefined };
 }
@@ -60,11 +74,11 @@ beforeEach(() => {
   vi.mocked(api.GET).mockReset();
 });
 
-function renderPage() {
+function renderPage(onNavigate?: (page: string, params?: any) => void) {
   return render(
     <MemoryRouter>
       <I18nProvider>
-        <ServicesPage />
+        <ServicesPage onNavigate={onNavigate} />
       </I18nProvider>
     </MemoryRouter>,
   );
@@ -111,4 +125,26 @@ it('says so plainly when the catalog is unavailable', async () => {
   renderPage();
 
   expect(await screen.findByRole('alert')).toBeInTheDocument();
+});
+
+// The defect this pins: the apply button used to carry the activity's
+// human-readable `code` ('deadwood'), not the UUID the backend actually
+// needs to identify the activity type (`PriceCalculator` submits the same
+// catalog's `id` as `activity_type_id`). A wizard started from this button
+// must receive the real id, not a string the API never promised as a key.
+it('passes the real backend activity UUID when the apply button is clicked', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer(mockActivities) as never);
+  const onNavigate = vi.fn();
+  renderPage(onNavigate);
+
+  await waitFor(() => {
+    expect(screen.getByText(DEADWOOD.name.uz_latn)).toBeInTheDocument();
+  });
+
+  const buttons = screen.getAllByRole('button', { name: /Ariza berish/i });
+  await userEvent.click(buttons[2]); // 3rd item: deadwood
+
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard', {
+    activity: DEADWOOD.id,
+  });
 });

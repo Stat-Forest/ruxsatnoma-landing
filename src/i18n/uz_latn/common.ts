@@ -38,7 +38,7 @@ export const common = {
   'footer.link.gis': 'Oʻrmon zonalari GIS kartasi',
   'footer.link.norms': 'Geobotanik normalar va qoidalar',
   'footer.link.prosecutor': 'Raqamli Nazorat (Prokuratura Portali)',
-  'footer.address': 'Toshkent sh., Chilonzor t.',
+  'footer.address': "O'rmon va yashil hududlarni ko'paytirish, cho'llanishga qarshi kurashish agentligi",
   'footer.copyright': '© 2026 Oʻrmon xoʻjaligi davlat qoʻmitasi. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-sistemasi',
 } as const;

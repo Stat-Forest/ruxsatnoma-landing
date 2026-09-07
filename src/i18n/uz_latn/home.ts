@@ -3,7 +3,7 @@ export const home = {
   'home.stats.activePermits.label': 'Amaldagi ruxsatnomalar',
   'home.stats.activePermits.note': 'Davlat reyestri maʼlumotlari',
   'home.stats.activeArea.label': 'Ajratilgan maydon',
-  'home.stats.activeArea.unit': 'ga',
+  'home.stats.activeArea.unit': 'gektar',
   'home.stats.activeArea.note': 'Amaldagi ruxsatnomalar boʻyicha',
   'home.stats.organizations.label': 'Oʻrmon xoʻjaliklari',
   'home.stats.organizations.note': 'Kam maʼlumotli kesimlar yashiriladi',

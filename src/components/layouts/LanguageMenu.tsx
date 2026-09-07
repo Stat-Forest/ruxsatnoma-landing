@@ -46,10 +46,10 @@ export function LanguageMenu({ value, label, onSelect }: LanguageMenuProps) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
-        className={`flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold backdrop-blur-sm transition-colors ${
+        className={`flex h-9 items-center gap-1.5 rounded-xl border border-[#E4E7EA] px-3 text-xs font-bold text-white transition-colors ${
           open
-            ? 'border-white/40 bg-[#2E7D4F] text-white shadow-xs'
-            : 'border-white/20 bg-black/30 text-gray-200 hover:bg-white/15 hover:text-white'
+            ? 'bg-white/20'
+            : 'bg-transparent hover:bg-white/20'
         }`}
       >
         <Globe className="h-4 w-4" />

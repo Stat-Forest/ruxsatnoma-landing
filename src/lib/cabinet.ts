@@ -9,8 +9,8 @@
  * would show a signed-in citizen a form they do not need.
  */
 export const CABINET_PATHS = {
-  /** The cabinet's front door. Signed in → dashboard; not → login. */
-  login: '/',
+  /** The cabinet's front door / login page. */
+  login: '/login',
   /** Submitting an application (decision #60.4: the wizard lives in the adminka). */
   wizard: '/my/applications/new',
 } as const;

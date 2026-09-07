@@ -98,6 +98,7 @@ function mockBackend({
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   vi.mocked(api.GET).mockReset();
 });
 
@@ -179,6 +180,70 @@ it('shows the services the catalog returns, not the six that used to be constant
   // catalogue for its own dropdown, so the name appears twice on the page.
   const section = await screen.findByTestId('home-activities');
   expect(within(section).getByText('Chorva mollarini boqish')).toBeInTheDocument();
+});
+
+const sampleActivities = [
+  {
+    id: '0198f100-0001-7000-8000-000000000001',
+    code: 'grazing',
+    name: { uz_latn: 'Chorva mollarini boqish' },
+    description: null,
+    processing_days: 15,
+  },
+  {
+    id: '0198f100-0001-7000-8000-000000000005',
+    code: 'deadwood',
+    name: { uz_latn: 'Quruq shox-shabba yigʻish' },
+    description: null,
+    processing_days: 15,
+  },
+  {
+    id: '0198f100-0001-7000-8000-000000000006',
+    code: 'science',
+    name: { uz_latn: 'Ilmiy tadqiqot' },
+    description: null,
+    processing_days: 15,
+  },
+];
+
+it('fetches and renders every activity type the public API returns', async () => {
+  mockBackend({ services: sampleActivities });
+  renderHome();
+
+  const section = await screen.findByTestId('home-activities');
+  await waitFor(() => {
+    expect(within(section).getByText(/Chorva mollarini boqish/i)).toBeInTheDocument();
+    expect(within(section).getByText(/Quruq shox-shabba/i)).toBeInTheDocument();
+    expect(within(section).getByText(/Ilmiy tadqiqot/i)).toBeInTheDocument();
+  });
+});
+
+// The defect this pins: the apply link used to carry the activity's
+// human-readable `code` ('deadwood'), not the UUID the backend actually
+// needs to identify the activity type (`PriceCalculator` submits the same
+// catalog's `id` as `activity_type_id`). A login started from this link
+// must receive the real id, not a string the API never promised as a key.
+it('passes the real backend activity UUID when apply link is clicked', async () => {
+  mockBackend({ services: sampleActivities });
+
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+
+  const section = await screen.findByTestId('home-activities');
+  await waitFor(() => expect(within(section).getByText(/Quruq shox-shabba/i)).toBeInTheDocument());
+  const applyButtons = within(section).getAllByRole('button', { name: /Ariza yozish/i });
+  expect(applyButtons.length).toBe(3);
+  applyButtons[1].click();
+
+  expect(onNavigate).toHaveBeenCalledWith('auth_login', {
+    activity: '0198f100-0001-7000-8000-000000000005',
+  });
 });
 
 it('says so when the catalog cannot be loaded, instead of showing anything invented', async () => {
