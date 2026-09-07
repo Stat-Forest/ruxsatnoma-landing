@@ -141,8 +141,8 @@ export const VerifyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
       {/* Page Header */}
-      <div className="text-center space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+      <div className="text-center space-y-3">
+        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('verify.header.badge')}
         </span>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">
@@ -151,7 +151,7 @@ export const VerifyPage: React.FC = () => {
         {/* xl, not lg: the Russian subtitle needs 576px to stay on one line,
             and a second line here pushes the search card and everything under
             it down by 20px whenever the language changes. */}
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto">
+        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">
           {t('verify.header.subtitle')}
         </p>
       </div>

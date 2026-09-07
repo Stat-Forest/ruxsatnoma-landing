@@ -259,13 +259,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
               {t('home.dashboard.badge')}
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-3">
               {t('home.dashboard.title')}
             </h2>
-            <p className="text-sm text-[#5A646D]">
+            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">
               {t('home.dashboard.subtitle')}
             </p>
           </div>
@@ -382,9 +382,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
-            <h2 className="text-2xl font-bold text-[#1A1F24] mt-1">{t('home.activities.sectionTitle')}</h2>
-            <p className="text-sm text-[#5A646D]">{t('home.activities.sectionSubtitle')}</p>
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
+            <h2 className="text-2xl font-bold text-[#1A1F24] mt-2">{t('home.activities.sectionTitle')}</h2>
+            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">{t('home.activities.sectionSubtitle')}</p>
           </div>
           <Button
             variant="outline"
@@ -470,10 +470,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
       {/* ── 4. HOW IT WORKS TIMELINE ───────────────────────────────── */}
       <section className="bg-white border border-[#E4E7EA] rounded-2xl p-8 shadow-xs space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
           <h2 className="text-2xl font-bold text-[#1A1F24]">{t('home.steps.sectionTitle')}</h2>
-          <p className="text-sm text-[#5A646D]">{t('home.steps.sectionSubtitle')}</p>
+          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('home.steps.sectionSubtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
@@ -497,14 +497,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           in the header. It is one form over two anonymous endpoints, and a
           visitor who wants a figure now gets it without leaving the page. */}
       <section aria-labelledby="calculator-heading" className="space-y-6">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
             {t('tariffs.header.badge')}
           </span>
           <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
             {t('tariffs.header.title')}
           </h2>
-          <p className="text-sm text-[#5A646D]">{t('tariffs.header.subtitle')}</p>
+          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('tariffs.header.subtitle')}</p>
         </div>
         <PriceCalculator />
       </section>

@@ -114,12 +114,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="text-center max-w-3xl mx-auto space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+      <div className="text-center max-w-3xl mx-auto space-y-3">
+        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('services.badge')}
         </span>
         <h1 className="text-3xl font-bold text-[#1A1F24]">{t('services.title')}</h1>
-        <p className="text-sm text-[#5A646D]">
+        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">
           {t('services.subtitle')}
         </p>
       </div>
