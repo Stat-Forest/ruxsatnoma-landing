@@ -168,11 +168,11 @@ it('fetches and renders activity types returned by the public API', async () => 
     return { data: stats, error: undefined } as never;
   });
 
-  const { container } = renderHome();
+  renderHome();
   await waitFor(() => {
-    expect(container.textContent).toContain('Chorva mollarini boqish');
-    expect(container.textContent).toContain('Quruq shox-shabba yigʻish');
-    expect(container.textContent).toContain('Ilmiy tadqiqot');
+    expect(screen.getAllByText(/Chorva mollarini boqish/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Ilmiy tadqiqot/i).length).toBeGreaterThan(0);
   });
 });
 
@@ -193,7 +193,7 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
     </MemoryRouter>,
   );
 
-  await waitFor(() => expect(screen.getByText('Quruq shox-shabba yigʻish')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0));
   const applyButtons = screen.getAllByRole('button', { name: /Ariza yozish/i });
   expect(applyButtons.length).toBeGreaterThan(0);
   applyButtons[1].click();

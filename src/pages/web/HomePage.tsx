@@ -227,13 +227,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     },
     {
       label: t('home.stats.organizations.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_organization.length || 0) : DASH,
+      value: statsState.status === 'ready' ? String(statsState.data.by_organization?.length || 0) : DASH,
       icon: <Users className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.organizations.note'),
     },
     {
       label: t('home.stats.regions.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_region.length || 0) : DASH,
+      value: statsState.status === 'ready' ? String(statsState.data.by_region?.length || 0) : DASH,
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.regions.note'),
     },
