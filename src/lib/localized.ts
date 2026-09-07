@@ -190,18 +190,27 @@ export function pickName(
 ): string {
   if (!name && !code) return '';
   const currentLang = getActiveLanguage(lang);
-
-  // Check known translations dictionary first (especially for missing ru/kaa in backend DB)
   const known = findKnownTranslation(code, name);
+
+  // The API's own `name` wins whenever it actually has something to say for
+  // the requested language — an administrator who renames a service via the
+  // admin dialog expects every screen reading that same row, this
+  // calculator's dropdown included, to reflect it right away. The
+  // REF_TRANSLATIONS constant below is only a fallback for a language `name`
+  // itself has nothing for (this project's own decision #90: only `uz_latn`
+  // is a required key in `LocalizedName`, so `ru`/`kaa` are routinely
+  // missing straight from the backend) — never a value that overrides one
+  // the row actually carries.
+  if (name) {
+    const directVal = name[currentLang];
+    if (typeof directVal === 'string' && directVal) return directVal;
+  }
+
   if (known && known[currentLang]) {
     return known[currentLang];
   }
 
-  // If name object has exact language
   if (name) {
-    const directVal = name[currentLang];
-    if (typeof directVal === 'string' && directVal) return directVal;
-
     // Fallbacks
     if (currentLang === 'ru') {
       const ruVal = name.ru;

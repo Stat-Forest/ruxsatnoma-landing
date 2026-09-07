@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "api:types": "bash scripts/gen-types.sh",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run",
     "check": "yarn lint && yarn build && yarn test"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ export const services = {
   'services.title': 'Forest Fund Land Use Services',
   'services.subtitle': 'Apply for all types of permits through the unified interactive portal.',
 
-  'services.card.termLabel': 'Validity:',
+  'services.card.termLabel': 'Processing time:',
   'services.card.daysUnit': 'days',
   'services.card.apply': 'Apply',
 

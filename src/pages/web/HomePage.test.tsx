@@ -250,7 +250,13 @@ it('says so when the catalog cannot be loaded, instead of showing anything inven
   mockBackend({ servicesError: { code: 'ERR-SYS-000' } });
   renderHome();
 
-  expect(await screen.findByTestId('home-activities-error')).toBeInTheDocument();
+  // Same treatment as `ServicesPage`'s own catalog error: the `Alert`
+  // component, discoverable by `role="alert"` — not a plain `<p>` a
+  // screen-reader user would never be told about. Scoped to this section's
+  // own wrapper: the price calculator below reads the same endpoint and
+  // renders its own `role="alert"` when it also fails.
+  const activitiesError = await screen.findByTestId('home-activities-error');
+  expect(within(activitiesError).getByRole('alert')).toHaveTextContent(/Xizmat turlarini yuklab boʻlmadi/i);
 });
 
 /**

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
-import { Skeleton } from '../../components/ui/Feedback';
+import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { useLanguage, useT } from '../../i18n/useT';
 import { api } from '../../api/client';
@@ -361,10 +361,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
         )}
 
+        {/* A plain `<p>` here used to say the catalog failed to load with no
+            `role="alert"` — a screen-reader user was never told the section
+            failed, unlike `ServicesPage`'s own catalog error a click away.
+            Same `Alert` component, same posture. The wrapping `data-testid`
+            disambiguates this alert from the price calculator's own — both
+            read `/public/refs/activity-types` and so fail together. */}
         {servicesState.status === 'error' && (
-          <p className="text-xs text-[#92400E]" data-testid="home-activities-error">
-            {t('home.activities.failed')}
-          </p>
+          <div data-testid="home-activities-error">
+            <Alert variant="danger">{t('home.activities.failed')}</Alert>
+          </div>
         )}
 
         {servicesState.status === 'ready' && servicesState.items.length === 0 && (
