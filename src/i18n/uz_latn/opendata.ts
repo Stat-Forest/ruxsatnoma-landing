@@ -15,7 +15,7 @@ export const opendata = {
 
   'opendata.stats.totalPermits.label': 'Amaldagi ruxsatnomalar',
   'opendata.stats.totalArea.label': 'Umumiy maydon',
-  'opendata.stats.totalArea.unit': 'ga',
+  'opendata.stats.totalArea.unit': 'gektar',
   'opendata.stats.kAnonymity.before': 'Maxfiylikni saqlash uchun kamida',
   'opendata.stats.kAnonymity.after':
     'ta amaldagi ruxsatnomasi boʻlgan hudud yoki tashkilotlargina roʻyxatda koʻrsatiladi.',

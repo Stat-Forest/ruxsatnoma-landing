@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trees, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
+import { Trees, ArrowRight, Phone, Mail, MapPin, Menu, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
@@ -19,6 +19,11 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
 }) => {
   const t = useT();
   const { language, setLanguage } = useLanguage();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [activeNav]);
 
   const navLinks = [
     { id: 'home', labelKey: 'nav.home', page: 'home' },
@@ -54,31 +59,27 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
             Uzbek one. Below `xl` the tagline is hidden, so every language leaves
             the logo the same width and flex is enough there — and grid at that
             size squeezes the logo onto two lines instead. */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 xl:grid xl:grid-cols-[1fr_auto_1fr]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 xl:grid xl:grid-cols-[auto_1fr_auto]">
           {/* Logo */}
           <button
             onClick={() => onNavigate?.('home')}
             className="flex items-center gap-3 text-left focus:outline-none shrink-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#2E7D4F] text-white flex items-center justify-center font-bold shadow-md border border-white/20">
+            <div className="w-10 h-10 rounded-xl bg-[#2E7D4F] text-white flex items-center justify-center font-bold shadow-md border border-white/20 shrink-0">
               <Trees className="w-5.5 h-5.5" />
             </div>
-            <div className="hidden sm:block">
-              <span className="block text-base font-bold text-white leading-tight tracking-tight">
+            <div className="hidden sm:block whitespace-nowrap">
+              <span className="block text-base font-bold text-white leading-tight tracking-tight whitespace-nowrap">
                 {t('brand.name')}
               </span>
-              {/* Hidden only between `lg` and `xl`: that is the band where the nav
-                  appears but the header is still narrow, and the Russian tagline
-                  is what pushes the row past the viewport. Below `lg` the nav is
-                  gone and there is room; from `xl` up the row fits with it. */}
-              <span className="block lg:hidden xl:block text-[11px] text-gray-200">
+              <span className="block lg:hidden xl:block text-[11px] text-gray-200 whitespace-nowrap">
                 {t('brand.tagline')}
               </span>
             </div>
           </button>
 
           {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1">
+          <nav className="hidden lg:flex items-center justify-center space-x-0.5 xl:space-x-1 px-2">
             {navLinks.map((link) => {
               const isActive = activeNav === link.id || (link.id === 'tariffs' && activeNav === 'tariffs');
               return (
@@ -98,7 +99,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           </nav>
 
           {/* Language Switcher & Auth Buttons */}
-          <div className="flex items-center gap-2 xl:gap-3 shrink-0 xl:justify-self-end">
+          <div className="flex items-center gap-2 xl:gap-3 shrink-0 justify-self-end">
             <LanguageMenu value={language} label={t('action.language')} onSelect={setLanguage} />
 
             {/* Wrapped rather than given `hidden` directly: `Button`'s own base
@@ -112,7 +113,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => onNavigate?.('auth_login')}
-                className="bg-black/30 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2"
+                className="!h-9 bg-transparent border-[#E4E7EA] text-white hover:bg-white/20 rounded-xl px-4 text-xs font-bold"
               >
                 {t('action.login')}
               </Button>
@@ -121,12 +122,61 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
               variant="success"
               size="sm"
               onClick={() => onNavigate?.('auth_login')}
-              className="bg-[#2E7D4F] hover:bg-[#23653F] text-white shadow-md font-bold rounded-xl px-4 py-2"
+              className="!h-9 bg-[#2E7D4F] hover:bg-[#23653F] text-white shadow-md font-bold rounded-xl px-3 sm:px-4 text-xs shrink-0"
             >
               {t('action.submitApplication')}
             </Button>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label={mobileMenuOpen ? 'Menyuni yopish' : 'Menyuni ochish'}
+              aria-expanded={mobileMenuOpen}
+              className="lg:hidden flex h-9 w-9 items-center justify-center rounded-xl border border-[#E4E7EA] bg-transparent text-white hover:bg-white/20 transition-colors shrink-0"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div data-testid="mobile-menu" className="lg:hidden border-t border-white/15 bg-[#17331B] px-4 pt-3 pb-5 space-y-1.5 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+            {navLinks.map((link) => {
+              const isActive = activeNav === link.id || (link.id === 'tariffs' && activeNav === 'tariffs');
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(link.page);
+                  }}
+                  className={`w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left ${
+                    isActive
+                      ? 'text-white bg-[#237443] border border-white/30 shadow-sm'
+                      : 'text-gray-200 hover:bg-white/15 hover:text-white'
+                  }`}
+                >
+                  {t(link.labelKey)}
+                </button>
+              );
+            })}
+            <div className="pt-2 border-t border-white/15 mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onNavigate?.('auth_login');
+                }}
+                className="w-full !h-9 bg-transparent border-[#E4E7EA] text-white hover:bg-white/20 rounded-xl text-xs font-bold justify-center"
+              >
+                {t('action.login')}
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Hero Banner Section (Only on Home Page) ──────────────── */}
@@ -274,10 +324,29 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           {/* Col 4 */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#7FB98A] mb-4">{t('footer.contacts')}</h4>
-            <ul className="space-y-2 text-xs text-gray-300">
-              <li className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#7FB98A]" /> +998 (71) 200-00-00</li>
-              <li className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[#7FB98A]" /> info@urmon.gov.uz</li>
-              <li className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#7FB98A]" /> {t('footer.address')}</li>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#0e3b26] flex items-center justify-center shrink-0 text-[#2ED177]">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <span className="text-xs text-gray-200 leading-snug pt-1">{t('footer.address')}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#0e3b26] flex items-center justify-center shrink-0 text-[#2ED177]">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <a href="tel:+998712078877" className="text-xs text-gray-200 hover:text-white transition-colors">
+                  +998 71 207 88 77
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#0e3b26] flex items-center justify-center shrink-0 text-[#2ED177]">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <a href="mailto:urmoninfo@gmail.com" className="text-xs text-gray-200 hover:text-white transition-colors">
+                  urmoninfo@gmail.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>

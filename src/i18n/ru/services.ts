@@ -31,4 +31,14 @@ export const services = {
   'services.items.recreation.category': 'Туризм и отдых',
   'services.items.recreation.desc': 'Возведение временных лёгких сооружений и оказание услуг в сфере экологического туризма.',
   'services.items.recreation.term': 'По условиям аукциона',
+
+  'services.items.deadwood.title': 'Разрешение на сбор валежника и хвороста',
+  'services.items.deadwood.category': 'Санитарная очистка',
+  'services.items.deadwood.desc': 'Сбор сухостоя, валежника и хвороста на территории лесного фонда в санитарных целях.',
+  'services.items.deadwood.term': '1–6 месяцев',
+
+  'services.items.science.title': 'Разрешение на научно-исследовательские работы',
+  'services.items.science.category': 'Научные исследования',
+  'services.items.science.desc': 'Проведение научно-исследовательских, опытно-экспериментальных и мониторинговых работ на землях лесного фонда.',
+  'services.items.science.term': '1–3 года',
 } as const;

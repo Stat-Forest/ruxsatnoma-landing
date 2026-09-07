@@ -41,4 +41,57 @@ describe('TariffsPage calculator CTA', () => {
     expect(assign).toHaveBeenCalledWith(cabinetUrl(CABINET_PATHS.wizard));
     expect(open).not.toHaveBeenCalled();
   });
+
+  it('renders translated activity and livestock options when language is Russian', async () => {
+    window.localStorage.setItem('lang', 'ru');
+    const { api } = await import('../../api/client');
+    vi.mocked(api.GET).mockImplementation((path: string) => {
+      if (path.includes('activity-types')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'act-1',
+              code: 'grazing',
+              name: {
+                en: 'Livestock grazing',
+                uz_cyrl: 'Чорва молларини боқиш',
+                uz_latn: 'Chorva mollarini boqish',
+              },
+            },
+          ],
+          error: undefined,
+        } as any);
+      }
+      if (path.includes('livestock-types')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'ls-1',
+              code: 'cattle_adult',
+              name: {
+                en: 'Cattle, adult',
+                uz_cyrl: 'Қорамол (катта)',
+                uz_latn: 'Qoramol (katta)',
+              },
+            },
+          ],
+          error: undefined,
+        } as any);
+      }
+      return Promise.resolve({ data: [], error: undefined } as any);
+    });
+
+    render(
+      <I18nProvider>
+        <TariffsPage />
+      </I18nProvider>,
+    );
+
+    // Dropdown activity should have Russian label "Выпас скота"
+    expect(await screen.findByText('Выпас скота')).toBeInTheDocument();
+    // Livestock label should have Russian label "Крупный рогатый скот (взрослый)"
+    expect(await screen.findByText('Крупный рогатый скот (взрослый)')).toBeInTheDocument();
+
+    window.localStorage.removeItem('lang');
+  });
 });

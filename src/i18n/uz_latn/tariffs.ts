@@ -26,4 +26,6 @@ export const tariffs = {
   'tariffs.calculator.resultLabel': 'Taxminiy summa:',
   'tariffs.calculator.submitCta': 'Shu boʻyicha ariza topshirish',
   'tariffs.calculator.estimateFailed': 'Hisoblash xizmatiga ulanib boʻlmadi.',
+  'tariffs.calculator.disclaimer':
+    'Faqat taxminiy hisob-kitob — majburiy toʻlov emas. Haqiqiy yer uchastkasi tanlanmaganligi sababli norma, mavsumiylik va yongʻin xavfsizligi tekshiruvlari oʻtkazilmadi hamda imtiyoz qoʻllanilmadi. Yakuniy summa ariza berish jarayonida aniqlanadi.',
 } as const;

@@ -7,7 +7,7 @@ import type { Column } from '../../components/ui/DataTable';
 import { api, BASE_URL } from '../../api/client';
 import { apiError, ApiError } from '../../api/errors';
 import { pickName } from '../../lib/localized';
-import { useT } from '../../i18n/useT';
+import { useLanguage, useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
 
 type OpenDataLayer = components['schemas']['OpenDataLayerOut'];
@@ -182,7 +182,7 @@ export const OpenDataPage: React.FC = () => {
       </div>
 
       <StatsSection stats={state.stats} />
-      <ApiAccessPanel />
+      {/* <ApiAccessPanel /> */}
       <LayerCatalogue layers={state.layers} />
     </div>
   );
@@ -202,6 +202,7 @@ type OrgRow = OrgStat & { id: string };
 
 function StatsSection({ stats }: { stats: OpenDataStats }) {
   const t = useT();
+  const { language } = useLanguage();
 
   const regionRows: RegionRow[] = stats.by_region.map((row, index) => ({
     ...row,
@@ -213,7 +214,7 @@ function StatsSection({ stats }: { stats: OpenDataStats }) {
     {
       key: 'region',
       header: t('opendata.stats.byRegion.columns.region'),
-      accessor: (row) => (row.region_name ? pickName(row.region_name) : t('opendata.stats.regionUnknown')),
+      accessor: (row) => (row.region_name ? pickName(row.region_name, language) : t('opendata.stats.regionUnknown')),
     },
     {
       key: 'permits',
@@ -231,12 +232,12 @@ function StatsSection({ stats }: { stats: OpenDataStats }) {
     {
       key: 'organization',
       header: t('opendata.stats.byOrganization.columns.organization'),
-      accessor: (row) => pickName(row.organization_name),
+      accessor: (row) => pickName(row.organization_name, language),
     },
     {
       key: 'region',
       header: t('opendata.stats.byOrganization.columns.region'),
-      accessor: (row) => (row.region_name ? pickName(row.region_name) : t('opendata.stats.regionUnknown')),
+      accessor: (row) => (row.region_name ? pickName(row.region_name, language) : t('opendata.stats.regionUnknown')),
     },
     {
       key: 'permits',
@@ -323,6 +324,7 @@ function CopyUrlButton({ url }: { url: string }) {
   );
 }
 
+/*
 function ApiUrlRow({ label, url }: { label: string; url: string }) {
   return (
     <div className="space-y-1">
@@ -339,8 +341,9 @@ function ApiUrlRow({ label, url }: { label: string; url: string }) {
 
 function ApiAccessPanel() {
   const t = useT();
-  const layersUrl = `${BASE_URL}/api/v1/public/open-data/layers`;
-  const statsUrl = `${BASE_URL}/api/v1/public/open-data/stats`;
+  const apiBase = BASE_URL || 'https://dev-api.ruxsatnoma-urmon.uz';
+  const layersUrl = `${apiBase}/api/v1/public/open-data/layers`;
+  const statsUrl = `${apiBase}/api/v1/public/open-data/stats`;
 
   return (
     <section className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4">
@@ -353,6 +356,7 @@ function ApiAccessPanel() {
     </section>
   );
 }
+*/
 
 type LayerFeatureState =
   | { status: 'loading' }
@@ -365,6 +369,7 @@ const DETAIL_PAGE_SIZE = 25;
 
 function LayerDetailPanel({ code, state }: { code: string; state: LayerFeatureState | undefined }) {
   const t = useT();
+  const { language } = useLanguage();
   const [page, setPage] = useState(1);
   const [showMap, setShowMap] = useState(false);
 
@@ -377,23 +382,28 @@ function LayerDetailPanel({ code, state }: { code: string; state: LayerFeatureSt
 
   if (!state || state.status === 'loading') {
     return (
-      <div className="flex items-center justify-center gap-2 text-sm text-[#5A646D] py-6">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span>{t('opendata.layer.loading')}</span>
+      <div className="p-6 text-center text-[#767F87] flex items-center justify-center gap-2">
+        <Loader2 className="w-4 h-4 animate-spin text-[#2E7D4F]" />
+        {t('opendata.layer.loading')}
       </div>
     );
   }
 
   if (state.status === 'error') {
     return (
-      <Alert variant="danger" title={t('opendata.layer.errorTitle')}>
-        {state.message}
-      </Alert>
+      <div className="p-6">
+        <Alert variant="danger" title={t('opendata.layer.errorTitle')}>
+          {state.message}
+        </Alert>
+      </div>
     );
   }
 
   const { collection } = state;
-  const rows: FeatureRow[] = collection.features.map((feature) => ({ id: feature.id, feature }));
+  const rows: FeatureRow[] = collection.features.map((feature, index) => ({
+    id: feature.id || `f-${index}`,
+    feature,
+  }));
   const totalPages = Math.max(1, Math.ceil(rows.length / DETAIL_PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * DETAIL_PAGE_SIZE, page * DETAIL_PAGE_SIZE);
 
@@ -402,7 +412,7 @@ function LayerDetailPanel({ code, state }: { code: string; state: LayerFeatureSt
       key: 'name',
       header: t('opendata.layer.table.columns.name'),
       accessor: (row) =>
-        row.feature.properties.name ? pickName(row.feature.properties.name) : t('opendata.layer.unnamedFeature'),
+        row.feature.properties.name ? pickName(row.feature.properties.name, language) : t('opendata.layer.unnamedFeature'),
     },
     {
       key: 'validFrom',
@@ -497,7 +507,9 @@ function LayerCard({
   onToggle: () => void;
 }) {
   const t = useT();
-  const featuresUrl = `${BASE_URL}/api/v1/public/open-data/layers/${layer.code}/features`;
+  const { language } = useLanguage();
+  const apiBase = BASE_URL || 'https://dev-api.ruxsatnoma-urmon.uz';
+  const featuresUrl = `${apiBase}/api/v1/public/open-data/layers/${layer.code}/features`;
 
   return (
     <div className="bg-white border border-[#E4E7EA] rounded-2xl shadow-xs overflow-hidden">
@@ -507,7 +519,7 @@ function LayerCard({
             <MapPin className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#1A1F24]">{pickName(layer.name)}</h3>
+            <h3 className="text-sm font-bold text-[#1A1F24]">{pickName(layer.name, language, layer.code)}</h3>
             <span className="mt-1 inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-2.5 py-0.5 rounded-full border border-[#D9EBDC]">
               {geometryTypeLabel(t, layer.geometry_type)}
             </span>

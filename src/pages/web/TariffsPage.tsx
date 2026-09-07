@@ -7,7 +7,7 @@ import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 import { pickName } from '../../lib/localized';
-import { useT } from '../../i18n/useT';
+import { useLanguage, useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
 
 type ActivityType = components['schemas']['PublicActivityTypeOut'];
@@ -98,10 +98,11 @@ function TariffsCalculator({
   livestockTypes: LivestockType[];
 }) {
   const t = useT();
+  const { language } = useLanguage();
   const [activityId, setActivityId] = useState(activityTypes[0]?.id ?? '');
   const [durationMonths, setDurationMonths] = useState(6);
-  const [headCounts, setHeadCounts] = useState<Record<string, number>>({});
-  const [quantity, setQuantity] = useState<number>(1);
+  const [headCounts, setHeadCounts] = useState<Record<string, number | ''>>({});
+  const [quantity, setQuantity] = useState<number | ''>(1);
 
   const [estimateStatus, setEstimateStatus] = useState<'idle' | 'loading' | 'ready' | 'refused'>('idle');
   const [estimateResult, setEstimateResult] = useState<EstimateResult | null>(null);
@@ -120,10 +121,12 @@ function TariffsCalculator({
     if (!selectedActivity) return;
 
     const items = Object.entries(headCounts)
-      .filter(([, count]) => count > 0)
-      .map(([livestock_code, count]) => ({ livestock_code, count }));
+      .filter(([, count]) => typeof count === 'number' && count > 0)
+      .map(([livestock_code, count]) => ({ livestock_code, count: count as number }));
 
-    if (isGrazing ? items.length === 0 : quantity <= 0) {
+    const numQuantity = typeof quantity === 'number' ? quantity : 0;
+
+    if (isGrazing ? items.length === 0 : numQuantity <= 0) {
       setEstimateStatus('idle');
       return;
     }
@@ -141,7 +144,7 @@ function TariffsCalculator({
               activity_type_id: selectedActivity.id,
               period_from: todayIso(),
               period_to: addMonthsIso(new Date(), durationMonths),
-              quantity: isGrazing ? undefined : quantity,
+              quantity: isGrazing ? undefined : numQuantity,
               items: isGrazing ? items : [],
             },
           });
@@ -199,21 +202,33 @@ function TariffsCalculator({
             <Select
               value={activityId}
               onChange={(e) => setActivityId(e.target.value)}
-              options={activityTypes.map((a) => ({ value: a.id, label: pickName(a.name) }))}
+              options={activityTypes.map((a) => ({ value: a.id, label: pickName(a.name, language, a.code) }))}
               touchSize
             />
           </FormField>
 
           {isGrazing ? (
             livestockTypes.map((lt) => (
-              <FormField key={lt.id} label={pickName(lt.name)}>
+              <FormField key={lt.id} label={pickName(lt.name, language, lt.code)}>
                 <Input
                   type="number"
                   min={0}
-                  value={headCounts[lt.code] ?? 0}
-                  onChange={(e) =>
-                    setHeadCounts((prev) => ({ ...prev, [lt.code]: Math.max(0, Number(e.target.value)) }))
-                  }
+                  placeholder="0"
+                  value={headCounts[lt.code] ?? ''}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      setHeadCounts((prev) => ({ ...prev, [lt.code]: '' }));
+                      return;
+                    }
+                    const clean = raw.replace(/^0+(?=\d)/, '');
+                    const num = parseInt(clean, 10);
+                    setHeadCounts((prev) => ({
+                      ...prev,
+                      [lt.code]: isNaN(num) ? '' : Math.max(0, num),
+                    }));
+                  }}
                   touchSize
                 />
               </FormField>
@@ -223,8 +238,19 @@ function TariffsCalculator({
               <Input
                 type="number"
                 min={0}
+                placeholder="1"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  if (raw === '') {
+                    setQuantity('');
+                    return;
+                  }
+                  const clean = raw.replace(/^0+(?=\d)/, '');
+                  const num = parseFloat(clean);
+                  setQuantity(isNaN(num) ? '' : Math.max(0, num));
+                }}
                 touchSize
               />
             </FormField>
@@ -299,7 +325,7 @@ function TariffsCalculator({
         {estimateStatus === 'ready' && estimateResult?.approximate && (
           <div className="flex items-start gap-2 p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-xs text-[#92400E]">
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{estimateResult.disclaimer}</span>
+            <span>{t('tariffs.calculator.disclaimer') || estimateResult.disclaimer}</span>
           </div>
         )}
       </section>

@@ -14,19 +14,78 @@ import {
   MapPin,
   Star,
   Send,
+  Flame,
+  GraduationCap,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
-import { useT } from '../../i18n/useT';
+import { Skeleton } from '../../components/ui/Feedback';
+import { useLanguage, useT } from '../../i18n/useT';
+import { pickName } from '../../lib/localized';
 import { api } from '../../api/client';
 import type { components } from '../../api/schema';
 
 type OpenDataStats = components['schemas']['OpenDataStatsOut'];
+type ActivityType = components['schemas']['PublicActivityTypeOut'];
 
 type StatsState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; data: OpenDataStats };
+
+type ActivitiesState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; data: ActivityType[] };
+
+const ACTIVITY_META: Record<
+  string,
+  {
+    icon: React.ReactNode;
+    badgeKey: string;
+    descKey: string;
+  }
+> = {
+  grazing: {
+    icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.grazing.badge',
+    descKey: 'home.activities.grazing.desc',
+  },
+  haymaking: {
+    icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.haymaking.badge',
+    descKey: 'home.activities.haymaking.desc',
+  },
+  apiary: {
+    icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.beekeeping.badge',
+    descKey: 'home.activities.beekeeping.desc',
+  },
+  recreation: {
+    icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.recreation.badge',
+    descKey: 'home.activities.recreation.desc',
+  },
+  deadwood: {
+    icon: <Flame className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.deadwood.badge',
+    descKey: 'home.activities.deadwood.desc',
+  },
+  science: {
+    icon: <GraduationCap className="w-6 h-6 text-[#2E7D4F]" />,
+    badgeKey: 'home.activities.science.badge',
+    descKey: 'home.activities.science.desc',
+  },
+};
+
+const DEFAULT_FALLBACK_ACTIVITIES: ActivityType[] = [
+  { id: 'grazing', code: 'grazing', name: { uz_latn: 'Chorva mollarini boqish', ru: 'Выпас скота', en: 'Livestock grazing' } },
+  { id: 'haymaking', code: 'haymaking', name: { uz_latn: 'Pichan tayyorlash', ru: 'Сенокошение', en: 'Haymaking' } },
+  { id: 'apiary', code: 'apiary', name: { uz_latn: 'Asalarichilik', ru: 'Пчеловодство', en: 'Apiary' } },
+  { id: 'recreation', code: 'recreation', name: { uz_latn: 'Dam olish va turizm', ru: 'Отдых и туризм', en: 'Recreation and tourism' } },
+  { id: 'deadwood', code: 'deadwood', name: { uz_latn: 'Quruq shox-shabba yigʻish', ru: 'Сбор валежника и хвороста', en: 'Deadwood collection' } },
+  { id: 'science', code: 'science', name: { uz_latn: 'Ilmiy tadqiqot', ru: 'Научные исследования', en: 'Scientific research' } },
+];
 
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
@@ -39,8 +98,10 @@ export interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
+  const { language } = useLanguage();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
+  const [activitiesState, setActivitiesState] = useState<ActivitiesState>({ status: 'loading' });
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
@@ -52,11 +113,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     let cancelled = false;
     async function load() {
       try {
-        const { data, error } = await api.GET('/api/v1/public/open-data/stats');
+        const [statsRes, actRes] = await Promise.all([
+          api.GET('/api/v1/public/open-data/stats'),
+          api.GET('/api/v1/public/refs/activity-types'),
+        ]);
         if (cancelled) return;
-        setStatsState(error || !data ? { status: 'error' } : { status: 'ready', data });
+        setStatsState(statsRes.error || !statsRes.data ? { status: 'error' } : { status: 'ready', data: statsRes.data });
+        if (actRes.data && Array.isArray(actRes.data) && actRes.data.length > 0) {
+          setActivitiesState({ status: 'ready', data: actRes.data });
+        } else {
+          setActivitiesState({ status: 'error' });
+        }
       } catch {
-        if (!cancelled) setStatsState({ status: 'error' });
+        if (!cancelled) {
+          setStatsState({ status: 'error' });
+          setActivitiesState({ status: 'error' });
+        }
       }
     }
     void load();
@@ -105,50 +177,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     },
   ];
 
-  const activities = [
-    {
-      id: 'grazing',
-      title: t('home.activities.grazing.title'),
-      desc: t('home.activities.grazing.desc'),
-      badge: t('home.activities.grazing.badge'),
-      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'haymaking',
-      title: t('home.activities.haymaking.title'),
-      desc: t('home.activities.haymaking.desc'),
-      badge: t('home.activities.haymaking.badge'),
-      icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'beekeeping',
-      title: t('home.activities.beekeeping.title'),
-      desc: t('home.activities.beekeeping.desc'),
-      badge: t('home.activities.beekeeping.badge'),
-      icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'wild_plants',
-      title: t('home.activities.wild_plants.title'),
-      desc: t('home.activities.wild_plants.desc'),
-      badge: t('home.activities.wild_plants.badge'),
-      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'medicinal_herbs',
-      title: t('home.activities.medicinal_herbs.title'),
-      desc: t('home.activities.medicinal_herbs.desc'),
-      badge: t('home.activities.medicinal_herbs.badge'),
-      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'recreation',
-      title: t('home.activities.recreation.title'),
-      desc: t('home.activities.recreation.desc'),
-      badge: t('home.activities.recreation.badge'),
-      icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-  ];
+  const currentActivities: ActivityType[] =
+    activitiesState.status === 'ready'
+      ? activitiesState.data
+      : DEFAULT_FALLBACK_ACTIVITIES;
 
   const newsList = [
     {
@@ -319,42 +351,74 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activities.map((act) => (
-            <div
-              key={act.id}
-              className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 bg-[#F0F7F1] rounded-xl">{act.icon}</div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
-                    {act.badge}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
-                  {act.title}
-                </h3>
-                <p className="text-xs text-[#5A646D] leading-relaxed">
-                  {act.desc}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-                {/* The annual-quota line was six invented constants (85,000 head,
-                    14,200 hectares, 42,000 bee colonies...) with no source
-                    anywhere in the system — stage 7.3 finding F7. Removed
-                    rather than replaced: nothing publishes a quota, and the
-                    tariff calculator below is what a citizen actually needs. */}
-                <span className="text-[#767F87]">{t('home.activities.tariffHint')}</span>
-                <button
-                  onClick={() => onNavigate?.('auth_login', { activity: act.id })}
-                  className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
+          {activitiesState.status === 'loading'
+            ? Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
                 >
-                  {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
+                  <div className="flex items-center justify-between">
+                    <Skeleton height="h-11" width="w-11" className="rounded-xl" />
+                    <Skeleton height="h-6" width="w-24" className="rounded-full" />
+                  </div>
+                  <Skeleton height="h-6" width="w-3/4" />
+                  <Skeleton height="h-4" width="w-full" />
+                  <Skeleton height="h-4" width="w-5/6" />
+                  <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+                    <Skeleton height="h-4" width="w-28" />
+                    <Skeleton height="h-4" width="w-20" />
+                  </div>
+                </div>
+              ))
+            : currentActivities.map((act) => {
+                const meta = ACTIVITY_META[act.code] ?? {
+                  icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
+                  badgeKey: 'home.activities.sectionBadge',
+                  descKey: '',
+                };
+                const title = pickName(act.name, language, act.code);
+                const desc = meta.descKey ? t(meta.descKey as any) : '';
+                const badge = meta.badgeKey ? t(meta.badgeKey as any) : t('home.activities.sectionBadge');
+
+                return (
+                  <div
+                    key={act.id}
+                    className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2.5 bg-[#F0F7F1] rounded-xl">{meta.icon}</div>
+                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
+                          {badge}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
+                        {title}
+                      </h3>
+                      <p className="text-xs text-[#5A646D] leading-relaxed">
+                        {desc}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.('tariffs', { activityId: act.id })}
+                        className="text-[#767F87] hover:text-[#2E7D4F] transition-colors"
+                      >
+                        {t('home.activities.tariffHint')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.('auth_login', { activity: act.id })}
+                        className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
+                      >
+                        {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
         </div>
       </section>
 
