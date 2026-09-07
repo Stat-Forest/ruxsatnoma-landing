@@ -3,7 +3,7 @@ import { Trees, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
-import landingBg from '../../assets/img/newbg.png';
+import landingBg from '../../assets/img/newbg.webp';
 
 export interface PublicLayoutProps {
   children?: React.ReactNode;
