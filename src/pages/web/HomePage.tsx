@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useInRouterContext, useLocation } from 'react-router';
 import {
   Search,
   QrCode,
@@ -19,11 +20,13 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
-import { Skeleton } from '../../components/ui/Feedback';
+import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { useLanguage, useT } from '../../i18n/useT';
-import { pickName } from '../../lib/localized';
 import { api } from '../../api/client';
+import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
+import { pickLocalized, pickName } from '../../lib/localized';
 import type { components } from '../../api/schema';
+import { Skeleton } from '@/components/ui/Feedback';
 
 type OpenDataStats = components['schemas']['OpenDataStatsOut'];
 type ActivityType = components['schemas']['PublicActivityTypeOut'];
@@ -87,10 +90,40 @@ const DEFAULT_FALLBACK_ACTIVITIES: ActivityType[] = [
   { id: 'science', code: 'science', name: { uz_latn: 'Ilmiy tadqiqot', ru: 'Научные исследования', en: 'Scientific research' } },
 ];
 
+type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
+
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
  *  honest one. Never a placeholder digit. */
 const DASH = '—';
+
+function HashScroller() {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash !== `#${CALCULATOR_ANCHOR}`) return;
+    const target = document.getElementById(CALCULATOR_ANCHOR);
+    if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash]);
+  return null;
+}
+
+const SafeLink: React.FC<React.ComponentProps<typeof Link>> = ({ to, children, ...props }) => {
+  const inRouter = useInRouterContext();
+  if (!inRouter) {
+    return (
+      <a href={typeof to === 'string' ? to : '#'} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={to} {...props}>
+      {children}
+    </Link>
+  );
+};
 
 export interface HomePageProps {
   onNavigate?: (page: string, params?: any) => void;
@@ -99,6 +132,7 @@ export interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
   const { language } = useLanguage();
+  const inRouter = useInRouterContext();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
   const [activitiesState, setActivitiesState] = useState<ActivitiesState>({ status: 'loading' });
@@ -132,6 +166,34 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       }
     }
     void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // The three news items used to be constants in the translation files — three
+  // announcements written once, dated August 2026, under a heading that says
+  // "news". They now come from the announcements module's anonymous route, and
+  // the section says plainly when there is nothing to show rather than
+  // inventing something (same posture as the statistics above).
+  const [newsState, setNewsState] = useState<NewsState>({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await fetchNews({ page: 1, pageSize: HOME_NEWS_COUNT });
+        if (!cancelled) {
+          if (data && Array.isArray(data.items)) {
+            setNewsState({ status: 'ready', items: data.items });
+          } else {
+            setNewsState({ status: 'error' });
+          }
+        }
+      } catch {
+        if (!cancelled) setNewsState({ status: 'error' });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -182,23 +244,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       ? activitiesState.data
       : DEFAULT_FALLBACK_ACTIVITIES;
 
-  const newsList = [
-    {
-      date: t('home.news.seasonalApplications.date'),
-      title: t('home.news.seasonalApplications.title'),
-      desc: t('home.news.seasonalApplications.desc'),
-    },
-    {
-      date: t('home.news.prosecutorIntegration.date'),
-      title: t('home.news.prosecutorIntegration.title'),
-      desc: t('home.news.prosecutorIntegration.desc'),
-    },
-    {
-      date: t('home.news.grazingRates.date'),
-      title: t('home.news.grazingRates.title'),
-      desc: t('home.news.grazingRates.desc'),
-    },
-  ];
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +254,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-16 font-sans">
+      {inRouter && <HashScroller />}
       {/* ── 1. DASHBOARD & VERIFICATION SECTION ────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -353,72 +399,72 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activitiesState.status === 'loading'
             ? Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <Skeleton height="h-11" width="w-11" className="rounded-xl" />
+                  <Skeleton height="h-6" width="w-24" className="rounded-full" />
+                </div>
+                <Skeleton height="h-6" width="w-3/4" />
+                <Skeleton height="h-4" width="w-full" />
+                <Skeleton height="h-4" width="w-5/6" />
+                <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+                  <Skeleton height="h-4" width="w-28" />
+                  <Skeleton height="h-4" width="w-20" />
+                </div>
+              </div>
+            ))
+            : currentActivities.map((act) => {
+              const meta = ACTIVITY_META[act.code] ?? {
+                icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
+                badgeKey: 'home.activities.sectionBadge',
+                descKey: '',
+              };
+              const title = pickName(act.name, language, act.code);
+              const desc = meta.descKey ? t(meta.descKey as any) : '';
+              const badge = meta.badgeKey ? t(meta.badgeKey as any) : t('home.activities.sectionBadge');
+
+              return (
                 <div
-                  key={idx}
-                  className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+                  key={act.id}
+                  className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
                 >
-                  <div className="flex items-center justify-between">
-                    <Skeleton height="h-11" width="w-11" className="rounded-xl" />
-                    <Skeleton height="h-6" width="w-24" className="rounded-full" />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="p-2.5 bg-[#F0F7F1] rounded-xl">{meta.icon}</div>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
+                        {badge}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
+                      {title}
+                    </h3>
+                    <p className="text-xs text-[#5A646D] leading-relaxed">
+                      {desc}
+                    </p>
                   </div>
-                  <Skeleton height="h-6" width="w-3/4" />
-                  <Skeleton height="h-4" width="w-full" />
-                  <Skeleton height="h-4" width="w-5/6" />
-                  <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
-                    <Skeleton height="h-4" width="w-28" />
-                    <Skeleton height="h-4" width="w-20" />
+
+                  <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
+                    <button
+                      type="button"
+                      onClick={() => onNavigate?.('tariffs', { activityId: act.id })}
+                      className="text-[#767F87] hover:text-[#2E7D4F] transition-colors"
+                    >
+                      {t('home.activities.tariffHint')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate?.('auth_login', { activity: act.id })}
+                      className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
+                    >
+                      {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-              ))
-            : currentActivities.map((act) => {
-                const meta = ACTIVITY_META[act.code] ?? {
-                  icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-                  badgeKey: 'home.activities.sectionBadge',
-                  descKey: '',
-                };
-                const title = pickName(act.name, language, act.code);
-                const desc = meta.descKey ? t(meta.descKey as any) : '';
-                const badge = meta.badgeKey ? t(meta.badgeKey as any) : t('home.activities.sectionBadge');
-
-                return (
-                  <div
-                    key={act.id}
-                    className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="p-2.5 bg-[#F0F7F1] rounded-xl">{meta.icon}</div>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
-                          {badge}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
-                        {title}
-                      </h3>
-                      <p className="text-xs text-[#5A646D] leading-relaxed">
-                        {desc}
-                      </p>
-                    </div>
-
-                    <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-                      <button
-                        type="button"
-                        onClick={() => onNavigate?.('tariffs', { activityId: act.id })}
-                        className="text-[#767F87] hover:text-[#2E7D4F] transition-colors"
-                      >
-                        {t('home.activities.tariffHint')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onNavigate?.('auth_login', { activity: act.id })}
-                        className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
-                      >
-                        {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+              );
+            })}
         </div>
       </section>
 
@@ -446,26 +492,65 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
+      {/* ── 4b. PRICE CALCULATOR ───────────────────────────────────── */}
+      {/* Was its own `/tariffs` screen until the news register took that slot
+          in the header. It is one form over two anonymous endpoints, and a
+          visitor who wants a figure now gets it without leaving the page. */}
+      <section aria-labelledby="calculator-heading" className="space-y-6">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
+            {t('tariffs.header.badge')}
+          </span>
+          <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
+            {t('tariffs.header.title')}
+          </h2>
+          <p className="text-sm text-[#5A646D]">{t('tariffs.header.subtitle')}</p>
+        </div>
+        <PriceCalculator />
+      </section>
+
       {/* ── 5. NEWS & ANNOUNCEMENTS ───────────────────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-[#E4E7EA] pb-4">
             <h3 className="text-lg font-bold text-[#1A1F24]">{t('home.news.sectionTitle')}</h3>
-            <a href="#" className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1">
+            <SafeLink
+              to="/news"
+              className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1"
+            >
               {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </SafeLink>
           </div>
 
-          <div className="space-y-4 divide-y divide-[#E4E7EA]">
-            {newsList.map((item, idx) => (
-              <div key={idx} className="pt-4 first:pt-0 space-y-1">
-                <span className="text-[11px] font-mono text-[#767F87]">{item.date}</span>
-                <h4 className="text-base font-bold text-[#1A1F24] hover:text-[#2E7D4F] cursor-pointer transition-colors">
-                  {item.title}
-                </h4>
-                <p className="text-xs text-[#5A646D] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+          <div className="space-y-4 divide-y divide-[#E4E7EA]" data-testid="home-news">
+            {newsState.status === 'loading' && (
+              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.loading')}</p>
+            )}
+            {newsState.status === 'error' && (
+              <p className="text-xs text-[#92400E] pt-4 first:pt-0">{t('home.news.failed')}</p>
+            )}
+            {newsState.status === 'ready' && (newsState.items ?? []).length === 0 && (
+              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.empty')}</p>
+            )}
+            {newsState.status === 'ready' &&
+              (newsState.items ?? []).map((item) => (
+                <SafeLink
+                  key={item.id}
+                  to={`/news/${item.id}`}
+                  data-testid={`home-news-${item.id}`}
+                  className="block pt-4 first:pt-0 space-y-1 group"
+                >
+                  <span className="text-[11px] font-mono text-[#767F87]">
+                    {formatNewsDate(item.publish_from)}
+                  </span>
+                  <h4 className="text-base font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
+                    {pickLocalized(item.title, language)}
+                  </h4>
+                  <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">
+                    {pickLocalized(item.body, language)}
+                  </p>
+                </SafeLink>
+              ))}
           </div>
         </div>
 
@@ -547,11 +632,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     key={item.value}
                     type="button"
                     onClick={() => setSelectedRating(item.value)}
-                    className={`text-left p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer group ${
-                      isSelected
+                    className={`text-left p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer group ${isSelected
                         ? 'bg-white border-[#2E7D4F] ring-2 ring-[#2E7D4F]/20 shadow-md transform -translate-y-1'
                         : 'bg-white/80 border-[#E4E7EA] hover:border-[#7FB98A] hover:bg-white shadow-xs'
-                    }`}
+                      }`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -560,9 +644,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                             <Star key={i} className="w-4 h-4 fill-[#EAB308]" />
                           ))}
                         </div>
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                          isSelected ? 'border-[#2E7D4F] bg-[#2E7D4F] text-white' : 'border-gray-300 group-hover:border-[#7FB98A]'
-                        }`}>
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-[#2E7D4F] bg-[#2E7D4F] text-white' : 'border-gray-300 group-hover:border-[#7FB98A]'
+                          }`}>
                           {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                         </div>
                       </div>

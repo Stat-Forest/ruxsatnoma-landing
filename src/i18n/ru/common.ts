@@ -5,7 +5,7 @@ export const common = {
 
   'nav.home': 'Главная',
   'nav.services': 'Услуги',
-  'nav.tariffs': 'Тарифы',
+  'nav.news': 'Новости',
   'nav.documents': 'Документы',
   'nav.opendata': 'Открытые данные',
   'nav.faq': 'Вопросы',
@@ -20,7 +20,7 @@ export const common = {
   'hero.subtitle':
     'Единый государственный портал для подачи заявки на выпас скота, сенокошение, пчеловодство и сбор лекарственных растений, получения документа с QR-кодом и проверки его подлинности.',
   'hero.cta.apply': 'Подать заявку (OneID)',
-  'hero.cta.tariffs': 'Тарифы и калькулятор',
+  'hero.cta.calculator': 'Рассчитать стоимость',
   'hero.trust.fast': 'Быстрое автоматическое рассмотрение',
   'hero.trust.qr': 'Официальный документ с QR-кодом',
   'hero.trust.online': '100% онлайн и безопасно',
@@ -32,7 +32,8 @@ export const common = {
   'footer.contacts': 'Контакты',
   'footer.link.howToApply': 'Порядок подачи заявки',
   'footer.link.verify': 'Проверка разрешения',
-  'footer.link.tariffs': 'Ставки оплаты и калькулятор',
+  'footer.link.calculator': 'Калькулятор стоимости',
+  'footer.link.news': 'Новости и объявления',
   'footer.link.appealStatus': 'Подать обращение и проверить статус',
   'footer.link.gis': 'ГИС-карта лесных зон',
   'footer.link.norms': 'Геоботанические нормы и правила',

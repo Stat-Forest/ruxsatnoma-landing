@@ -5,7 +5,7 @@ export const common = {
 
   'nav.home': 'Bas bet',
   'nav.services': 'Xızmetler',
-  'nav.tariffs': 'Tarifler',
+  'nav.news': 'Jańalıqlar',
   'nav.documents': 'Hújjetler',
   'nav.opendata': 'Ashıq maǵlıwmatlar',
   'nav.faq': 'Sorawlar',
@@ -20,7 +20,7 @@ export const common = {
   'hero.subtitle':
     'Sharwa malların baǵıw, pıshen orıw, pal hárreshilik hám emlik ósimlikler jıynaw ushın arza tapsırıw, QR-kodlı hújjet alıw hám haqıyqıylıǵın tekseriw birden-bir mámleketlik portali.',
   'hero.cta.apply': 'Arza tapsırıw (OneID)',
-  'hero.cta.tariffs': 'Tarifler hám kalkulyator',
+  'hero.cta.calculator': 'Bahalaw kalkulyatorı',
   'hero.trust.fast': 'Tezkor avtomatikalıq kórip shıǵıw',
   'hero.trust.qr': 'QR-kodlı rásmiy hújjet',
   'hero.trust.online': '100% Onlayn hám qawipsiz',
@@ -32,7 +32,8 @@ export const common = {
   'footer.contacts': 'Baylanıs',
   'footer.link.howToApply': 'Arza beriw tártibi',
   'footer.link.verify': 'Ruxsatnamanı tekseriw',
-  'footer.link.tariffs': 'Tólem stavkaları hám kalkulyator',
+  'footer.link.calculator': 'Baha kalkulyatorı',
+  'footer.link.news': 'Jańalıqlar hám daǵazalar',
   'footer.link.appealStatus': 'Múrjat jiberiw hám tekseriw',
   'footer.link.gis': 'Orman zonaları GIS kartası',
   'footer.link.norms': 'Geobotanikalıq normalar hám qádeler',

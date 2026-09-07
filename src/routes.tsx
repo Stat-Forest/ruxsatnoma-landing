@@ -2,10 +2,12 @@ import type { RouteObject } from 'react-router';
 import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
+import { CALCULATOR_ANCHOR } from './components/calculator/PriceCalculator';
 import {
   HomePage,
   ServicesPage,
-  TariffsPage,
+  NewsPage,
+  NewsItemPage,
   DocumentsPage,
   OpenDataPage,
   FaqPage,
@@ -16,13 +18,13 @@ import {
 export type NavigateFn = (page: string, params?: Record<string, unknown>) => void;
 
 /** Legacy page-id -> real path. Every existing page still calls
- * `onNavigate?.('tariffs')` the way it did under the old `useState` build
+ * `onNavigate?.('services')` the way it did under the old `useState` build
  * (decision: keep the markup exactly as it is) — this map is the only thing
  * that changed, so those calls now change the URL instead of a `useState`. */
 const PAGE_TO_PATH: Record<string, string> = {
   home: '/',
   services: '/services',
-  tariffs: '/tariffs',
+  news: '/news',
   documents: '/documents',
   opendata: '/opendata',
   faq: '/faq',
@@ -35,6 +37,11 @@ const PAGE_TO_PATH: Record<string, string> = {
   activities: '/services',
   feedback: '/faq',
 };
+
+/** The price calculator is a SECTION of the home page, not a page: it lost its
+ *  own `/tariffs` screen when the news register took that slot. Header CTA,
+ *  footer link and the old bookmarked URL all land on the same anchor. */
+const CALCULATOR_PATH = `/#${CALCULATOR_ANCHOR}`;
 
 const PATH_TO_PAGE: Record<string, string> = Object.fromEntries(
   Object.entries(PAGE_TO_PATH)
@@ -69,6 +76,15 @@ function Layout() {
       goToCabinet(cabinetPath);
       return;
     }
+    if (page === 'calculator') {
+      // Already home: scroll, because navigating to the same path would not.
+      if (location.pathname === '/') {
+        document.getElementById(CALCULATOR_ANCHOR)?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        navigate(CALCULATOR_PATH);
+      }
+      return;
+    }
     if (page === 'verify') {
       const query = params?.query;
       navigate(typeof query === 'string' && query ? `/check?q=${encodeURIComponent(query)}` : '/check');
@@ -81,7 +97,9 @@ function Layout() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const activeNav = PATH_TO_PAGE[location.pathname] ?? 'home';
+  const activeNav = location.pathname.startsWith('/news/')
+    ? 'news_item'
+    : (PATH_TO_PAGE[location.pathname] ?? 'home');
 
   return (
     <PublicLayout onNavigate={onNavigate} activeNav={activeNav}>
@@ -108,7 +126,11 @@ export const routeConfig: RouteObject[] = [
     children: [
       { index: true, element: <HomeRoute /> },
       { path: 'services', element: <ServicesRoute /> },
-      { path: 'tariffs', element: <TariffsPage /> },
+      { path: 'news', element: <NewsPage /> },
+      { path: 'news/:newsId', element: <NewsItemPage /> },
+      // `/tariffs` was the calculator's own screen until the news register took
+      // its place in the header; the bookmarks that already exist keep working.
+      { path: 'tariffs', element: <Navigate to={CALCULATOR_PATH} replace /> },
       { path: 'documents', element: <DocumentsPage /> },
       { path: 'opendata', element: <OpenDataPage /> },
       { path: 'faq', element: <FaqPage /> },

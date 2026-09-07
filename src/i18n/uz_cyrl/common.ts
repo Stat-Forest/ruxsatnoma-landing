@@ -5,7 +5,7 @@ export const common = {
 
   'nav.home': 'Бош саҳифа',
   'nav.services': 'Хизматлар',
-  'nav.tariffs': 'Тарифлар',
+  'nav.news': 'Янгиликлар',
   'nav.documents': 'Ҳужжатлар',
   'nav.opendata': 'Очиқ маълумотлар',
   'nav.faq': 'Саволлар',
@@ -20,7 +20,7 @@ export const common = {
   'hero.subtitle':
     'Чорва молларини боқиш, пичан ўриш, асаларичилик ва доривор ўсимликлар йиғиш учун ариза топшириш, QR-кодли ҳужжат олиш ва ҳақиқийлигини текшириш ягона давлат портали.',
   'hero.cta.apply': 'Ариза топшириш (OneID)',
-  'hero.cta.tariffs': 'Тарифлар ва калькулятор',
+  'hero.cta.calculator': 'Нархни ҳисоблаш',
   'hero.trust.fast': 'Тезкор автоматик кўриб чиқиш',
   'hero.trust.qr': 'QR-кодли расмий ҳужжат',
   'hero.trust.online': '100% Онлайн ва хавфсиз',
@@ -32,7 +32,8 @@ export const common = {
   'footer.contacts': 'Алоқа',
   'footer.link.howToApply': 'Ариза бериш тартиби',
   'footer.link.verify': 'Рухсатнома текшириш',
-  'footer.link.tariffs': 'Тўлов ставкалари ва калькулятор',
+  'footer.link.calculator': 'Нарх калькулятори',
+  'footer.link.news': 'Янгиликлар ва эълонлар',
   'footer.link.appealStatus': 'Мурожаат юбориш ва текшириш',
   'footer.link.gis': 'Ўрмон зоналари GIS картаси',
   'footer.link.norms': 'Геоботаник нормалар ва қоидалар',

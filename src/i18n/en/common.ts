@@ -5,7 +5,7 @@ export const common = {
 
   'nav.home': 'Home',
   'nav.services': 'Services',
-  'nav.tariffs': 'Tariffs',
+  'nav.news': 'News',
   'nav.documents': 'Documents',
   'nav.opendata': 'Open Data',
   'nav.faq': 'FAQ',
@@ -20,7 +20,7 @@ export const common = {
   'hero.subtitle':
     'Unified state portal for submitting applications, obtaining QR-coded official documents, and verifying permits for cattle grazing, haymaking, beekeeping, and medicinal plant collection.',
   'hero.cta.apply': 'Apply Now (OneID)',
-  'hero.cta.tariffs': 'Tariffs & Calculator',
+  'hero.cta.calculator': 'Price Calculator',
   'hero.trust.fast': 'Fast Automated Review',
   'hero.trust.qr': 'Official QR-Coded Document',
   'hero.trust.online': '100% Online & Secure',
@@ -32,7 +32,8 @@ export const common = {
   'footer.contacts': 'Contacts',
   'footer.link.howToApply': 'Application Procedure',
   'footer.link.verify': 'Permit Verification',
-  'footer.link.tariffs': 'Payment Rates & Calculator',
+  'footer.link.calculator': 'Price Calculator',
+  'footer.link.news': 'News & Announcements',
   'footer.link.appealStatus': 'Submit & Track Appeals',
   'footer.link.gis': 'Forest Zones GIS Map',
   'footer.link.norms': 'Geobotanical Norms & Rules',

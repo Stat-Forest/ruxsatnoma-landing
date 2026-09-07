@@ -3,7 +3,7 @@ import { Trees, ArrowRight, Phone, Mail, MapPin, Menu, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
-import landingBg from '../../assets/img/newbg.png';
+import landingBg from '../../assets/img/newbg.webp';
 
 export interface PublicLayoutProps {
   children?: React.ReactNode;
@@ -28,7 +28,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
   const navLinks = [
     { id: 'home', labelKey: 'nav.home', page: 'home' },
     { id: 'services', labelKey: 'nav.services', page: 'services' },
-    { id: 'tariffs', labelKey: 'nav.tariffs', page: 'tariffs' },
+    { id: 'news', labelKey: 'nav.news', page: 'news' },
     { id: 'documents', labelKey: 'nav.documents', page: 'documents' },
     { id: 'opendata', labelKey: 'nav.opendata', page: 'opendata' },
     { id: 'faq', labelKey: 'nav.faq', page: 'faq' },
@@ -81,7 +81,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           {/* Navigation Links */}
           <nav className="hidden lg:flex items-center justify-center space-x-0.5 xl:space-x-1 px-2">
             {navLinks.map((link) => {
-              const isActive = activeNav === link.id || (link.id === 'tariffs' && activeNav === 'tariffs');
+              const isActive = activeNav === link.id || (link.id === 'news' && activeNav === 'news_item');
               return (
                 <button
                   key={link.id}
@@ -223,10 +223,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => onNavigate?.('tariffs')}
+                  onClick={() => onNavigate?.('calculator')}
                   className="bg-black/40 border-white/40 text-white hover:bg-black/60 backdrop-blur-md shadow-xl transition-colors font-semibold rounded-xl px-7 py-4 text-base"
                 >
-                  {t('hero.cta.tariffs')}
+                  {t('hero.cta.calculator')}
                 </Button>
               </div>
 
@@ -287,8 +287,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate?.('tariffs')} className="hover:text-white transition-colors text-left">
-                  {t('footer.link.tariffs')}
+                <button onClick={() => onNavigate?.('calculator')} className="hover:text-white transition-colors text-left">
+                  {t('footer.link.calculator')}
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate?.('news')} className="hover:text-white transition-colors text-left">
+                  {t('footer.link.news')}
                 </button>
               </li>
               <li>

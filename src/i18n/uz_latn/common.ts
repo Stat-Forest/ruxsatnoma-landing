@@ -5,7 +5,7 @@ export const common = {
 
   'nav.home': 'Bosh sahifa',
   'nav.services': 'Xizmatlar',
-  'nav.tariffs': 'Tariflar',
+  'nav.news': 'Yangiliklar',
   'nav.documents': 'Hujjatlar',
   'nav.opendata': 'Ochiq maʼlumotlar',
   'nav.faq': 'Savollar',
@@ -20,7 +20,7 @@ export const common = {
   'hero.subtitle':
     'Chorva mollarini boqish, pichan oʻrish, asalarichilik va dorivor oʻsimliklar yigʻish uchun ariza topshirish, QR-kodli hujjat olish va haqiqiyligini tekshirish yagona davlat portali.',
   'hero.cta.apply': 'Ariza topshirish (OneID)',
-  'hero.cta.tariffs': 'Tariflar va kalkulyator',
+  'hero.cta.calculator': 'Narxni hisoblash',
   'hero.trust.fast': 'Tezkor avtomatik koʻrib chiqish',
   'hero.trust.qr': 'QR-kodli rasmiy hujjat',
   'hero.trust.online': '100% Onlayn va xavfsiz',
@@ -32,7 +32,8 @@ export const common = {
   'footer.contacts': 'Aloqa',
   'footer.link.howToApply': 'Ariza berish tartibi',
   'footer.link.verify': 'Ruxsatnoma tekshirish',
-  'footer.link.tariffs': 'Toʻlov stavkalari va kalkulyator',
+  'footer.link.calculator': 'Narx kalkulyatori',
+  'footer.link.news': 'Yangiliklar va eʼlonlar',
   'footer.link.appealStatus': 'Murojaat yuborish va tekshirish',
   'footer.link.gis': 'Oʻrmon zonalari GIS kartasi',
   'footer.link.norms': 'Geobotanik normalar va qoidalar',

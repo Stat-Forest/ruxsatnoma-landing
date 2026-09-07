@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TariffsPage } from './TariffsPage';
+import { PriceCalculator } from './PriceCalculator';
 import { CABINET_PATHS, cabinetUrl, navigation } from '../../lib/cabinet';
 import { I18nProvider } from '../../i18n';
 
-// TariffsPage calls goToCabinet directly from its own onClick — it takes no
+// PriceCalculator calls goToCabinet directly from its own onClick — it takes no
 // onNavigate prop and bypasses routes.tsx's onNavigate/CABINET_ENTRIES table
 // entirely (see routes.tsx's docstring on CABINET_ENTRIES). This was the
 // seventh sign-in call site, the one still calling
@@ -25,13 +25,13 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe('TariffsPage calculator CTA', () => {
+describe('PriceCalculator CTA', () => {
   it('sends "Shu boʻyicha ariza topshirish" to the cabinet wizard, never id.egov.uz', async () => {
     const assign = vi.spyOn(navigation, 'assign').mockImplementation(() => {});
     const open = vi.spyOn(window, 'open');
     render(
       <I18nProvider>
-        <TariffsPage />
+        <PriceCalculator />
       </I18nProvider>,
     );
 
@@ -83,7 +83,7 @@ describe('TariffsPage calculator CTA', () => {
 
     render(
       <I18nProvider>
-        <TariffsPage />
+        <PriceCalculator />
       </I18nProvider>,
     );
 
