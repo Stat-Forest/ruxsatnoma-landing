@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronDown } from 'lucide-react';
 
 // ── FormField Container ──────────────────────────────────────────────────────
 export interface FormFieldProps {
@@ -70,19 +70,20 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const isError = Boolean(error);
-    const heightClass = touchSize ? 'h-[48px] text-base' : 'h-[40px] text-sm';
+    const heightClass = touchSize ? 'h-[48px] text-base' : 'h-[42px] text-sm';
 
-    let borderClass = 'border-[#767F87] focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/20';
+    let borderClass =
+      'border-[#D0D5DD] hover:border-[#2E7D4F]/60 focus:border-[#2E7D4F] focus:ring-4 focus:ring-[#2E7D4F]/15';
     if (isError) {
-      borderClass = 'border-[#B91C1C] focus:border-[#B91C1C] focus:ring-2 focus:ring-[#B91C1C]/20';
+      borderClass = 'border-[#B91C1C] focus:border-[#B91C1C] focus:ring-4 focus:ring-[#B91C1C]/15';
     } else if (success) {
-      borderClass = 'border-[#15803D] focus:border-[#15803D] focus:ring-2 focus:ring-[#15803D]/20';
+      borderClass = 'border-[#15803D] focus:border-[#15803D] focus:ring-4 focus:ring-[#15803D]/15';
     }
 
     return (
       <div className="relative w-full inline-flex items-center">
         {leftIcon && (
-          <span className="absolute left-3 text-[#767F87] pointer-events-none inline-flex items-center">
+          <span className="absolute left-3.5 text-[#767F87] pointer-events-none inline-flex items-center">
             {leftIcon}
           </span>
         )}
@@ -90,13 +91,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={id}
           disabled={disabled}
-          className={`w-full bg-white border rounded-md px-3 text-[#1A1F24] placeholder-[#9AA3AB] transition-all outline-none disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] disabled:cursor-not-allowed ${heightClass} ${
-            leftIcon ? 'pl-9' : ''
-          } ${rightIcon || isError || success ? 'pr-9' : ''} ${borderClass} ${className}`}
+          className={`w-full bg-white border rounded-xl px-3.5 text-[#1A1F24] placeholder-[#9AA3AB] shadow-xs transition-all outline-none disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] disabled:cursor-not-allowed ${heightClass} ${
+            leftIcon ? 'pl-10' : ''
+          } ${rightIcon || isError || success ? 'pr-10' : ''} ${borderClass} ${className}`}
           {...props}
         />
         {(rightIcon || isError || success) && (
-          <span className="absolute right-3 inline-flex items-center pointer-events-none">
+          <span className="absolute right-3.5 inline-flex items-center pointer-events-none">
             {isError ? (
               <AlertCircle className="w-4 h-4 text-[#B91C1C]" />
             ) : success ? (
@@ -127,24 +128,29 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ options, error, touchSize = false, className = '', disabled, ...props }, ref) => {
-    const heightClass = touchSize ? 'h-[48px] text-base' : 'h-[40px] text-sm';
+    const heightClass = touchSize ? 'h-[48px] text-base' : 'h-[42px] text-sm';
     const borderClass = error
-      ? 'border-[#B91C1C] focus:ring-2 focus:ring-[#B91C1C]/20'
-      : 'border-[#767F87] focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/20';
+      ? 'border-[#B91C1C] focus:border-[#B91C1C] focus:ring-4 focus:ring-[#B91C1C]/15'
+      : 'border-[#D0D5DD] hover:border-[#2E7D4F]/60 focus:border-[#2E7D4F] focus:ring-4 focus:ring-[#2E7D4F]/15';
 
     return (
-      <select
-        ref={ref}
-        disabled={disabled}
-        className={`w-full bg-white border rounded-md px-3 text-[#1A1F24] transition-all outline-none disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] disabled:cursor-not-allowed ${heightClass} ${borderClass} ${className}`}
-        {...props}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative w-full inline-flex items-center">
+        <select
+          ref={ref}
+          disabled={disabled}
+          className={`w-full appearance-none bg-white border rounded-xl pl-3.5 pr-11 text-[#1A1F24] font-medium shadow-xs transition-all outline-none cursor-pointer disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] disabled:cursor-not-allowed ${heightClass} ${borderClass} ${className}`}
+          {...props}
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value} disabled={opt.disabled} className="py-1 text-[#1A1F24]">
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <span className="absolute right-4 pointer-events-none text-[#5A646D] flex items-center justify-center">
+          <ChevronDown className="w-4 h-4 text-[#5A646D] stroke-[2.25]" />
+        </span>
+      </div>
     );
   }
 );
@@ -160,8 +166,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ error, maxLength, value, onChange, className = '', disabled, ...props }, ref) => {
     const charCount = typeof value === 'string' ? value.length : 0;
     const borderClass = error
-      ? 'border-[#B91C1C] focus:ring-2 focus:ring-[#B91C1C]/20'
-      : 'border-[#767F87] focus:border-[#2E7D4F] focus:ring-2 focus:ring-[#2E7D4F]/20';
+      ? 'border-[#B91C1C] focus:border-[#B91C1C] focus:ring-4 focus:ring-[#B91C1C]/15'
+      : 'border-[#D0D5DD] hover:border-[#2E7D4F]/60 focus:border-[#2E7D4F] focus:ring-4 focus:ring-[#2E7D4F]/15';
 
     return (
       <div className="w-full flex flex-col">
@@ -171,7 +177,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           onChange={onChange}
           maxLength={maxLength}
           disabled={disabled}
-          className={`w-full bg-white border rounded-md p-3 text-sm text-[#1A1F24] placeholder-[#9AA3AB] min-h-[100px] resize-y transition-all outline-none disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] ${borderClass} ${className}`}
+          className={`w-full bg-white border rounded-xl p-3.5 text-sm text-[#1A1F24] placeholder-[#9AA3AB] min-h-[100px] resize-y shadow-xs transition-all outline-none disabled:bg-[#F8F9FA] disabled:text-[#9AA3AB] ${borderClass} ${className}`}
           {...props}
         />
         {maxLength && (

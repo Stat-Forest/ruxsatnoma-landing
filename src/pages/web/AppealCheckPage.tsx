@@ -276,12 +276,12 @@ export const AppealCheckPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
-      <div className="text-center space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+      <div className="text-center space-y-3">
+        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('appeal.header.badge')}
         </span>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">{t('appeal.header.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto">{t('appeal.header.subtitle')}</p>
+        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">{t('appeal.header.subtitle')}</p>
       </div>
 
       <AppealForm

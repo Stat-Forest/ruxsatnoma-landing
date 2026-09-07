@@ -68,6 +68,7 @@ function mockBackend({ stats: statsAnswer = stats, statsError, news = newsPage, 
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   vi.mocked(api.GET).mockReset();
 });
 
@@ -140,3 +141,65 @@ it('says so when the aggregates cannot be loaded, instead of showing a figure', 
   await waitFor(() => expect(container.textContent).toContain('—'));
   expect(container.textContent).not.toContain('42,850');
 });
+
+const sampleActivities = [
+  {
+    id: '0198f100-0001-7000-8000-000000000001',
+    code: 'grazing',
+    name: { uz_latn: 'Chorva mollarini boqish' },
+  },
+  {
+    id: '0198f100-0001-7000-8000-000000000005',
+    code: 'deadwood',
+    name: { uz_latn: 'Quruq shox-shabba yigʻish' },
+  },
+  {
+    id: '0198f100-0001-7000-8000-000000000006',
+    code: 'science',
+    name: { uz_latn: 'Ilmiy tadqiqot' },
+  },
+];
+
+it('fetches and renders activity types returned by the public API', async () => {
+  vi.mocked(api.GET).mockImplementation(async (path: string) => {
+    if (path.includes('activity-types')) {
+      return { data: sampleActivities, error: undefined } as never;
+    }
+    return { data: stats, error: undefined } as never;
+  });
+
+  renderHome();
+  await waitFor(() => {
+    expect(screen.getAllByText(/Chorva mollarini boqish/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Ilmiy tadqiqot/i).length).toBeGreaterThan(0);
+  });
+});
+
+it('passes the real backend activity UUID when apply link is clicked', async () => {
+  vi.mocked(api.GET).mockImplementation(async (path: string) => {
+    if (path.includes('activity-types')) {
+      return { data: sampleActivities, error: undefined } as never;
+    }
+    return { data: stats, error: undefined } as never;
+  });
+
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+
+  await waitFor(() => expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0));
+  const applyButtons = screen.getAllByRole('button', { name: /Ariza yozish/i });
+  expect(applyButtons.length).toBeGreaterThan(0);
+  applyButtons[1].click();
+
+  expect(onNavigate).toHaveBeenCalledWith('auth_login', {
+    activity: '0198f100-0001-7000-8000-000000000005',
+  });
+});
+

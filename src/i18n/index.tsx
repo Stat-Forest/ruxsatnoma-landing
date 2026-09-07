@@ -4,10 +4,13 @@ import { I18nContext, normalizeLanguage, resolveLanguage } from './context';
 import type { Language, UiLanguage } from './context';
 import { ru } from './ru';
 import { uz_latn } from './uz_latn';
+import { uz_cyrl } from './uz_cyrl';
+import { kaa } from './kaa';
+import { en } from './en';
 
 // A key present in one map but missing from the other is a compile error here,
 // not a silent runtime fallback on a live page.
-const DICTIONARIES: Record<UiLanguage, Record<keyof typeof uz_latn, string>> = { uz_latn, ru };
+const DICTIONARIES: Record<UiLanguage, Record<keyof typeof uz_latn, string>> = { uz_latn, uz_cyrl, ru, kaa, en };
 
 const STORAGE_KEY = 'lang';
 

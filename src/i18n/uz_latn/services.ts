@@ -31,4 +31,14 @@ export const services = {
   'services.items.recreation.category': 'Turizm va Dam olish',
   'services.items.recreation.desc': 'Vaqtinchalik yengil inshootlar qurish va ekologik turizm yoʻnalishida xizmatlar koʻrsatish.',
   'services.items.recreation.term': 'Auksion shartnomasi boʻyicha',
+
+  'services.items.deadwood.title': 'Quruq shox-shabba yigʻish ruxsatnomasi',
+  'services.items.deadwood.category': 'Sanitariya tozalovi',
+  'services.items.deadwood.desc': 'Oʻrmon fondi hududlaridan sanitariya qoidalariga asosan toʻkilgan quruq shox-shabba va oʻtin yigʻish.',
+  'services.items.deadwood.term': '1 oy - 6 oy',
+
+  'services.items.science.title': 'Ilmiy-tadqiqot ishlarini olib borish ruxsatnomasi',
+  'services.items.science.category': 'Ilmiy tadqiqot',
+  'services.items.science.desc': 'Oʻrmon xoʻjaligi yerlarida ilmiy-tadqiqot, tajriba-sinov va monitoring ishlarini olib borish.',
+  'services.items.science.term': '1 yil - 3 yil',
 } as const;

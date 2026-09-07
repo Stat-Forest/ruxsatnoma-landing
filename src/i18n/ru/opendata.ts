@@ -13,9 +13,9 @@ export const opendata = {
   'opendata.error.rateLimit.before': 'Превышен лимит запросов. Повторите попытку через',
   'opendata.error.rateLimit.after': 'сек.',
 
-  'opendata.stats.totalPermits.label': 'Действующих разрешений',
+  'opendata.stats.totalPermits.label': 'Действующие разрешения',
   'opendata.stats.totalArea.label': 'Общая площадь',
-  'opendata.stats.totalArea.unit': 'га',
+  'opendata.stats.totalArea.unit': 'гектар',
   'opendata.stats.kAnonymity.before':
     'В целях защиты данных в разрезе показаны только регионы и организации не менее чем с',
   'opendata.stats.kAnonymity.after': 'действующими разрешениями.',
