@@ -1,56 +1,49 @@
-import React from 'react';
-import { ShieldCheck, ArrowRight, FileCheck2, Trees, MapPin } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
+import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { Button } from '../../components/ui/button';
-import { useT } from '../../i18n/useT';
+import { fetchServices, type Service } from '../../api/services';
+import { serviceIcon } from '../../lib/serviceIcons';
+import { pickLocalized } from '../../lib/localized';
+import { useLanguage, useT } from '../../i18n/useT';
 
 export interface ServicesPageProps {
   onNavigate?: (page: string, params?: any) => void;
 }
 
+type PageState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; services: Service[] };
+
+/**
+ * A2 — the full service catalogue. The six cards used to be constants here,
+ * each carrying an invented "term" (a duration guess, in one case an
+ * "up to 3 working days" promise the system has never honoured). They now
+ * come from `GET /public/refs/activity-types` (`api/services.ts`) — nothing
+ * on this page may render a service the catalog did not return, or a term
+ * this page made up.
+ */
 export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
   const t = useT();
-  const servicesList = [
-    {
-      id: 'grazing',
-      title: t('services.items.grazing.title'),
-      category: t('services.items.grazing.category'),
-      desc: t('services.items.grazing.desc'),
-      term: t('services.items.grazing.term'),
-      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'haymaking',
-      title: t('services.items.haymaking.title'),
-      category: t('services.items.haymaking.category'),
-      desc: t('services.items.haymaking.desc'),
-      term: t('services.items.haymaking.term'),
-      icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'beekeeping',
-      title: t('services.items.beekeeping.title'),
-      category: t('services.items.beekeeping.category'),
-      desc: t('services.items.beekeeping.desc'),
-      term: t('services.items.beekeeping.term'),
-      icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'wild_plants',
-      title: t('services.items.wildPlants.title'),
-      category: t('services.items.wildPlants.category'),
-      desc: t('services.items.wildPlants.desc'),
-      term: t('services.items.wildPlants.term'),
-      icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-    {
-      id: 'recreation',
-      title: t('services.items.recreation.title'),
-      category: t('services.items.recreation.category'),
-      desc: t('services.items.recreation.desc'),
-      term: t('services.items.recreation.term'),
-      icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
-    },
-  ];
+  const { language } = useLanguage();
+  const [state, setState] = useState<PageState>({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    setState({ status: 'loading' });
+    void (async () => {
+      try {
+        const services = await fetchServices();
+        if (!cancelled) setState({ status: 'ready', services });
+      } catch {
+        if (!cancelled) setState({ status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="space-y-8 font-sans">
@@ -68,37 +61,86 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {servicesList.map((svc) => (
-          <div
-            key={svc.id}
-            className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-[#F0F7F1] rounded-xl">{svc.icon}</div>
-                <span className="text-xs font-semibold text-[#5A646D] bg-[#F8F9FA] px-2.5 py-1 rounded-lg border border-[#E4E7EA]">
-                  {svc.category}
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-[#1A1F24]">{svc.title}</h3>
-              <p className="text-xs text-[#5A646D] leading-relaxed">{svc.desc}</p>
-            </div>
+      {state.status === 'loading' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="services-loading">
+          <Skeleton height="h-52" />
+          <Skeleton height="h-52" />
+          <Skeleton height="h-52" />
+          <Skeleton height="h-52" />
+        </div>
+      )}
 
-            <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-              <span className="text-[#767F87]">{t('services.card.termLabel')} <b className="text-[#1A1F24]">{svc.term}</b></span>
-              <Button
-                variant="primary"
-                size="sm"
-                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                onClick={() => onNavigate?.('applicant_wizard', { activity: svc.id })}
-              >
-                {t('services.card.apply')}
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {state.status === 'error' && (
+        <Alert variant="danger" title={t('services.error.title')}>
+          {t('services.error.text')}
+        </Alert>
+      )}
+
+      {state.status === 'ready' && state.services.length === 0 && (
+        <div
+          data-testid="services-empty"
+          className="bg-white border border-[#E4E7EA] rounded-2xl p-10 text-center space-y-2"
+        >
+          <p className="text-sm text-[#5A646D]">{t('services.empty')}</p>
+        </div>
+      )}
+
+      {state.status === 'ready' && state.services.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {state.services.map((svc) => (
+            <ServiceCard key={svc.id} service={svc} language={language} onNavigate={onNavigate} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
+
+function ServiceCard({
+  service,
+  language,
+  onNavigate,
+}: {
+  service: Service;
+  language: string;
+  onNavigate?: (page: string, params?: any) => void;
+}) {
+  const t = useT();
+  const Icon = serviceIcon(service.code);
+  const description = pickLocalized(service.description, language);
+
+  return (
+    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
+      <div className="space-y-3">
+        <div className="p-3 bg-[#F0F7F1] rounded-xl w-fit">
+          <Icon className="w-6 h-6 text-[#2E7D4F]" />
+        </div>
+        <h3 className="text-lg font-bold text-[#1A1F24]">{pickLocalized(service.name, language)}</h3>
+        {/* `description` is nullable (two of six rows have none, on purpose —
+            see `api/services.ts`); no placeholder sentence stands in for it. */}
+        {description && (
+          <p data-testid={`service-desc-${service.id}`} className="text-xs text-[#5A646D] leading-relaxed">
+            {description}
+          </p>
+        )}
+      </div>
+
+      <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
+        <span className="text-[#767F87]">
+          {t('services.card.termLabel')}{' '}
+          <b className="text-[#1A1F24]">
+            {service.processing_days} {t('services.card.daysUnit')}
+          </b>
+        </span>
+        <Button
+          variant="primary"
+          size="sm"
+          rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+          onClick={() => onNavigate?.('applicant_wizard', { activity: service.code })}
+        >
+          {t('services.card.apply')}
+        </Button>
+      </div>
+    </div>
+  );
+}

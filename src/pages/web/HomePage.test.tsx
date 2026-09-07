@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '../../i18n';
@@ -47,15 +47,42 @@ const newsPage = {
   page_size: 3,
 };
 
-/**
- * The page now calls three anonymous endpoints — the aggregates, the news, and
- * (through the calculator section it absorbed from `/tariffs`) the two
- * reference catalogues. Routing the mock by path keeps each test's own
- * subject the only thing it changes.
- */
-type Answers = { stats?: unknown; statsError?: unknown; news?: unknown; newsError?: unknown };
+/** As `GET /public/refs/activity-types` answers them — the same catalogue the
+ *  activities section and `ServicesPage` both read (`api/services.ts`). */
+const ACTIVITY_ID = 'a0000000-0000-4000-8000-000000000002';
+const activityTypes = [
+  {
+    id: ACTIVITY_ID,
+    code: 'grazing',
+    name: { uz_latn: 'Chorva mollarini boqish', ru: 'Выпас скота' },
+    description: { uz_latn: 'Yaylov konturlarida chorva boqish uchun ruxsatnoma.', ru: 'Разрешение на выпас скота.' },
+    processing_days: 15,
+  },
+];
 
-function mockBackend({ stats: statsAnswer = stats, statsError, news = newsPage, newsError }: Answers = {}) {
+/**
+ * The page now calls four anonymous endpoints — the aggregates, the news, the
+ * activities catalogue and (through the calculator section it absorbed from
+ * `/tariffs`) the two reference catalogues. Routing the mock by path keeps
+ * each test's own subject the only thing it changes.
+ */
+type Answers = {
+  stats?: unknown;
+  statsError?: unknown;
+  news?: unknown;
+  newsError?: unknown;
+  services?: unknown;
+  servicesError?: unknown;
+};
+
+function mockBackend({
+  stats: statsAnswer = stats,
+  statsError,
+  news = newsPage,
+  newsError,
+  services = activityTypes,
+  servicesError,
+}: Answers = {}) {
   vi.mocked(api.GET).mockImplementation(((path: string) => {
     if (path === '/api/v1/public/open-data/stats') {
       return Promise.resolve({ data: statsError ? undefined : statsAnswer, error: statsError });
@@ -63,7 +90,10 @@ function mockBackend({ stats: statsAnswer = stats, statsError, news = newsPage, 
     if (path === '/api/v1/public/announcements') {
       return Promise.resolve({ data: newsError ? undefined : news, error: newsError });
     }
-    return Promise.resolve({ data: [], error: undefined }); // the calculator's catalogues
+    if (path === '/api/v1/public/refs/activity-types') {
+      return Promise.resolve({ data: servicesError ? undefined : services, error: servicesError });
+    }
+    return Promise.resolve({ data: [], error: undefined }); // the calculator's livestock-types catalogue
   }) as never);
 }
 
@@ -139,4 +169,35 @@ it('says so when the aggregates cannot be loaded, instead of showing a figure', 
   const { container } = renderHome();
   await waitFor(() => expect(container.textContent).toContain('—'));
   expect(container.textContent).not.toContain('42,850');
+});
+
+it('shows the services the catalog returns, not the six that used to be constants', async () => {
+  mockBackend();
+  renderHome();
+
+  // Scoped to the activities section: the calculator below reads the same
+  // catalogue for its own dropdown, so the name appears twice on the page.
+  const section = await screen.findByTestId('home-activities');
+  expect(within(section).getByText('Chorva mollarini boqish')).toBeInTheDocument();
+});
+
+it('says so when the catalog cannot be loaded, instead of showing anything invented', async () => {
+  mockBackend({ servicesError: { code: 'ERR-SYS-000' } });
+  renderHome();
+
+  expect(await screen.findByTestId('home-activities-error')).toBeInTheDocument();
+});
+
+/**
+ * The defect this pins: an anonymous visitor who had never received a
+ * service was asked to rate it, could not give it a 1, and the answer was
+ * thrown away on submit (stage 7.7 finding). The rating moved to the
+ * citizen's cabinet — this page must carry none of it any more.
+ */
+it('no longer shows the satisfaction form', async () => {
+  mockBackend();
+  renderHome();
+
+  await waitFor(() => expect(screen.queryByText(/sifatini baholang/i)).not.toBeInTheDocument());
+  expect(screen.queryByText(/baho yuborish/i)).not.toBeInTheDocument();
 });
