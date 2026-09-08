@@ -1,24 +1,14 @@
-/** Documents page. */
+/** Documents page (A?) — the legal-documents register (`/documents`). The
+ *  documents themselves come from the backend in the editor's own languages;
+ *  only the page's own chrome is here. */
 export const documents = {
   'documents.badge': 'Документы и законодательство',
   'documents.title': 'Нормативно-правовые документы',
   'documents.subtitle':
     'Действующие законы, постановления и нормативы в сфере лесного хозяйства.',
   'documents.download': 'Скачать PDF',
-
-  'documents.doc1.title': 'Лесной кодекс Республики Узбекистан',
-  'documents.doc1.desc':
-    'Регулирует отношения в сфере охраны, защиты, воспроизводства лесов и рационального использования лесных ресурсов.',
-
-  'documents.doc2.title': 'Положение о порядке выпаса скота на землях лесного фонда',
-  'documents.doc2.desc':
-    'Устанавливает нормы пастбищной ёмкости и порядок выдачи разрешений на выпас скота.',
-
-  'documents.doc3.title': 'Базовая расчётная величина (БРВ) и ставки платежей на 2026 год',
-  'documents.doc3.desc':
-    'Свод коэффициентов платежей, уплачиваемых при оформлении разрешений.',
-
-  'documents.doc4.title': 'Руководство по геоботаническим исследованиям и нормам пастбищной ёмкости',
-  'documents.doc4.desc':
-    'Условная единица поголовья скота (MaxSB), приходящаяся на 1 гектар пастбищной площади.',
+  'documents.openSource': 'Открыть на lex.uz',
+  'documents.empty': 'Пока нет опубликованных документов.',
+  'documents.error.title': 'Не удалось загрузить документы',
+  'documents.error.text': 'Попробуйте обновить страницу позже.',
 } as const;

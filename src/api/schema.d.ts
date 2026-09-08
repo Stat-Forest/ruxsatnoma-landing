@@ -1024,6 +1024,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/legal-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Legal Documents */
+        get: operations["list_legal_documents_api_v1_admin_legal_documents_get"];
+        put?: never;
+        /** Create Legal Document */
+        post: operations["create_legal_document_api_v1_admin_legal_documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/legal-documents/{doc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Legal Document */
+        get: operations["get_legal_document_api_v1_admin_legal_documents__doc_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch Legal Document */
+        patch: operations["patch_legal_document_api_v1_admin_legal_documents__doc_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/legal-documents/{doc_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Legal Document */
+        post: operations["publish_legal_document_api_v1_admin_legal_documents__doc_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/legal-documents/{doc_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive Legal Document */
+        post: operations["archive_legal_document_api_v1_admin_legal_documents__doc_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/legal-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Public Legal Documents */
+        get: operations["list_public_legal_documents_api_v1_public_legal_documents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/legal-documents/{doc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Public Legal Document */
+        get: operations["get_public_legal_document_api_v1_public_legal_documents__doc_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/legal-documents/{doc_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download Public Legal Document
+         * @description The document is addressed by ITS id, not the file's: `GET /files/{id}`
+         *     needs a session, so without this route a public document's own PDF would be
+         *     a link the visitor cannot open.
+         */
+        get: operations["download_public_legal_document_api_v1_public_legal_documents__doc_id__file_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/announcements": {
         parameters: {
             query?: never;
@@ -3521,6 +3647,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/permits/{permit_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rate Permit
+         * @description The citizen's verdict on their own issued permit, 1-5, once (ruling #140).
+         *
+         *     404 `ERR-SYS-003` for a stranger — the card's own answer, so this route is
+         *     not a permit-existence oracle. 403 `ERR-ACL-001` for a caller who can READ
+         *     the permit (a required signer, a `permits.view_any` holder) but is not its
+         *     holder. 409 `ERR-PERM-001` for a permit not yet issued, or already rated.
+         */
+        post: operations["rate_permit_api_v1_permits__permit_id__rating_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/permits/{permit_id}/suspend": {
         parameters: {
             query?: never;
@@ -3701,6 +3852,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/ratings/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Ratings Summary
+         * @description The overall average and count over the caller's own zone
+         *     (`app.core.abac.zone_filter`, all three axes: region, district AND
+         *     organization — never `organization_id` alone, the finding
+         *     `dashboard.repo.permits_kpi` already closed), plus the same pair broken
+         *     down by organization and by activity type. `organization_id`/
+         *     `activity_type_id` narrow the zone further; neither widens it.
+         */
+        get: operations["get_ratings_summary_api_v1_admin_ratings_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Ratings
+         * @description The anonymous comment feed: date, service, leshoz, score, text — never
+         *     who left it. Zone-scoped the same way the summary above is, and narrowable
+         *     by the same two optional filters — a screen that narrows the summary to
+         *     one leshoz must narrow this feed too, or the numbers above and the
+         *     comments below them describe different populations with nothing saying so
+         *     (final review, finding 3).
+         */
+        get: operations["list_ratings_api_v1_admin_ratings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/permits/check": {
         parameters: {
             query?: never;
@@ -3833,6 +4034,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inspections/tasks/{task_id}/reassign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reassign Task */
+        post: operations["reassign_task_api_v1_inspections_tasks__task_id__reassign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inspections/acts": {
         parameters: {
             query?: never;
@@ -3910,7 +4128,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Cases */
+        /**
+         * List Cases
+         * @description `applicant_id` (ruling R8, finding F3): every case against ONE
+         *     violator, for anyone who may already see those cases — the filter runs
+         *     INSIDE `_case_scope`, so a leshoz head still sees only their own zone's
+         *     cases against that applicant, never another oblast's.
+         */
         get: operations["list_cases_api_v1_inspections_cases_get"];
         put?: never;
         post?: never;
@@ -6530,7 +6754,10 @@ export interface components {
         /**
          * CaseCardOut
          * @description `GET /inspections/cases/{id}`: the case's own columns, FLAT, plus its
-         *     append-only timeline and any appeals filed against its decision.
+         *     append-only timeline, any appeals filed against its decision, and how
+         *     many of the SAME applicant's other cases already reached a decision
+         *     (ruling R8, `tz/04`'s "shows the history" half of the repeat-violation
+         *     line — the "suggests stricter" half is deliberately NOT built).
          */
         CaseCardOut: {
             /**
@@ -6583,6 +6810,8 @@ export interface components {
             history: components["schemas"]["CaseHistoryEntry"][];
             /** Appeals */
             appeals: components["schemas"]["AppealOut"][];
+            /** Prior Cases Count */
+            prior_cases_count: number;
         };
         /** CaseHistoryEntry */
         CaseHistoryEntry: {
@@ -7707,6 +7936,7 @@ export interface components {
             rejections: components["schemas"]["RejectionRowOut"][];
             risk_indicators: components["schemas"]["RiskIndicatorsKpiOut"];
             inspections: components["schemas"]["InspectionsKpiOut"];
+            satisfaction: components["schemas"]["SatisfactionKpiOut"];
             /** Omitted */
             omitted: string[];
         };
@@ -7754,6 +7984,117 @@ export interface components {
             is_public?: boolean | null;
             /** Status */
             status?: string | null;
+        };
+        /** LegalDocumentAdminOut */
+        LegalDocumentAdminOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: {
+                [key: string]: unknown;
+            };
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            } | null;
+            /** Doc Number */
+            doc_number: string;
+            /**
+             * Adopted On
+             * Format: date
+             */
+            adopted_on: string;
+            /** Source Url */
+            source_url: string | null;
+            file: components["schemas"]["FileRef"] | null;
+            /** Status */
+            status: string;
+            /** Sort Order */
+            sort_order: number;
+            /**
+             * Created By
+             * Format: uuid
+             */
+            created_by: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** LegalDocumentCreateIn */
+        LegalDocumentCreateIn: {
+            title: components["schemas"]["LocalizedName"];
+            summary?: components["schemas"]["LocalizedName"] | null;
+            /** Doc Number */
+            doc_number: string;
+            /**
+             * Adopted On
+             * Format: date
+             */
+            adopted_on: string;
+            /** Source Url */
+            source_url?: string | null;
+            /** File Id */
+            file_id?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /**
+         * LegalDocumentOut
+         * @description What the anonymous site gets. No `status`, no `sort_order`, no
+         *     `created_by`: those are editorial bookkeeping, and the citizen gets what the
+         *     page prints. `file` is null for a document that lives only on lex.uz.
+         */
+        LegalDocumentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: {
+                [key: string]: unknown;
+            };
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            } | null;
+            /** Doc Number */
+            doc_number: string;
+            /**
+             * Adopted On
+             * Format: date
+             */
+            adopted_on: string;
+            /** Source Url */
+            source_url: string | null;
+            file: components["schemas"]["FileRef"] | null;
+        };
+        /**
+         * LegalDocumentPatchIn
+         * @description All fields optional — only keys present in the request are touched
+         *     (`exclude_unset=True`), the convention `AnnouncementPatchIn` established.
+         */
+        LegalDocumentPatchIn: {
+            title?: components["schemas"]["LocalizedName"] | null;
+            summary?: components["schemas"]["LocalizedName"] | null;
+            /** Doc Number */
+            doc_number?: string | null;
+            /** Adopted On */
+            adopted_on?: string | null;
+            /** Source Url */
+            source_url?: string | null;
+            /** File Id */
+            file_id?: string | null;
+            /** Sort Order */
+            sort_order?: number | null;
         };
         /**
          * LivestockItemIn
@@ -8555,6 +8896,28 @@ export interface components {
             /** Page Size */
             page_size: number;
         };
+        /** Page[LegalDocumentAdminOut] */
+        Page_LegalDocumentAdminOut_: {
+            /** Items */
+            items: components["schemas"]["LegalDocumentAdminOut"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** Page[LegalDocumentOut] */
+        Page_LegalDocumentOut_: {
+            /** Items */
+            items: components["schemas"]["LegalDocumentOut"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
         /** Page[ManualConfirmationOut] */
         Page_ManualConfirmationOut_: {
             /** Items */
@@ -8625,6 +8988,17 @@ export interface components {
         Page_PermitOut_: {
             /** Items */
             items: components["schemas"]["PermitOut"][];
+            /** Total */
+            total: number;
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+        };
+        /** Page[RatingCommentRow] */
+        Page_RatingCommentRow_: {
+            /** Items */
+            items: components["schemas"]["RatingCommentRow"][];
             /** Total */
             total: number;
             /** Page */
@@ -8985,6 +9359,7 @@ export interface components {
              * Format: date
              */
             document_date: string;
+            rating?: components["schemas"]["PermitRatingOut"] | null;
         };
         /**
          * PermitHistoryRow
@@ -9097,6 +9472,35 @@ export interface components {
             template_id: string | null;
             /** Issued At */
             issued_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * PermitRatingIn
+         * @description `POST /permits/{id}/rating` — the citizen's verdict on a permit they
+         *     actually received (ruling #140). One per permit, checked by the service,
+         *     never left to `permit_ratings`'s own UNIQUE index.
+         */
+        PermitRatingIn: {
+            /** Score */
+            score: number;
+            /** Comment */
+            comment?: string | null;
+        };
+        /**
+         * PermitRatingOut
+         * @description One rating, exactly as `permit_ratings` stores it. No `permit_id`, no
+         *     applicant: ruling #141 keeps the author off every response built from this
+         *     table, and this is the shape every such response embeds.
+         */
+        PermitRatingOut: {
+            /** Score */
+            score: number;
+            /** Comment */
+            comment: string | null;
             /**
              * Created At
              * Format: date-time
@@ -9482,6 +9886,86 @@ export interface components {
             code: string;
             /** Message */
             message: string;
+        };
+        /**
+         * RatingCommentRow
+         * @description `GET /admin/ratings` — one row of the anonymous comment feed.
+         *
+         *     Ruling #141: date, service, leshoz, score, text. No applicant, no permit
+         *     number — anything that identifies WHO rated is absent by construction, not
+         *     filtered out at render time. `test_comments_never_name_the_author` asserts
+         *     this on the SERIALIZED body rather than on this class, on purpose: a field
+         *     added here later would pass a field-name check and still leak.
+         */
+        RatingCommentRow: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Score */
+            score: number;
+            /** Comment */
+            comment: string | null;
+            /** Organization Name */
+            organization_name: {
+                [key: string]: unknown;
+            };
+            /** Activity Type Name */
+            activity_type_name: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * RatingsBreakdownRow
+         * @description One group of `GET /admin/ratings/summary`'s two breakdowns — exactly
+         *     one of `organization_id`/`activity_type_id` is set, depending on which
+         *     list this row sits in.
+         */
+        RatingsBreakdownRow: {
+            /** Organization Id */
+            organization_id?: string | null;
+            /** Activity Type Id */
+            activity_type_id?: string | null;
+            /** Name */
+            name: {
+                [key: string]: unknown;
+            };
+            /** Avg Score */
+            avg_score: string;
+            /** Count */
+            count: number;
+        };
+        /**
+         * RatingsSummaryOut
+         * @description `GET /admin/ratings/summary` — the overall average and count over the
+         *     caller's zone and the given period, plus the same pair broken down by
+         *     organization and by activity type. `avg_score`/`count` are both null-safe:
+         *     zero ratings in scope reads as `avg_score: null, count: 0`, never a 404 or
+         *     a division-by-zero — a summary has no row to refuse.
+         */
+        RatingsSummaryOut: {
+            /** Avg Score */
+            avg_score: string | null;
+            /** Count */
+            count: number;
+            /** By Organization */
+            by_organization: components["schemas"]["RatingsBreakdownRow"][];
+            /** By Activity Type */
+            by_activity_type: components["schemas"]["RatingsBreakdownRow"][];
+        };
+        /**
+         * ReassignIn
+         * @description `POST /inspections/tasks/{id}/reassign` (ruling R6): the handover — the
+         *     task keeps its id, its due date and its history, only `assigned_to`
+         *     changes.
+         */
+        ReassignIn: {
+            /**
+             * New Assignee Id
+             * Format: uuid
+             */
+            new_assignee_id: string;
         };
         /**
          * ReconciliationOut
@@ -10160,6 +10644,17 @@ export interface components {
             effective_to?: string | null;
             /** Basis */
             basis?: string | null;
+        };
+        /**
+         * SatisfactionKpiOut
+         * @description Ruling #143. `avg_score` is `None`, never `0`, for a period with no
+         *     ratings — a portal may not state a number it cannot produce.
+         */
+        SatisfactionKpiOut: {
+            /** Avg Score */
+            avg_score: string | null;
+            /** Count */
+            count: number;
         };
         /** SavedFilterIn */
         SavedFilterIn: {
@@ -13470,6 +13965,294 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnnouncementAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_legal_documents_api_v1_admin_legal_documents_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_LegalDocumentAdminOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_legal_document_api_v1_admin_legal_documents_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegalDocumentCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_legal_document_api_v1_admin_legal_documents__doc_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_legal_document_api_v1_admin_legal_documents__doc_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegalDocumentPatchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_legal_document_api_v1_admin_legal_documents__doc_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_legal_document_api_v1_admin_legal_documents__doc_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_public_legal_documents_api_v1_public_legal_documents_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_LegalDocumentOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_public_legal_document_api_v1_public_legal_documents__doc_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LegalDocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_public_legal_document_api_v1_public_legal_documents__doc_id__file_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -17600,6 +18383,41 @@ export interface operations {
             };
         };
     };
+    rate_permit_api_v1_permits__permit_id__rating_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                permit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PermitRatingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermitRatingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     suspend_permit_api_v1_permits__permit_id__suspend_post: {
         parameters: {
             query?: never;
@@ -17868,6 +18686,76 @@ export interface operations {
             };
         };
     };
+    get_ratings_summary_api_v1_admin_ratings_summary_get: {
+        parameters: {
+            query: {
+                period_from: string;
+                period_to: string;
+                organization_id?: string | null;
+                activity_type_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingsSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ratings_api_v1_admin_ratings_get: {
+        parameters: {
+            query: {
+                period_from: string;
+                period_to: string;
+                organization_id?: string | null;
+                activity_type_id?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_RatingCommentRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     check_permit_api_v1_public_permits_check_get: {
         parameters: {
             query?: {
@@ -18114,6 +19002,41 @@ export interface operations {
             };
         };
     };
+    reassign_task_api_v1_inspections_tasks__task_id__reassign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_acts_api_v1_inspections_acts_get: {
         parameters: {
             query?: {
@@ -18320,6 +19243,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string | null;
+                applicant_id?: string | null;
                 page?: number;
                 page_size?: number;
             };
