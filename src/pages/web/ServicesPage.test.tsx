@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import userEvent from '@testing-library/user-event';
 import { ServicesPage } from './ServicesPage';
 import { I18nProvider } from '../../i18n';
@@ -11,88 +12,139 @@ vi.mock('../../api/client', () => ({
 
 import { api } from '../../api/client';
 
+/**
+ * The defect this file pins: the six services used to be constants in the
+ * translation files, each carrying an invented "up to 3 working days" term
+ * that the system has never honoured (real deadline: `SLA_DAYS`, 15). They
+ * now come from `GET /public/refs/activity-types` — nothing here may render
+ * a service the catalog did not return, or a term this page made up.
+ */
+
+const GRAZING = {
+  id: 'a0000000-0000-4000-8000-000000000001',
+  code: 'grazing',
+  name: { uz_latn: 'Chorva mollarini boqish', ru: 'Выпас скота' },
+  description: {
+    uz_latn: 'Yaylov konturlarida belgilangan normalarga muvofiq chorva boqish uchun ruxsatnoma.',
+    ru: 'Разрешение на выпас скота на пастбищных контурах в соответствии с нормой.',
+  },
+  processing_days: 15,
+};
+
+const BEEKEEPING = {
+  id: 'a0000000-0000-4000-8000-000000000002',
+  code: 'apiary',
+  name: { uz_latn: 'Asalarichilik', ru: 'Пчеловодство' },
+  description: {
+    uz_latn: 'Asalari oilalarini oʻrmon yerlariga vaqtinchalik joylashtirish.',
+    ru: 'Временное размещение пчелиных семей на землях лесного фонда.',
+  },
+  processing_days: 15,
+};
+
+// `deadwood` and `science` never had copy on this site (migration `0038`'s
+// own docstring) — their `description` is `null`, on purpose, not a gap to
+// fill in.
+const DEADWOOD = {
+  id: 'a0000000-0000-4000-8000-000000000003',
+  code: 'deadwood',
+  name: { uz_latn: 'Quruq shoxlarni yigʻish', ru: 'Сбор сухостоя' },
+  description: null,
+  processing_days: 15,
+};
+
 const mockActivities = [
-  {
-    id: '0198f100-0001-7000-8000-000000000001',
-    code: 'grazing',
-    name: { uz_latn: 'Chorva mollarini boqish' },
-  },
-  {
-    id: '0198f100-0001-7000-8000-000000000002',
-    code: 'haymaking',
-    name: { uz_latn: 'Pichan tayyorlash' },
-  },
-  {
-    id: '0198f100-0001-7000-8000-000000000003',
-    code: 'apiary',
-    name: { uz_latn: 'Asalarichilik' },
-  },
+  GRAZING,
+  BEEKEEPING,
+  DEADWOOD,
   {
     id: '0198f100-0001-7000-8000-000000000004',
     code: 'recreation',
     name: { uz_latn: 'Dam olish va turizm' },
-  },
-  {
-    id: '0198f100-0001-7000-8000-000000000005',
-    code: 'deadwood',
-    name: { uz_latn: 'Quruq shox-shabba yigʻish' },
-  },
-  {
-    id: '0198f100-0001-7000-8000-000000000006',
-    code: 'science',
-    name: { uz_latn: 'Ilmiy tadqiqot' },
+    description: null,
+    processing_days: 15,
   },
 ];
+
+function answer(items: unknown[]) {
+  return { data: items, error: undefined };
+}
 
 beforeEach(() => {
   vi.mocked(api.GET).mockReset();
 });
 
-function renderServices(onNavigate?: (page: string, params?: any) => void) {
+function renderPage(onNavigate?: (page: string, params?: any) => void) {
   return render(
-    <I18nProvider>
-      <ServicesPage onNavigate={onNavigate} />
-    </I18nProvider>,
+    <MemoryRouter>
+      <I18nProvider>
+        <ServicesPage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
   );
 }
 
-it('loads and renders 6 services from the activity-types API', async () => {
-  vi.mocked(api.GET).mockResolvedValue({ data: mockActivities, error: undefined } as never);
-  renderServices();
+it('lists the services the API returns, not a hard-coded six', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([GRAZING, BEEKEEPING]) as never);
+  renderPage();
 
-  await waitFor(() => {
-    expect(screen.getByText(/Chorva mollarini boqish boʻyicha ruxsatnoma/i)).toBeInTheDocument();
-    expect(screen.getByText(/Quruq shox-shabba yigʻish ruxsatnomasi/i)).toBeInTheDocument();
-    expect(screen.getByText(/Ilmiy-tadqiqot ishlarini olib borish ruxsatnomasi/i)).toBeInTheDocument();
-  });
-
-  expect(screen.getAllByRole('button', { name: /Ariza berish/i })).toHaveLength(6);
+  expect(await screen.findByText(GRAZING.name.uz_latn)).toBeInTheDocument();
+  // "recreation" (not in this answer) is the only service whose Uzbek name
+  // contains "dam olish" — its absence proves the page rendered the API's
+  // list, not a hard-coded six that always included it.
+  expect(screen.queryByText(/dam olish/i)).not.toBeInTheDocument();
 });
 
-it('navigates to applicant_wizard with real UUID when apply button is clicked', async () => {
-  vi.mocked(api.GET).mockResolvedValue({ data: mockActivities, error: undefined } as never);
+it('says the real term, in days', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([GRAZING]) as never);
+  renderPage();
+
+  expect(await screen.findByText(/15 kun/)).toBeInTheDocument();
+  expect(screen.queryByText(/3 ish kuni/)).not.toBeInTheDocument();
+});
+
+it('renders a null description without a placeholder sentence', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([DEADWOOD]) as never);
+  renderPage();
+
+  expect(await screen.findByText(DEADWOOD.name.uz_latn)).toBeInTheDocument();
+  // No invented copy stands in for the missing description — the page must
+  // not render a description element for this card at all.
+  expect(screen.queryByTestId(`service-desc-${DEADWOOD.id}`)).not.toBeInTheDocument();
+});
+
+it('says the catalog is empty rather than showing a blank grid', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([]) as never);
+  renderPage();
+
+  expect(await screen.findByTestId('services-empty')).toBeInTheDocument();
+});
+
+it('says so plainly when the catalog is unavailable', async () => {
+  vi.mocked(api.GET).mockRejectedValue(new Error('network error'));
+  renderPage();
+
+  expect(await screen.findByRole('alert')).toBeInTheDocument();
+});
+
+// The defect this pins: the apply button used to carry the activity's
+// human-readable `code` ('deadwood'), not the UUID the backend actually
+// needs to identify the activity type (`PriceCalculator` submits the same
+// catalog's `id` as `activity_type_id`). A wizard started from this button
+// must receive the real id, not a string the API never promised as a key.
+it('passes the real backend activity UUID when the apply button is clicked', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer(mockActivities) as never);
   const onNavigate = vi.fn();
-  renderServices(onNavigate);
+  renderPage(onNavigate);
 
   await waitFor(() => {
-    expect(screen.getByText(/Quruq shox-shabba yigʻish ruxsatnomasi/i)).toBeInTheDocument();
+    expect(screen.getByText(DEADWOOD.name.uz_latn)).toBeInTheDocument();
   });
 
   const buttons = screen.getAllByRole('button', { name: /Ariza berish/i });
-  await userEvent.click(buttons[4]); // 5th item: deadwood
+  await userEvent.click(buttons[2]); // 3rd item: deadwood
 
   expect(onNavigate).toHaveBeenCalledWith('applicant_wizard', {
-    activity: '0198f100-0001-7000-8000-000000000005',
+    activity: DEADWOOD.id,
   });
-});
-
-it('renders fallback services when the API call fails', async () => {
-  vi.mocked(api.GET).mockResolvedValue({ data: undefined, error: { code: 'ERR-NET-001' } } as never);
-  renderServices();
-
-  await waitFor(() => {
-    expect(screen.getByText(/Chorva mollarini boqish/i)).toBeInTheDocument();
-  });
-
-  expect(screen.getAllByRole('button', { name: /Ariza berish/i })).toHaveLength(6);
 });

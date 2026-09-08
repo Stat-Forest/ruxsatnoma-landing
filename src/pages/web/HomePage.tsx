@@ -4,7 +4,6 @@ import {
   Search,
   QrCode,
   ArrowRight,
-  ShieldCheck,
   FileCheck2,
   CheckCircle2,
   Users,
@@ -13,84 +12,29 @@ import {
   PhoneCall,
   ExternalLink,
   MapPin,
-  Star,
-  Send,
-  Flame,
-  GraduationCap,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
+import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { useLanguage, useT } from '../../i18n/useT';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
-import { pickLocalized, pickName } from '../../lib/localized';
+import { fetchServices, type Service } from '../../api/services';
+import { serviceIcon } from '../../lib/serviceIcons';
+import { pickLocalized } from '../../lib/localized';
 import type { components } from '../../api/schema';
-import { Skeleton } from '@/components/ui/Feedback';
 
 type OpenDataStats = components['schemas']['OpenDataStatsOut'];
-type ActivityType = components['schemas']['PublicActivityTypeOut'];
 
 type StatsState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; data: OpenDataStats };
 
-type ActivitiesState =
-  | { status: 'loading' }
-  | { status: 'error' }
-  | { status: 'ready'; data: ActivityType[] };
-
-const ACTIVITY_META: Record<
-  string,
-  {
-    icon: React.ReactNode;
-    badgeKey: string;
-    descKey: string;
-  }
-> = {
-  grazing: {
-    icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.grazing.badge',
-    descKey: 'home.activities.grazing.desc',
-  },
-  haymaking: {
-    icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.haymaking.badge',
-    descKey: 'home.activities.haymaking.desc',
-  },
-  apiary: {
-    icon: <ShieldCheck className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.beekeeping.badge',
-    descKey: 'home.activities.beekeeping.desc',
-  },
-  recreation: {
-    icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.recreation.badge',
-    descKey: 'home.activities.recreation.desc',
-  },
-  deadwood: {
-    icon: <Flame className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.deadwood.badge',
-    descKey: 'home.activities.deadwood.desc',
-  },
-  science: {
-    icon: <GraduationCap className="w-6 h-6 text-[#2E7D4F]" />,
-    badgeKey: 'home.activities.science.badge',
-    descKey: 'home.activities.science.desc',
-  },
-};
-
-const DEFAULT_FALLBACK_ACTIVITIES: ActivityType[] = [
-  { id: 'grazing', code: 'grazing', name: { uz_latn: 'Chorva mollarini boqish', ru: 'Выпас скота', en: 'Livestock grazing' } },
-  { id: 'haymaking', code: 'haymaking', name: { uz_latn: 'Pichan tayyorlash', ru: 'Сенокошение', en: 'Haymaking' } },
-  { id: 'apiary', code: 'apiary', name: { uz_latn: 'Asalarichilik', ru: 'Пчеловодство', en: 'Apiary' } },
-  { id: 'recreation', code: 'recreation', name: { uz_latn: 'Dam olish va turizm', ru: 'Отдых и туризм', en: 'Recreation and tourism' } },
-  { id: 'deadwood', code: 'deadwood', name: { uz_latn: 'Quruq shox-shabba yigʻish', ru: 'Сбор валежника и хвороста', en: 'Deadwood collection' } },
-  { id: 'science', code: 'science', name: { uz_latn: 'Ilmiy tadqiqot', ru: 'Научные исследования', en: 'Scientific research' } },
-];
-
 type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
+
+type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: Service[] };
 
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
@@ -135,7 +79,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const inRouter = useInRouterContext();
   const [quickSearchInput, setQuickSearchInput] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
-  const [activitiesState, setActivitiesState] = useState<ActivitiesState>({ status: 'loading' });
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
@@ -147,22 +90,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     let cancelled = false;
     async function load() {
       try {
-        const [statsRes, actRes] = await Promise.all([
-          api.GET('/api/v1/public/open-data/stats'),
-          api.GET('/api/v1/public/refs/activity-types'),
-        ]);
+        const { data, error } = await api.GET('/api/v1/public/open-data/stats');
         if (cancelled) return;
-        setStatsState(statsRes.error || !statsRes.data ? { status: 'error' } : { status: 'ready', data: statsRes.data });
-        if (actRes.data && Array.isArray(actRes.data) && actRes.data.length > 0) {
-          setActivitiesState({ status: 'ready', data: actRes.data });
-        } else {
-          setActivitiesState({ status: 'error' });
-        }
+        setStatsState(error || !data ? { status: 'error' } : { status: 'ready', data });
       } catch {
-        if (!cancelled) {
-          setStatsState({ status: 'error' });
-          setActivitiesState({ status: 'error' });
-        }
+        if (!cancelled) setStatsState({ status: 'error' });
       }
     }
     void load();
@@ -199,15 +131,26 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     };
   }, []);
 
-  const [selectedRating, setSelectedRating] = useState<string>('');
-  const [ratingSubmitted, setRatingSubmitted] = useState<boolean>(false);
+  // The six activity cards below used to be constants — a title, a
+  // description and a badge per service, hand-typed in the translation files.
+  // They now come from the same catalog `ServicesPage` reads (`api/services.ts`),
+  // so the two can never list a different set of services.
+  const [servicesState, setServicesState] = useState<ServicesState>({ status: 'loading' });
 
-  const handleRatingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedRating) {
-      setRatingSubmitted(true);
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const items = await fetchServices();
+        if (!cancelled) setServicesState({ status: 'ready', items });
+      } catch {
+        if (!cancelled) setServicesState({ status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const stats = [
     {
@@ -238,12 +181,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       note: t('home.stats.regions.note'),
     },
   ];
-
-  const currentActivities: ActivityType[] =
-    activitiesState.status === 'ready'
-      ? activitiesState.data
-      : DEFAULT_FALLBACK_ACTIVITIES;
-
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -396,9 +333,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activitiesState.status === 'loading'
-            ? Array.from({ length: 6 }).map((_, idx) => (
+        {/* The six cards below used to be constants — a title, a description
+            and a "badge" (e.g. "Most in demand") hand-typed per service, none
+            of it sourced from anywhere in the system. They now come from the
+            same catalog `ServicesPage` reads, so the two pages can never list
+            a different set of services (`api/services.ts`). */}
+        {servicesState.status === 'loading' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities-loading">
+            {Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={idx}
                 className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
@@ -415,57 +357,33 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <Skeleton height="h-4" width="w-20" />
                 </div>
               </div>
-            ))
-            : currentActivities.map((act) => {
-              const meta = ACTIVITY_META[act.code] ?? {
-                icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
-                badgeKey: 'home.activities.sectionBadge',
-                descKey: '',
-              };
-              const title = pickName(act.name, language, act.code);
-              const desc = meta.descKey ? t(meta.descKey as any) : '';
-              const badge = meta.badgeKey ? t(meta.badgeKey as any) : t('home.activities.sectionBadge');
+            ))}
+          </div>
+        )}
 
-              return (
-                <div
-                  key={act.id}
-                  className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="p-2.5 bg-[#F0F7F1] rounded-xl">{meta.icon}</div>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
-                        {badge}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
-                      {title}
-                    </h3>
-                    <p className="text-xs text-[#5A646D] leading-relaxed">
-                      {desc}
-                    </p>
-                  </div>
+        {/* A plain `<p>` here used to say the catalog failed to load with no
+            `role="alert"` — a screen-reader user was never told the section
+            failed, unlike `ServicesPage`'s own catalog error a click away.
+            Same `Alert` component, same posture. The wrapping `data-testid`
+            disambiguates this alert from the price calculator's own — both
+            read `/public/refs/activity-types` and so fail together. */}
+        {servicesState.status === 'error' && (
+          <div data-testid="home-activities-error">
+            <Alert variant="danger">{t('home.activities.failed')}</Alert>
+          </div>
+        )}
 
-                  <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-                    <button
-                      type="button"
-                      onClick={() => onNavigate?.('tariffs', { activityId: act.id })}
-                      className="text-[#767F87] hover:text-[#2E7D4F] transition-colors"
-                    >
-                      {t('home.activities.tariffHint')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onNavigate?.('auth_login', { activity: act.id })}
-                      className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
-                    >
-                      {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
+        {servicesState.status === 'ready' && servicesState.items.length === 0 && (
+          <p className="text-xs text-[#5A646D]">{t('home.activities.empty')}</p>
+        )}
+
+        {servicesState.status === 'ready' && servicesState.items.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities">
+            {servicesState.items.map((svc) => (
+              <ActivityCard key={svc.id} service={svc} language={language} t={t} onNavigate={onNavigate} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── 4. HOW IT WORKS TIMELINE ───────────────────────────────── */}
@@ -584,98 +502,60 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
-
-      {/* ── 6. PORTALNI BAHOLASH (PREMIUM RATING SECTION) ────────── */}
-      <section className="bg-gradient-to-br from-white via-[#FBFDFB] to-[#F0F7F1] border border-[#E4E7EA] rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
-        {ratingSubmitted ? (
-          <div className="py-8 px-6 bg-white border border-[#D9EBDC] rounded-2xl text-center space-y-3 shadow-md max-w-2xl mx-auto">
-            <div className="w-14 h-14 bg-[#F0F7F1] text-[#2E7D4F] rounded-full flex items-center justify-center mx-auto shadow-inner">
-              <CheckCircle2 className="w-8 h-8 text-[#15803D]" />
-            </div>
-            <h3 className="text-xl font-bold text-[#1A1F24]">{t('home.rating.thankYouTitle')}</h3>
-            <p className="text-sm text-[#5A646D] max-w-md mx-auto">
-              {t('home.rating.thankYouDesc')}
-            </p>
-            <div className="pt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F0F7F1] text-[#2E7D4F] text-xs font-bold rounded-full border border-[#D9EBDC]">
-                <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> {t('home.rating.resultLabel')} {selectedRating} {t('home.rating.resultUnit')}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleRatingSubmit} className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4E7EA] pb-5">
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F0F7F1] text-[#2E7D4F] text-xs font-bold uppercase tracking-wider rounded-full border border-[#D9EBDC] mb-2">
-                  <Star className="w-3.5 h-3.5 fill-[#2E7D4F]" /> {t('home.rating.badge')}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-extrabold text-[#1A1F24]">
-                  {t('home.rating.formTitle')}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#5A646D] mt-0.5">
-                  {t('home.rating.formSubtitle')}
-                </p>
-              </div>
-            </div>
-
-            {/* Interactive Rating Options Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { value: '5', title: t('home.rating.options.5.title'), desc: t('home.rating.options.5.desc'), stars: 5 },
-                { value: '4', title: t('home.rating.options.4.title'), desc: t('home.rating.options.4.desc'), stars: 4 },
-                { value: '3', title: t('home.rating.options.3.title'), desc: t('home.rating.options.3.desc'), stars: 3 },
-                { value: '2', title: t('home.rating.options.2.title'), desc: t('home.rating.options.2.desc'), stars: 2 },
-              ].map((item) => {
-                const isSelected = selectedRating === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setSelectedRating(item.value)}
-                    className={`text-left p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer group ${isSelected
-                        ? 'bg-white border-[#2E7D4F] ring-2 ring-[#2E7D4F]/20 shadow-md transform -translate-y-1'
-                        : 'bg-white/80 border-[#E4E7EA] hover:border-[#7FB98A] hover:bg-white shadow-xs'
-                      }`}
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[#EAB308]">
-                          {Array.from({ length: item.stars }).map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-[#EAB308]" />
-                          ))}
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-[#2E7D4F] bg-[#2E7D4F] text-white' : 'border-gray-300 group-hover:border-[#7FB98A]'
-                          }`}>
-                          {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                        </div>
-                      </div>
-                      <h4 className={`text-base font-bold transition-colors ${isSelected ? 'text-[#2E7D4F]' : 'text-[#1A1F24]'}`}>
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-[#5A646D] leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <Button
-                type="submit"
-                variant="success"
-                size="lg"
-                disabled={!selectedRating}
-                rightIcon={<Send className="w-4 h-4" />}
-                className="bg-[#2E7D4F] hover:bg-[#23653F] text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-transform active:scale-95 disabled:opacity-50"
-              >
-                {t('home.rating.submitButton')}
-              </Button>
-            </div>
-          </form>
-        )}
-      </section>
     </div>
   );
 };
+
+function ActivityCard({
+  service,
+  language,
+  t,
+  onNavigate,
+}: {
+  service: Service;
+  language: string;
+  t: (key: string) => string;
+  onNavigate?: (page: string, params?: any) => void;
+}) {
+  const Icon = serviceIcon(service.code);
+  const description = pickLocalized(service.description, language);
+
+  return (
+    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="p-2.5 bg-[#F0F7F1] rounded-xl">
+            <Icon className="w-6 h-6 text-[#2E7D4F]" />
+          </div>
+          {/* The real processing term (`processing_days`, ruling #138) where a
+              hand-typed badge ("Most in demand", "Seasonal"...) used to sit —
+              those made no claim the system could back up. */}
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
+            {service.processing_days} {t('home.activities.daysUnit')}
+          </span>
+        </div>
+        <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
+          {pickLocalized(service.name, language)}
+        </h3>
+        {/* `description` is nullable (two of six rows have none, on purpose —
+            see `api/services.ts`); no placeholder sentence stands in for it. */}
+        {description && <p className="text-xs text-[#5A646D] leading-relaxed">{description}</p>}
+      </div>
+
+      <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
+        {/* The annual-quota line was six invented constants (85,000 head,
+            14,200 hectares, 42,000 bee colonies...) with no source
+            anywhere in the system — stage 7.3 finding F7. Removed
+            rather than replaced: nothing publishes a quota, and the
+            tariff calculator below is what a citizen actually needs. */}
+        <span className="text-[#767F87]">{t('home.activities.tariffHint')}</span>
+        <button
+          onClick={() => onNavigate?.('auth_login', { activity: service.id })}
+          className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
+        >
+          {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}

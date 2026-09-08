@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '../../i18n';
@@ -47,15 +47,42 @@ const newsPage = {
   page_size: 3,
 };
 
-/**
- * The page now calls three anonymous endpoints — the aggregates, the news, and
- * (through the calculator section it absorbed from `/tariffs`) the two
- * reference catalogues. Routing the mock by path keeps each test's own
- * subject the only thing it changes.
- */
-type Answers = { stats?: unknown; statsError?: unknown; news?: unknown; newsError?: unknown };
+/** As `GET /public/refs/activity-types` answers them — the same catalogue the
+ *  activities section and `ServicesPage` both read (`api/services.ts`). */
+const ACTIVITY_ID = 'a0000000-0000-4000-8000-000000000002';
+const activityTypes = [
+  {
+    id: ACTIVITY_ID,
+    code: 'grazing',
+    name: { uz_latn: 'Chorva mollarini boqish', ru: 'Выпас скота' },
+    description: { uz_latn: 'Yaylov konturlarida chorva boqish uchun ruxsatnoma.', ru: 'Разрешение на выпас скота.' },
+    processing_days: 15,
+  },
+];
 
-function mockBackend({ stats: statsAnswer = stats, statsError, news = newsPage, newsError }: Answers = {}) {
+/**
+ * The page now calls four anonymous endpoints — the aggregates, the news, the
+ * activities catalogue and (through the calculator section it absorbed from
+ * `/tariffs`) the two reference catalogues. Routing the mock by path keeps
+ * each test's own subject the only thing it changes.
+ */
+type Answers = {
+  stats?: unknown;
+  statsError?: unknown;
+  news?: unknown;
+  newsError?: unknown;
+  services?: unknown;
+  servicesError?: unknown;
+};
+
+function mockBackend({
+  stats: statsAnswer = stats,
+  statsError,
+  news = newsPage,
+  newsError,
+  services = activityTypes,
+  servicesError,
+}: Answers = {}) {
   vi.mocked(api.GET).mockImplementation(((path: string) => {
     if (path === '/api/v1/public/open-data/stats') {
       return Promise.resolve({ data: statsError ? undefined : statsAnswer, error: statsError });
@@ -63,7 +90,10 @@ function mockBackend({ stats: statsAnswer = stats, statsError, news = newsPage, 
     if (path === '/api/v1/public/announcements') {
       return Promise.resolve({ data: newsError ? undefined : news, error: newsError });
     }
-    return Promise.resolve({ data: [], error: undefined }); // the calculator's catalogues
+    if (path === '/api/v1/public/refs/activity-types') {
+      return Promise.resolve({ data: servicesError ? undefined : services, error: servicesError });
+    }
+    return Promise.resolve({ data: [], error: undefined }); // the calculator's livestock-types catalogue
   }) as never);
 }
 
@@ -142,47 +172,59 @@ it('says so when the aggregates cannot be loaded, instead of showing a figure', 
   expect(container.textContent).not.toContain('42,850');
 });
 
+it('shows the services the catalog returns, not the six that used to be constants', async () => {
+  mockBackend();
+  renderHome();
+
+  // Scoped to the activities section: the calculator below reads the same
+  // catalogue for its own dropdown, so the name appears twice on the page.
+  const section = await screen.findByTestId('home-activities');
+  expect(within(section).getByText('Chorva mollarini boqish')).toBeInTheDocument();
+});
+
 const sampleActivities = [
   {
     id: '0198f100-0001-7000-8000-000000000001',
     code: 'grazing',
     name: { uz_latn: 'Chorva mollarini boqish' },
+    description: null,
+    processing_days: 15,
   },
   {
     id: '0198f100-0001-7000-8000-000000000005',
     code: 'deadwood',
     name: { uz_latn: 'Quruq shox-shabba yigʻish' },
+    description: null,
+    processing_days: 15,
   },
   {
     id: '0198f100-0001-7000-8000-000000000006',
     code: 'science',
     name: { uz_latn: 'Ilmiy tadqiqot' },
+    description: null,
+    processing_days: 15,
   },
 ];
 
-it('fetches and renders activity types returned by the public API', async () => {
-  vi.mocked(api.GET).mockImplementation(async (path: string) => {
-    if (path.includes('activity-types')) {
-      return { data: sampleActivities, error: undefined } as never;
-    }
-    return { data: stats, error: undefined } as never;
-  });
-
+it('fetches and renders every activity type the public API returns', async () => {
+  mockBackend({ services: sampleActivities });
   renderHome();
+
+  const section = await screen.findByTestId('home-activities');
   await waitFor(() => {
-    expect(screen.getAllByText(/Chorva mollarini boqish/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Ilmiy tadqiqot/i).length).toBeGreaterThan(0);
+    expect(within(section).getByText(/Chorva mollarini boqish/i)).toBeInTheDocument();
+    expect(within(section).getByText(/Quruq shox-shabba/i)).toBeInTheDocument();
+    expect(within(section).getByText(/Ilmiy tadqiqot/i)).toBeInTheDocument();
   });
 });
 
+// The defect this pins: the apply link used to carry the activity's
+// human-readable `code` ('deadwood'), not the UUID the backend actually
+// needs to identify the activity type (`PriceCalculator` submits the same
+// catalog's `id` as `activity_type_id`). A login started from this link
+// must receive the real id, not a string the API never promised as a key.
 it('passes the real backend activity UUID when apply link is clicked', async () => {
-  vi.mocked(api.GET).mockImplementation(async (path: string) => {
-    if (path.includes('activity-types')) {
-      return { data: sampleActivities, error: undefined } as never;
-    }
-    return { data: stats, error: undefined } as never;
-  });
+  mockBackend({ services: sampleActivities });
 
   const onNavigate = vi.fn();
   render(
@@ -193,9 +235,10 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
     </MemoryRouter>,
   );
 
-  await waitFor(() => expect(screen.getAllByText(/Quruq shox-shabba/i).length).toBeGreaterThan(0));
-  const applyButtons = screen.getAllByRole('button', { name: /Ariza yozish/i });
-  expect(applyButtons.length).toBeGreaterThan(0);
+  const section = await screen.findByTestId('home-activities');
+  await waitFor(() => expect(within(section).getByText(/Quruq shox-shabba/i)).toBeInTheDocument());
+  const applyButtons = within(section).getAllByRole('button', { name: /Ariza yozish/i });
+  expect(applyButtons.length).toBe(3);
   applyButtons[1].click();
 
   expect(onNavigate).toHaveBeenCalledWith('auth_login', {
@@ -203,3 +246,29 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
   });
 });
 
+it('says so when the catalog cannot be loaded, instead of showing anything invented', async () => {
+  mockBackend({ servicesError: { code: 'ERR-SYS-000' } });
+  renderHome();
+
+  // Same treatment as `ServicesPage`'s own catalog error: the `Alert`
+  // component, discoverable by `role="alert"` — not a plain `<p>` a
+  // screen-reader user would never be told about. Scoped to this section's
+  // own wrapper: the price calculator below reads the same endpoint and
+  // renders its own `role="alert"` when it also fails.
+  const activitiesError = await screen.findByTestId('home-activities-error');
+  expect(within(activitiesError).getByRole('alert')).toHaveTextContent(/Xizmat turlarini yuklab boʻlmadi/i);
+});
+
+/**
+ * The defect this pins: an anonymous visitor who had never received a
+ * service was asked to rate it, could not give it a 1, and the answer was
+ * thrown away on submit (stage 7.7 finding). The rating moved to the
+ * citizen's cabinet — this page must carry none of it any more.
+ */
+it('no longer shows the satisfaction form', async () => {
+  mockBackend();
+  renderHome();
+
+  await waitFor(() => expect(screen.queryByText(/sifatini baholang/i)).not.toBeInTheDocument());
+  expect(screen.queryByText(/baho yuborish/i)).not.toBeInTheDocument();
+});
