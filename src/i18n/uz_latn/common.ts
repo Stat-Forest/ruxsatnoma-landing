@@ -1,7 +1,13 @@
 /** Header, footer and anything shared by more than one page. */
 export const common = {
-  'brand.name': 'ruxsatnoma-urmon.uz',
-  'brand.tagline': 'Oʻrmon xoʻjaligi davlat portali',
+  'brand.name':
+    'O‘ZBEKISTON RESPUBLIKASI EKOLOGIYA, ATROF-MUHITNI MUHOFAZA QILISH VA IQLIM O‘ZGARISHI VAZIRLIGI HUZURIDAGI O‘RMON VA YASHIL HUDUDLARNI KO‘PAYTIRISH, CHO‘LLANISHGA QARSHI KURASHISH AGENTLIGI RUXSATNOMA OLISH PORTALI',
+  'brand.ministry':
+    'O‘zbekiston Respublikasi Ekologiya, atrof-muhitni muhofaza qilish va iqlim o‘zgarishi vazirligi huzuridagi',
+  'brand.agency':
+    'O‘rmon va yashil hududlarni ko‘paytirish, cho‘llanishga qarshi kurashish agentligi',
+  'brand.portal': 'Ruxsatnoma olish portali',
+  'brand.tagline': 'Ruxsatnoma olish portali',
 
   'nav.home': 'Bosh sahifa',
   'nav.services': 'Xizmatlar',

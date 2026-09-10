@@ -1,5 +1,6 @@
 import React from 'react';
-import { Trees, Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
+import logoImg from '@/assets/img/logo.png';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
@@ -52,7 +53,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
   const hours = contacts ? pickLocalized(contacts.hours, uiLanguage) : '';
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans text-[#1A1F24]">
+    <div className="min-h-screen bg-white flex flex-col font-sans text-[#1A1F24] overflow-x-hidden">
       {/* ── Top Header ─────────────────────────────────────────── */}
       <header className={`sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 ${
         activeNav === 'home'
@@ -69,21 +70,23 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
             Uzbek one. Below `xl` the tagline is hidden, so every language leaves
             the logo the same width and flex is enough there — and grid at that
             size squeezes the logo onto two lines instead. */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 xl:grid xl:grid-cols-[auto_1fr_auto]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 min-h-[72px] py-2 flex items-center justify-between gap-2 sm:gap-4 xl:grid xl:grid-cols-[auto_1fr_auto]">
           {/* Logo */}
           <button
             onClick={() => onNavigate?.('home')}
-            className="flex items-center gap-3 text-left focus:outline-none shrink-0"
+            className="flex items-center gap-3 text-left focus:outline-none shrink-0 group py-1"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#2E7D4F] text-white flex items-center justify-center font-bold shadow-md border border-white/20 shrink-0">
-              <Trees className="w-5.5 h-5.5" />
-            </div>
-            <div className="hidden sm:block whitespace-nowrap">
-              <span className="block text-base font-bold text-white leading-tight tracking-tight whitespace-nowrap">
-                {t('brand.name')}
+            <img
+              src={logoImg}
+              alt="Logo"
+              className="w-12 h-12 object-contain shrink-0 drop-shadow-sm transition-transform group-hover:scale-105"
+            />
+            <div className="hidden sm:flex flex-col justify-center items-center text-center max-w-[280px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[650px]">
+              <span className="text-[8px] xl:text-[9px] text-white font-bold uppercase leading-tight mt-0.5">
+                {t('brand.agency')}
               </span>
-              <span className="block lg:hidden xl:block text-[11px] text-gray-200 whitespace-nowrap">
-                {t('brand.tagline')}
+              <span className="text-[9px] xl:text-[10px] text-[#A7F3D0] font-extrabold uppercase tracking-wide leading-tight mt-0.5">
+                {t('brand.portal')}
               </span>
             </div>
           </button>
@@ -156,7 +159,23 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
 
         {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
-          <div data-testid="mobile-menu" className="lg:hidden border-t border-white/15 bg-[#17331B] px-4 pt-3 pb-5 space-y-1.5 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+          <div data-testid="mobile-menu" className="lg:hidden border-t border-white/15 bg-[#17331B] px-4 pt-3 pb-5 space-y-2 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+            <div className="pb-3 mb-1 border-b border-white/15 flex items-center gap-3">
+              <img
+                src={logoImg}
+                alt="Logo"
+                className="w-10 h-10 object-contain shrink-0"
+              />
+              <div className="flex flex-col text-left">
+
+                <span className="text-[10px] text-white font-bold uppercase leading-tight mt-0.5">
+                  {t('brand.agency')}
+                </span>
+                <span className="text-[10.5px] text-[#A7F3D0] font-extrabold uppercase tracking-wide leading-tight mt-0.5">
+                  {t('brand.portal')}
+                </span>
+              </div>
+            </div>
             {navLinks.map((link) => {
               const isActive = activeNav === link.id;
               return (
@@ -209,11 +228,21 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Col 1 */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded bg-[#2E7D4F] flex items-center justify-center">
-                <Trees className="w-5 h-5 text-white" />
+            <div className="flex items-start gap-3">
+              <img
+                src={logoImg}
+                alt="Logo"
+                className="w-12 h-12 object-contain shrink-0 mt-0.5 drop-shadow-sm"
+              />
+              <div className="flex flex-col text-left">
+
+                <span className="font-bold text-[11px] text-white uppercase leading-snug mt-0.5">
+                  {t('brand.agency')}
+                </span>
+                <span className="text-xs font-extrabold text-[#A7F3D0] uppercase tracking-wide mt-1">
+                  {t('brand.portal')}
+                </span>
               </div>
-              <span className="font-bold text-lg">{t('brand.name')}</span>
             </div>
             <p className="text-xs text-gray-300 leading-relaxed">
               {t('footer.about')}

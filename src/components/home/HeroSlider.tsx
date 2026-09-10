@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check, Pause, Play } from 'lucide-react';
-import { PermitSlideArt, ServicesSlideArt, VerifySlideArt } from '../art/HeroPanorama';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 
@@ -281,7 +280,9 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
   return (
     <section
-      className="relative overflow-hidden bg-[#0C2312] h-[460px] sm:h-[560px] lg:h-[620px]"
+      className="relative overflow-hidden h-[460px] sm:h-[540px] lg:h-[580px]"
+
+
       // Hover and keyboard focus both pause: a reader must never be moved
       // out from under the link they are reaching for. `onFocus`/`onBlur`
       // bubble in React, so focus anywhere inside the hero counts.
@@ -290,62 +291,52 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
-      {[PermitSlideArt, VerifySlideArt, ServicesSlideArt].map((Art, i) => (
-        <div
-          key={i}
-          // `.hero-slide` carries the transition — an inline `transition:`
-          // here was unreachable by `motion.css`'s reduced-motion block.
-          className="hero-slide absolute inset-0"
-          style={{
-            opacity: slide === i ? 1 : 0,
-            transform: slide === i ? 'scale(1.07)' : 'scale(1)',
-          }}
-        >
-          <Art />
-        </div>
-      ))}
+      {/* Background video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-center"
+      >
+        <source src="/video/Uzbekistan_forest_economy_docume…_1080p_20260910145426.mp4" type="video/mp4" />
+      </video>
 
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <Atmosphere />
-      </div>
 
+
+      {/* Qoramtir gradient faqat chap tomondagi matn orqasida bo'ladi, o'ng tomoni to'liq toza video */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(100deg, rgba(8,26,14,.88) 0%, rgba(8,26,14,.6) 40%, rgba(8,26,14,0) 68%)',
+            'linear-gradient(to right, rgba(5,18,10,0.88) 0%, rgba(5,18,10,0.68) 32%, rgba(5,18,10,0.2) 46%, rgba(5,18,10,0) 54%)',
         }}
-      />
-      <div
-        // Faint enough not to grey out the panorama — at .35 it read as fog
-        // over every snow cap and sheep.
-        className="absolute inset-0 pointer-events-none opacity-15"
-        style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.14) 1px, transparent 1px)', backgroundSize: '4px 4px' }}
       />
 
       <div className="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6">
         <div className="max-w-xl lg:max-w-2xl">
-          <div className="reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-white/25 backdrop-blur-md">
+          <div className="reveal-top inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-white/25 backdrop-blur-md">
             <span className="live w-1.5 h-1.5 rounded-full bg-[#4ADE80] shadow-[0_0_0_4px_rgba(74,222,128,.22)]" />
             <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{copy.badge}</span>
           </div>
 
           <h1
-            className="reveal mt-5 text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.1] tracking-tight"
-            style={{ animationDelay: '.1s' }}
+            className="reveal-left mt-5 text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-[1.1] tracking-tight"
+            style={{ animationDelay: '.15s' }}
           >
             {copy.title}
-            <span className="block text-[#9CE3AE]">{copy.titleAccent}</span>
+            <span className="reveal-right block text-[#9CE3AE]" style={{ animationDelay: '.3s' }}>{copy.titleAccent}</span>
           </h1>
 
           <p
-            className="reveal mt-4 text-sm sm:text-base leading-relaxed text-[#DCE8DE] max-w-lg"
-            style={{ animationDelay: '.2s' }}
+            className="reveal-zoom mt-4 text-xs sm:text-sm leading-relaxed text-[#DCE8DE] max-w-lg"
+            style={{ animationDelay: '.45s' }}
           >
             {copy.subtitle}
           </p>
 
-          <div className="reveal mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: '.3s' }}>
+          <div className="reveal mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: '.6s' }}>
             <button
               type="button"
               onClick={() => onNavigate?.(actions.primary)}
@@ -363,7 +354,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
             </button>
           </div>
 
-          <div className="reveal mt-8 flex flex-wrap items-center gap-5" style={{ animationDelay: '.42s' }}>
+          <div className="reveal-right mt-8 flex flex-wrap items-center gap-5" style={{ animationDelay: '.75s' }}>
             {[t('hero.trust.fast'), t('hero.trust.qr'), t('hero.trust.online')].map((label) => (
               <div key={label} className="flex items-center gap-2 text-xs font-semibold text-[#C7DCCB]">
                 <Check className="w-4 h-4 text-[#7FE0A0]" />

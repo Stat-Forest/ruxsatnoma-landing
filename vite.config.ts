@@ -49,6 +49,7 @@ function rawCssPlugin(): Plugin {
 export default defineConfig({
   plugins: [rawCssPlugin(), react(), tailwindcss()],
   server: {
+    port: 5174,
     host: true,
     proxy: {
       '/api': {
