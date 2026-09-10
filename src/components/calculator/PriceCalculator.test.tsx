@@ -139,12 +139,30 @@ describe('PriceCalculator — six activities, six field sets', () => {
     vi.mocked(api.GET).mockImplementation(mockRefs() as never);
     renderCalculator();
 
-    // Grazing is the catalogue's first activity, selected by default.
-    expect(await screen.findByLabelText(/bosh soni/i)).toBeInTheDocument();
-
-    await userEvent.click(await screen.findByRole('button', { name: /pichan tayyorlash/i }));
-    expect(screen.getByLabelText(/oʻrim maydoni/i)).toBeInTheDocument();
+    // Haymaking is selected by default (even though grazing is the
+    // catalogue's first activity), so the head-count field appears only
+    // after the citizen picks grazing.
+    expect(await screen.findByLabelText(/oʻrim maydoni/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/bosh soni/i)).not.toBeInTheDocument();
+
+    await userEvent.click(await screen.findByRole('button', { name: /chorva mollarini boqish/i }));
+    expect(screen.getByLabelText(/bosh soni/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/oʻrim maydoni/i)).not.toBeInTheDocument();
+  });
+
+  it('selects haymaking by default regardless of catalogue order, not the first catalogue entry', async () => {
+    const { api } = await import('../../api/client');
+    vi.mocked(api.GET).mockImplementation(mockRefs() as never);
+    renderCalculator();
+
+    expect(await screen.findByRole('button', { name: /pichan tayyorlash/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: /chorva mollarini boqish/i })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('never shows a computed sum before the estimate call answers', () => {
