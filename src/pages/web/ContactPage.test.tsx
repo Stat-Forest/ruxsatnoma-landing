@@ -33,12 +33,20 @@ beforeEach(() => {
   vi.mocked(fetchSiteSettings).mockReset();
 });
 
-function renderContact() {
-  return render(
+/**
+ * ALWAYS rendered with `onNavigate`, exactly as `routes.tsx` renders it.
+ * `onNavigate?.(...)` is optional-chained, so a bare `<ContactPage/>` — which
+ * is how the route shipped — leaves both of this page's buttons compiling,
+ * rendering and doing nothing; a test that renders it without the prop can
+ * never see that.
+ */
+function renderContact(onNavigate = vi.fn()) {
+  render(
     <I18nProvider>
-      <ContactPage />
+      <ContactPage onNavigate={onNavigate} />
     </I18nProvider>,
   );
+  return onNavigate;
 }
 
 it('sends an appeal from the contact page', async () => {
@@ -74,6 +82,17 @@ it('never renders a placeholder address when none is known', async () => {
   expect(screen.queryByText('Manzil')).not.toBeInTheDocument();
   expect(screen.queryByText(/\[MANZIL\]/)).not.toBeInTheDocument();
   expect(screen.queryByText(/\[MUDDAT\]/)).not.toBeInTheDocument();
+});
+
+it('opens the appeal-status check and the documents register from the side panels', async () => {
+  vi.mocked(fetchSiteSettings).mockResolvedValue(fullSettings);
+  const onNavigate = renderContact();
+
+  await userEvent.click(screen.getByRole('button', { name: /^tekshirish$/i }));
+  expect(onNavigate).toHaveBeenCalledWith('appeal_check');
+
+  await userEvent.click(screen.getByRole('button', { name: /hujjatlar boʻlimi/i }));
+  expect(onNavigate).toHaveBeenCalledWith('documents');
 });
 
 it('renders without contact details when the site-settings endpoint fails', async () => {

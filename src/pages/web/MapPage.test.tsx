@@ -101,12 +101,19 @@ beforeEach(() => {
   project.mockClear();
 });
 
-function renderMap() {
-  return render(
+/**
+ * ALWAYS rendered with `onNavigate`, exactly as `routes.tsx` renders it.
+ * `onNavigate?.(...)` is optional-chained, so a bare `<MapPage/>` — which is
+ * how the route shipped — leaves "Shu kontur boʻyicha ariza berish"
+ * compiling, rendering and doing nothing when pressed.
+ */
+function renderMap(onNavigate = vi.fn()) {
+  render(
     <I18nProvider>
-      <MapPage />
+      <MapPage onNavigate={onNavigate} />
     </I18nProvider>,
   );
+  return onNavigate;
 }
 
 it('lists contours and marks the selected one on the map', async () => {
@@ -140,6 +147,16 @@ describe('when there are no public layers at all', () => {
     expect(await screen.findByText(/ochiq gis qatlami yoʻq/i)).toBeInTheDocument();
     expect(screen.queryByTestId('contour-row')).not.toBeInTheDocument();
   });
+});
+
+it('sends the selected contour to the application wizard', async () => {
+  mockApi();
+  const onNavigate = renderMap();
+
+  await screen.findAllByTestId('contour-row');
+  await userEvent.click(screen.getByRole('button', { name: /shu kontur boʻyicha ariza berish/i }));
+
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard');
 });
 
 it('keeps the free/taken filter chips disabled rather than faking a state', async () => {

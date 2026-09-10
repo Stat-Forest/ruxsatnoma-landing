@@ -125,12 +125,32 @@ function useLandingNavigate(): NavigateFn {
   return useOutletContext<{ onNavigate: NavigateFn }>().onNavigate;
 }
 
+/**
+ * EVERY page that calls `onNavigate?.(...)` needs a wrapper here. The call is
+ * optional-chained, so a page rendered as a bare `<AboutPage/>` compiles,
+ * renders and silently does nothing when its primary button is pressed —
+ * which is how six buttons across `/about`, `/contact` and `/map` shipped
+ * dead. Their own tests now render them with the prop, so a wrapper dropped
+ * from this list fails a test instead of a click.
+ */
 function HomeRoute() {
   return <HomePage onNavigate={useLandingNavigate()} />;
 }
 
 function ServicesRoute() {
   return <ServicesPage onNavigate={useLandingNavigate()} />;
+}
+
+function AboutRoute() {
+  return <AboutPage onNavigate={useLandingNavigate()} />;
+}
+
+function ContactRoute() {
+  return <ContactPage onNavigate={useLandingNavigate()} />;
+}
+
+function MapRoute() {
+  return <MapPage onNavigate={useLandingNavigate()} />;
 }
 
 export const routeConfig: RouteObject[] = [
@@ -145,9 +165,9 @@ export const routeConfig: RouteObject[] = [
       // its place in the header; the bookmarks that already exist keep working.
       { path: 'tariffs', element: <Navigate to={CALCULATOR_PATH} replace /> },
       { path: 'documents', element: <DocumentsPage /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'map', element: <MapPage /> },
+      { path: 'about', element: <AboutRoute /> },
+      { path: 'contact', element: <ContactRoute /> },
+      { path: 'map', element: <MapRoute /> },
       { path: 'check', element: <VerifyPage /> },
       { path: 'appeal-check', element: <AppealCheckPage /> },
       // The standalone FAQ and open-data screens are retired (stage 8): their
