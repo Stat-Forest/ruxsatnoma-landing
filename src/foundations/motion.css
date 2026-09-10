@@ -20,7 +20,7 @@
 @keyframes drift { from { transform: translateX(-180px); } to { transform: translateX(180px); } }
 
 .flock { animation: flock 34s linear infinite; }
-@keyframes flock { from { transform: translate(-260px, 40px); } to { transform: translate(1560px, -60px); } }
+@keyframes flock { from { transform: translate(1300px, 40px); } to { transform: translate(-500px, -60px); } }
 
 .wing-a { animation: wing 1.1s ease-in-out infinite; }
 .wing-b { animation: wing 1.4s ease-in-out infinite .3s; }
