@@ -32,6 +32,8 @@ const { addControl, addSource, addLayer, fitBounds, remove, extend, MapMock } = 
 vi.mock('maplibre-gl', () => ({
   Map: MapMock,
   NavigationControl: vi.fn(),
+  // `worker.ts` registers the bundled worker at import time; the mock only has to accept it.
+  setWorkerUrl: vi.fn(),
   ScaleControl: vi.fn(),
   // Same arrow-function-can't-construct pitfall as `MapMock` above.
   LngLatBounds: vi.fn().mockImplementation(function () {
