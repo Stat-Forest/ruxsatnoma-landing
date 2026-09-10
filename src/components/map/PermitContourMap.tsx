@@ -99,7 +99,13 @@ export default function PermitContourMap({ contour }: PermitContourMapProps) {
 
   return (
     <div className="relative w-full h-72 sm:h-96 rounded-xl overflow-hidden border border-[#E4E7EA]">
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* Positioned INLINE, not by a Tailwind class: MapLibre's own stylesheet
+          sets `.maplibregl-map { position: relative }` on this very element, and
+          in the production bundle that rule follows Tailwind's `.absolute`, so
+          the class lost, `inset-0` meant nothing and the container was 0px tall
+          — a 300px canvas hidden under `overflow: hidden`, on every stand,
+          while jsdom-based tests (no layout) saw nothing wrong. */}
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
       <div className="absolute left-3 top-3 max-w-[220px] space-y-2 rounded-xl bg-white/95 px-3.5 py-3 shadow-md">
         <div className="text-[11px] font-bold uppercase tracking-wide text-[#123522]">

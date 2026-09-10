@@ -143,6 +143,17 @@ it('falls back to the first layer when the forest-fund layer is not published', 
   expect(requestedFeatureLayers()).toEqual(['fire_bans']);
 });
 
+it('positions the map container inline, where MapLibre\'s own stylesheet cannot unset it', async () => {
+  mockApi();
+  renderMap();
+  await screen.findAllByText('K-14');
+  // Same guard as `PermitContourMap.test.tsx`: the class-based `absolute inset-0`
+  // lost to `.maplibregl-map { position: relative }` in the production bundle.
+  const container = (MapMock.mock.calls[0][0] as { container: HTMLElement }).container;
+  expect(container.style.position).toBe('absolute');
+  expect(container.style.inset).toBe('0px');
+});
+
 it('lists contours and marks the selected one on the map', async () => {
   mockApi();
   renderMap();
