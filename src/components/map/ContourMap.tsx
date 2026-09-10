@@ -116,7 +116,13 @@ export default function ContourMap({ collection, selectedId }: ContourMapProps) 
 
   return (
     <div className="relative w-full h-full min-h-[420px]">
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* Positioned INLINE, not by a Tailwind class: MapLibre's own stylesheet
+          sets `.maplibregl-map { position: relative }` on this very element, and
+          in the production bundle that rule follows Tailwind's `.absolute`, so
+          the class lost, `inset-0` meant nothing and the container was 0px tall
+          — a 300px canvas hidden under `overflow: hidden`, on every stand,
+          while jsdom-based tests (no layout) saw nothing wrong. */}
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
       {markerPos && (
         <div
           data-testid="map-marker"

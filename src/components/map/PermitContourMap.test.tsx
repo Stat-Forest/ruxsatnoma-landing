@@ -83,6 +83,17 @@ describe('PermitContourMap', () => {
     vi.clearAllMocks();
   });
 
+  it('positions the map container inline, where MapLibre\'s own stylesheet cannot unset it', () => {
+    renderMap(samplePolygon);
+
+    // `.maplibregl-map { position: relative }` beat Tailwind's `.absolute` in
+    // the production bundle and the container collapsed to 0px on every stand
+    // (2026-09-10). jsdom does no layout, so the guard is the inline rule itself.
+    const container = MapMock.mock.calls[0][0].container as HTMLElement;
+    expect(container.style.position).toBe('absolute');
+    expect(container.style.inset).toBe('0px');
+  });
+
   it('draws the contour, fits bounds to it, and names it in the legend', () => {
     renderMap(samplePolygon);
 
