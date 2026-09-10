@@ -72,7 +72,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           leftIcon && <span className="inline-flex shrink-0">{leftIcon}</span>
         )}
-        <span>{children}</span>
+        {/* `display: contents` drops this span's own box so its children act as
+            direct flex items of the button — an icon passed as a raw child
+            (instead of via leftIcon/rightIcon) still sits inline with the
+            label and picks up the button's `gap-*` spacing. */}
+        <span className="contents">{children}</span>
         {!isLoading && rightIcon && (
           <span className="inline-flex shrink-0">{rightIcon}</span>
         )}
