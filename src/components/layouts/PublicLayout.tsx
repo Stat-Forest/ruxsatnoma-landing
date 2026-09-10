@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trees, ArrowRight, Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
+import { Trees, Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
@@ -8,7 +8,6 @@ import { fetchSiteSettings } from '../../api/site';
 import type { SiteSettings } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
-import landingBg from '../../assets/img/newbg.webp';
 
 export interface PublicLayoutProps {
   children?: React.ReactNode;
@@ -194,79 +193,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
         )}
       </header>
 
-      {/* ── Hero Banner Section (Only on Home Page) ──────────────── */}
-      {activeNav === 'home' && (
-        <section className="relative overflow-hidden border-b border-[#E4E7EA] text-white min-h-[calc(100vh-4rem)] flex items-center py-12 sm:py-16">
-          {/* Background image container - Cropped to remove top & bottom black letterbox bars */}
-          <div
-            className="absolute -inset-y-16 inset-x-0 z-0 bg-cover bg-center transform scale-115"
-            style={{ backgroundImage: `url(${landingBg})` }}
-          />
-          {/* Soft left gradient for text contrast */}
-          <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#0A1C0E]/70 via-[#0A1C0E]/35 to-transparent" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-            {/* 4xl, not 3xl: at 768px the Russian h1 wraps onto a fourth line while
-                the Uzbek one keeps three, and the hero is vertically centred — so
-                that single extra line moved the whole banner on every language
-                switch. Russian fits in three lines from 832px on. */}
-            <div className="max-w-4xl space-y-6">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-black/40 backdrop-blur-md text-white font-semibold text-xs rounded-full border border-white/30 shadow-lg">
-                <Trees className="w-4 h-4 text-[#7FB98A]" />
-                {t('hero.badge')}
-              </span>
-
-              <h1 className="text-3xl sm:text-6xl font-extrabold text-white leading-tight [text-shadow:_0_3px_14px_rgba(0,0,0,0.85)] tracking-tight">
-                {t('hero.title')} <span className="text-[#64D88C]">{t('hero.titleAccent')}</span>
-              </h1>
-
-              <p className="text-base sm:text-xl text-gray-100 leading-relaxed max-w-2xl font-medium [text-shadow:_0_2px_8px_rgba(0,0,0,0.8)]">
-                {t('hero.subtitle')}
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-3">
-                <Button
-                  variant="success"
-                  size="lg"
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                  onClick={() => onNavigate?.('auth_login')}
-                  className="shadow-2xl hover:scale-105 active:scale-95 transition-transform bg-[#2E7D4F] hover:bg-[#23653F] px-8 py-4 text-base sm:text-lg font-bold rounded-xl"
-                >
-                  {t('hero.cta.apply')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => onNavigate?.('calculator')}
-                  className="bg-black/40 border-white/40 text-white hover:bg-black/60 backdrop-blur-md shadow-xl transition-colors font-semibold rounded-xl px-7 py-4 text-base"
-                >
-                  {t('hero.cta.calculator')}
-                </Button>
-              </div>
-
-              {/* Trust Badges */}
-              {/* Widened for the same reason: at 2xl the three Russian labels wrap
-                  onto a second row (45px -> 89px) and the centred hero moved by
-                  half of that. */}
-              <div className="flex flex-wrap items-center gap-6 pt-6 text-xs sm:text-sm text-gray-200 font-medium border-t border-white/20 max-w-4xl">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#64D88C] animate-pulse" />
-                  <span>{t('hero.trust.fast')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#64D88C]" />
-                  <span>{t('hero.trust.qr')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#64D88C]" />
-                  <span>{t('hero.trust.online')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* The home hero lives in `HomePage`'s own `HeroSlider` since the stage 8
+          redesign — three slides, its own atmosphere layer and its own copy.
+          The layout no longer renders one, or the home page would carry two. */}
 
       {/* ── Main Content Slot ───────────────────────────────────── */}
       {children && <main className="flex-1 max-w-7xl mx-auto px-6 py-10 w-full">{children}</main>}
