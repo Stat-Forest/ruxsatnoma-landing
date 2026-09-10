@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check, Pause, Play } from 'lucide-react';
+import { PermitSlideArt, ServicesSlideArt, VerifySlideArt } from '../art/HeroPanorama';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 
@@ -169,99 +170,6 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
 
-/** Slide 1: forest ridges. Ported from `design-canvas/Main.dc.html`'s slide-1
- *  `<svg>`, attributes translated to React's camelCase. */
-function Slide1Art() {
-  return (
-    <svg viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" className="block w-full h-full">
-      <defs>
-        <linearGradient id="hero-sky1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#123522" />
-          <stop offset="1" stopColor="#2A5C39" />
-        </linearGradient>
-        <linearGradient id="hero-fog1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#7FB98A" stopOpacity=".30" />
-          <stop offset="1" stopColor="#7FB98A" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <rect width="1440" height="620" fill="url(#hero-sky1)" />
-      <circle cx="1120" cy="150" r="70" fill="#E8F3EA" opacity=".16" />
-      <path
-        d="M0 430 L180 300 L330 400 L470 268 L640 420 L800 310 L980 425 L1130 320 L1290 430 L1440 350 L1440 620 L0 620 Z"
-        fill="#1B4527"
-        opacity=".92"
-      />
-      <path
-        d="M0 500 L150 420 L320 500 L500 400 L700 505 L880 425 L1080 510 L1250 430 L1440 505 L1440 620 L0 620 Z"
-        fill="#143A20"
-      />
-      <path d="M0 560 L240 512 L520 566 L780 520 L1040 570 L1280 524 L1440 562 L1440 620 L0 620 Z" fill="#0E2C18" />
-      <rect width="1440" height="300" fill="url(#hero-fog1)" />
-    </svg>
-  );
-}
-
-/** Slide 2: QR / verification grid. */
-function Slide2Art() {
-  return (
-    <svg viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" className="block w-full h-full">
-      <defs>
-        <linearGradient id="hero-sky2" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#0F3A26" />
-          <stop offset="1" stopColor="#22513A" />
-        </linearGradient>
-      </defs>
-      <rect width="1440" height="620" fill="url(#hero-sky2)" />
-      <g opacity=".22" stroke="#7FB98A" strokeWidth="1" fill="none">
-        <path d="M980 60 h380 v380 h-380 Z" />
-        <path d="M1030 110 h280 v280 h-280 Z" />
-        <path d="M1080 160 h180 v180 h-180 Z" />
-      </g>
-      <g fill="#7FB98A" opacity=".30">
-        <rect x="1100" y="180" width="36" height="36" />
-        <rect x="1160" y="180" width="18" height="18" />
-        <rect x="1204" y="180" width="36" height="36" />
-        <rect x="1100" y="240" width="18" height="18" />
-        <rect x="1148" y="228" width="24" height="24" />
-        <rect x="1204" y="252" width="18" height="18" />
-        <rect x="1100" y="288" width="36" height="36" />
-        <rect x="1160" y="300" width="18" height="18" />
-        <rect x="1204" y="288" width="36" height="36" />
-      </g>
-      <path
-        d="M0 470 L220 380 L420 470 L640 372 L860 480 L1080 400 L1290 486 L1440 420 L1440 620 L0 620 Z"
-        fill="#123A26"
-        opacity=".9"
-      />
-      <path d="M0 545 L260 500 L560 556 L860 505 L1160 560 L1440 512 L1440 620 L0 620 Z" fill="#0C2B1C" />
-    </svg>
-  );
-}
-
-/** Slide 3: six directions / apiary silhouette. */
-function Slide3Art() {
-  return (
-    <svg viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" className="block w-full h-full">
-      <defs>
-        <linearGradient id="hero-sky3" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#14361F" />
-          <stop offset="1" stopColor="#356B42" />
-        </linearGradient>
-      </defs>
-      <rect width="1440" height="620" fill="url(#hero-sky3)" />
-      <g opacity=".5">
-        <path d="M1060 470 l0 -70 m-34 34 l34 -34 l34 34" stroke="#9CCBA4" strokeWidth="3" fill="none" strokeLinecap="round" />
-        <ellipse cx="1060" cy="486" rx="46" ry="14" fill="#0F2E1B" opacity=".5" />
-      </g>
-      <path d="M0 400 C 240 340, 420 460, 660 400 S 1080 330, 1440 410 L1440 620 L0 620 Z" fill="#1D4A2B" opacity=".92" />
-      <path d="M0 486 C 260 440, 480 540, 760 486 S 1180 430, 1440 500 L1440 620 L0 620 Z" fill="#143A20" />
-      <g fill="#0E2C18">
-        <path d="M0 566 C 300 528, 600 592, 900 552 S 1260 528, 1440 570 L1440 620 L0 620 Z" />
-      </g>
-    </svg>
-  );
-}
-
 /** Light shafts, drifting mist and a three-bird flock — the shared motion
  *  classes `rays`/`drift-a`/`drift-b`/`flock`/`wing-a`/`wing-b` from
  *  `src/foundations/motion.css` (Task 6), ported 1:1 from the same section of
@@ -290,8 +198,11 @@ function Atmosphere() {
       <g className="drift-a">
         <rect x="-200" y="300" width="1840" height="120" fill="url(#hero-mist)" />
       </g>
+      {/* Kept above the meadow (y≈440–500): that band carries each slide's
+          focal group, and mist across it washed the permit card and the
+          flock out. */}
       <g className="drift-b">
-        <rect x="-200" y="404" width="1840" height="150" fill="url(#hero-mist)" opacity=".8" />
+        <rect x="-200" y="370" width="1840" height="90" fill="url(#hero-mist)" opacity=".55" />
       </g>
 
       <g className="flock" stroke="#EAF3EC" strokeWidth="2.2" fill="none" strokeLinecap="round" opacity=".72">
@@ -379,7 +290,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
-      {[Slide1Art, Slide2Art, Slide3Art].map((Art, i) => (
+      {[PermitSlideArt, VerifySlideArt, ServicesSlideArt].map((Art, i) => (
         <div
           key={i}
           // `.hero-slide` carries the transition — an inline `transition:`
@@ -402,11 +313,13 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(100deg, rgba(8,26,14,.88) 0%, rgba(8,26,14,.62) 42%, rgba(8,26,14,.10) 100%)',
+            'linear-gradient(100deg, rgba(8,26,14,.88) 0%, rgba(8,26,14,.6) 40%, rgba(8,26,14,0) 68%)',
         }}
       />
       <div
-        className="absolute inset-0 pointer-events-none opacity-35"
+        // Faint enough not to grey out the panorama — at .35 it read as fog
+        // over every snow cap and sheep.
+        className="absolute inset-0 pointer-events-none opacity-15"
         style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.14) 1px, transparent 1px)', backgroundSize: '4px 4px' }}
       />
 
