@@ -69,7 +69,7 @@
    * who had asked the whole site to hold still. `motion.test.ts` scans the
    * source for `animate-*` class names and fails on one that is missing
    * from this list. */
-  .animate-spin, .animate-pulse, .animate-in {
+  .animate-spin, .animate-pulse, .animate-in, .animate-ping, .animate-bounce, .animate-soft-glow-pulse {
     animation: none !important;
   }
 }

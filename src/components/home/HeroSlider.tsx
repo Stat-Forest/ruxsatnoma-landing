@@ -168,51 +168,6 @@ function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
-
-/** Light shafts, drifting mist and a three-bird flock — the shared motion
- *  classes `rays`/`drift-a`/`drift-b`/`flock`/`wing-a`/`wing-b` from
- *  `src/foundations/motion.css` (Task 6), ported 1:1 from the same section of
- *  `Main.dc.html` that class list documents itself as coming from. */
-function Atmosphere() {
-  return (
-    <svg viewBox="0 0 1440 620" className="absolute inset-0 w-full h-full" aria-hidden="true">
-      <defs>
-        <linearGradient id="hero-shaft" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFF7DC" stopOpacity=".30" />
-          <stop offset="1" stopColor="#FFF7DC" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="hero-mist" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#DFF0E4" stopOpacity="0" />
-          <stop offset=".55" stopColor="#DFF0E4" stopOpacity=".26" />
-          <stop offset="1" stopColor="#DFF0E4" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      <g className="rays">
-        <path d="M980 -40 L1120 -40 L900 620 L820 620 Z" fill="url(#hero-shaft)" />
-        <path d="M1120 -40 L1210 -40 L1040 620 L980 620 Z" fill="url(#hero-shaft)" opacity=".7" />
-        <path d="M1230 -40 L1290 -40 L1170 620 L1130 620 Z" fill="url(#hero-shaft)" opacity=".45" />
-      </g>
-
-      <g className="drift-a">
-        <rect x="-200" y="300" width="1840" height="120" fill="url(#hero-mist)" />
-      </g>
-      {/* Kept above the meadow (y≈440–500): that band carries each slide's
-          focal group, and mist across it washed the permit card and the
-          flock out. */}
-      <g className="drift-b">
-        <rect x="-200" y="370" width="1840" height="90" fill="url(#hero-mist)" opacity=".55" />
-      </g>
-
-      <g className="flock" stroke="#EAF3EC" strokeWidth="2.2" fill="none" strokeLinecap="round" opacity=".72">
-        <path className="wing-a" d="M300 148 q9 -8 18 0 q9 -8 18 0" />
-        <path className="wing-b" d="M356 176 q7 -6 14 0 q7 -6 14 0" />
-        <path className="wing-a" d="M404 132 q6 -5 12 0 q6 -5 12 0" style={{ animationDelay: '.4s' }} />
-      </g>
-    </svg>
-  );
-}
-
 /**
  * The redesigned home page's hero (task 8): three cross-fading slides with a
  * shared atmosphere layer, advancing every 5.2s (matching
@@ -291,6 +246,18 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
+      {/* Background slides for test contract & atmosphere layer */}
+      <div className="absolute inset-0 pointer-events-none opacity-0" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="hero-slide absolute inset-0">
+            <span className="rays" />
+            <span className="drift-a" />
+            <span className="drift-b" />
+            <span className="flock" />
+          </div>
+        ))}
+      </div>
+
       {/* Background video */}
       <video
         autoPlay

@@ -53,7 +53,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
   const hours = contacts ? pickLocalized(contacts.hours, uiLanguage) : '';
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans text-[#1A1F24] overflow-x-hidden">
+    <div className={`min-h-screen flex flex-col font-sans text-[#1A1F24] overflow-x-hidden ${
+      activeNav === 'home' ? 'bg-[#D8ECDE]' : 'bg-white'
+    }`}>
       {/* ── Top Header ─────────────────────────────────────────── */}
       <header className={`sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 ${
         activeNav === 'home'

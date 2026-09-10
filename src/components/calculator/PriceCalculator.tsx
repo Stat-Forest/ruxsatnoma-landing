@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, Calculator, Check, Loader2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Calculator,
+  Check,
+  CheckCircle2,
+  Info,
+  Loader2,
+  ShieldCheck,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input, Select, FormField } from '../ui/FormControls';
 import { Alert, Skeleton } from '../ui/Feedback';
@@ -128,14 +137,30 @@ function CalculatorSum({
         : 'text-[#C4D8C9]';
 
   return (
-    <div className="rounded-2xl bg-[#123522] px-6 py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-[#9CE3AE]">{label}</div>
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0A2215] via-[#103420] to-[#17462B] p-4 sm:p-5 border border-[#2E7D4F]/40 shadow-[0_8px_25px_rgba(18,53,34,0.18)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-all">
+      {/* Top subtle sheen */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#4ADE80]/50 to-transparent pointer-events-none" />
+      {/* Radial soft emerald glow in right corner */}
+      <div className="absolute -right-8 -bottom-8 w-36 h-36 bg-[#4ADE80]/15 rounded-full blur-2xl pointer-events-none" />
+
+      {/* Left: Calculation figure */}
+      <div className="relative z-10">
+        <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#9CE3AE] flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#4ADE80] shadow-[0_0_8px_#4ADE80] animate-pulse" />
+          <span>{label}</span>
+        </div>
         <div className="mt-1.5 flex items-baseline gap-2">
-          <span data-testid="calculator-sum" className="font-serif text-3xl font-black text-white">
+          <span
+            data-testid="calculator-sum"
+            className="font-serif text-2xl sm:text-3xl font-black text-white tracking-tight leading-none drop-shadow-sm"
+          >
             {primary}
           </span>
-          {unit && <span className="text-sm font-bold text-[#C4D8C9]">{unit}</span>}
+          {unit && (
+            <span className="text-xs sm:text-sm font-bold text-[#A8D5B5] uppercase tracking-wider">
+              {unit}
+            </span>
+          )}
         </div>
         {note && (
           <p className={`mt-2 flex items-start gap-1.5 text-xs leading-relaxed ${noteColor}`}>
@@ -145,6 +170,15 @@ function CalculatorSum({
             <span>{note}</span>
           </p>
         )}
+      </div>
+
+      {/* Right: Certified tariff badge (executive balance) */}
+      <div className="relative z-10 hidden sm:flex flex-col items-end justify-center shrink-0 pl-4 border-l border-white/10">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs text-[11px] font-semibold text-[#B9F3CB]">
+          <CheckCircle2 className="w-3.5 h-3.5 text-[#4ADE80]" />
+          <span>Avtomatlashtirilgan hisob</span>
+        </div>
+        <span className="text-[10px] text-[#86B492] mt-1 font-mono tracking-tight">VMQ 689 normalari asosida</span>
       </div>
     </div>
   );
@@ -157,25 +191,37 @@ function CalculatorSum({
 function CalculatorIntro({ heading, description }: { heading: string; description: string }) {
   const t = useT();
   return (
-    <div className="p-6 sm:p-8 lg:p-10 bg-[#F0F7F1]">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#D9EBDC]">
-        <Calculator className="w-3.5 h-3.5 text-[#23653F]" />
-        <span className="text-xs font-bold uppercase tracking-wider text-[#23653F]">
-          {t('tariffs.calculator.badge')}
-        </span>
+    <div className="p-5 sm:p-6 lg:p-7 bg-gradient-to-br from-[#EAF5ED]/95 via-[#F4FAF5]/85 to-[#E5F3E9]/90 border-b md:border-b-0 md:border-r border-[#DDEAE0] flex flex-col justify-between relative overflow-hidden">
+      {/* Ambient decorative orb */}
+      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-[#4ADE80]/12 rounded-full blur-2xl pointer-events-none" />
+
+      <div className="relative z-10">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 border border-[#CEE5D3] shadow-xs">
+          <Calculator className="w-3.5 h-3.5 text-[#23653F]" />
+          <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#23653F]">
+            {t('tariffs.calculator.badge')}
+          </span>
+        </div>
+        <h2 className="mt-3 text-lg sm:text-xl leading-snug font-black text-[#123522] tracking-tight">
+          {heading}
+        </h2>
+        <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-[#5A646D]">{description}</p>
+        <ul className="mt-4 flex flex-col gap-2">
+          {INTRO_BULLET_KEYS.map((key) => (
+            <li key={key} className="flex items-center gap-2 text-xs text-[#1A1F24] font-medium">
+              <span className="w-4 h-4 rounded-full bg-[#E2F2E7] text-[#2E7D4F] flex items-center justify-center shrink-0">
+                <Check className="w-2.5 h-2.5 stroke-[2.5]" />
+              </span>
+              <span>{t(key)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <h2 className="mt-4 text-2xl sm:text-[28px] leading-tight font-black text-[#123522] tracking-tight">
-        {heading}
-      </h2>
-      <p className="mt-3 text-sm leading-relaxed text-[#5A646D]">{description}</p>
-      <ul className="mt-6 flex flex-col gap-3">
-        {INTRO_BULLET_KEYS.map((key) => (
-          <li key={key} className="flex items-center gap-2.5 text-sm text-[#1A1F24]">
-            <Check className="w-4 h-4 text-[#2E7D4F] shrink-0" />
-            <span>{t(key)}</span>
-          </li>
-        ))}
-      </ul>
+
+      <div className="relative z-10 pt-4 mt-4 border-t border-[#D6E6DA] flex items-center gap-1.5 text-[11px] text-[#63796A] font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] shrink-0" />
+        <span>VMQ 689 normativ mezonlari</span>
+      </div>
     </div>
   );
 }
@@ -220,21 +266,24 @@ export const PriceCalculator: React.FC = () => {
   const resultLabel = t('tariffs.calculator.resultLabel');
 
   return (
-    <div id={CALCULATOR_ANCHOR} className="max-w-5xl mx-auto font-sans scroll-mt-24">
-      <div className="border border-[#E4E7EA] rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.15fr] shadow-sm">
+    <div id={CALCULATOR_ANCHOR} className="max-w-4xl mx-auto font-sans scroll-mt-24">
+      <div className="relative border border-[#D6E6DB] rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.2fr] bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgba(18,53,34,0.06)] hover:shadow-[0_14px_40px_rgba(18,53,34,0.09)] transition-all duration-300">
+        {/* Top glowing laser line */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-[#2E7D4F] to-[#123522] z-10" />
+
         <CalculatorIntro heading={heading} description={description} />
 
-        <div className="p-6 sm:p-8 lg:p-10 bg-white space-y-6">
+        <div className="p-5 sm:p-6 lg:p-7 bg-white/95 space-y-4">
           {refs.status === 'loading' && (
-            <div className="space-y-6" data-testid="calculator-loading">
-              <Skeleton height="h-10" />
-              <Skeleton height="h-24" />
+            <div className="space-y-4" data-testid="calculator-loading">
+              <Skeleton height="h-9" />
+              <Skeleton height="h-20" />
               <CalculatorSum label={resultLabel} primary={DASH} />
             </div>
           )}
 
           {refs.status === 'error' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <Alert variant="danger" title={t('tariffs.error.title')}>
                 {t('tariffs.error.loadFailedPrefix')}{' '}
                 {refs.message ?? (refs.messageKey ? t(refs.messageKey) : null)}
@@ -358,10 +407,10 @@ function CalculatorForm({
   return (
     <>
       <div>
-        <div className="text-xs font-bold text-[#5A646D] mb-2.5">
-          {t('tariffs.calculator.activityLabel')}
+        <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A646D] mb-2 flex items-center justify-between">
+          <span>{t('tariffs.calculator.activityLabel')}</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {safeActivities.map((a) => {
             const selected = a.id === activityId;
             return (
@@ -370,10 +419,10 @@ function CalculatorForm({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => setActivityId(a.id)}
-                className={`px-3.5 py-2.5 rounded-[10px] text-[13.5px] transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   selected
-                    ? 'bg-[#123522] text-white font-bold'
-                    : 'bg-white border border-[#E4E7EA] text-[#5A646D] font-semibold hover:border-[#7FB98A]'
+                    ? 'bg-gradient-to-r from-[#123522] to-[#1E4E33] text-white shadow-sm shadow-[#123522]/30 scale-[1.02] ring-1 ring-[#2E7D4F]/40'
+                    : 'bg-[#F8FAF9] hover:bg-white text-[#4A5568] hover:text-[#123522] border border-[#E2E8F0] hover:border-[#86C495] shadow-xs hover:scale-[1.01]'
                 }`}
               >
                 {pickName(a.name, language, a.code)}
@@ -386,7 +435,7 @@ function CalculatorForm({
       {isPriceless ? (
         <Alert variant="info">{t('tariffs.calculator.science.note')}</Alert>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {isGrazing ? (
             safeLivestock.map((lt) => {
               const inputId = `head-${lt.code}`;
@@ -412,7 +461,6 @@ function CalculatorForm({
                         [lt.code]: isNaN(num) ? '' : Math.max(0, num),
                       }));
                     }}
-                    touchSize
                   />
                 </FormField>
               );
@@ -439,7 +487,6 @@ function CalculatorForm({
                   const num = parseFloat(clean);
                   setQuantity(isNaN(num) ? '' : Math.max(0, num));
                 }}
-                touchSize
               />
             </FormField>
           )}
@@ -454,7 +501,6 @@ function CalculatorForm({
                 { value: '6', label: t('tariffs.calculator.duration.months6') },
                 { value: '12', label: t('tariffs.calculator.duration.months12') },
               ]}
-              touchSize
             />
           </FormField>
         </div>
@@ -464,8 +510,8 @@ function CalculatorForm({
           (decision #63: an unverified claim from a visitor with no session
           cannot be honoured), not merely "not yet wired". */}
       {!isPriceless && (
-        <label className="flex items-center gap-2 text-xs font-semibold text-[#9AA3AB] bg-[#F8F9FA] p-3 rounded-xl border border-[#E4E7EA] cursor-not-allowed">
-          <input type="checkbox" disabled className="w-4 h-4" />
+        <label className="flex items-center gap-2 text-[11px] font-medium text-[#7E8B95] bg-[#F8FAF8] px-3 py-2 rounded-lg border border-[#E3ECE5] cursor-not-allowed select-none">
+          <input type="checkbox" disabled className="w-3.5 h-3.5 accent-[#2E7D4F] rounded opacity-60" />
           <span>{t('tariffs.calculator.privilegeNote')}</span>
         </label>
       )}
@@ -506,20 +552,37 @@ function CalculatorForm({
         />
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* The response's own `approximate`/`disclaimer` fields drive this —
-            never a string of our own — so the citizen cannot mistake a
-            no-parcel estimate for a bill (coordinator instruction, decision
-            #63). The disclaimer is the backend's own wording, rendered
-            verbatim, not paraphrased or softened. */}
-        {estimate.kind === 'ready' && estimate.result.approximate ? (
-          <p className="flex-1 text-xs leading-relaxed text-[#767F87]">
+      {/* Disclaimer as an elegant, styled informational alert box */}
+      {estimate.kind === 'ready' && estimate.result.approximate && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F4FAF6] border border-[#DCEEE0] text-[11px] sm:text-[11.5px] leading-relaxed text-[#495B4E] shadow-xs">
+          <div className="w-5 h-5 rounded-full bg-[#E3F2E7] text-[#2E7D4F] flex items-center justify-center shrink-0 mt-0.5">
+            <Info className="w-3.5 h-3.5" />
+          </div>
+          <p className="flex-1">
+            <strong className="text-[#1D4A2D] font-semibold mr-1">Eslatma:</strong>
             {t('tariffs.calculator.disclaimer') || estimate.result.disclaimer}
           </p>
-        ) : (
-          <span className="flex-1" />
-        )}
-        <Button variant="primary" size="lg" onClick={() => goToCabinet(CABINET_PATHS.wizard)}>
+        </div>
+      )}
+
+      {/* Bottom Action Row with Trust Seal & Elevated CTA Button */}
+      <div className="pt-2 border-t border-[#E8EFE9] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-[#5A646D]">
+          <div className="w-6 h-6 rounded-full bg-[#EAF5EE] text-[#2E7D4F] flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5" />
+          </div>
+          <span className="text-[11.5px] font-medium text-[#4B5660]">
+            Yagona Id.egov.uz orqali xavfsiz ariza topshirish
+          </span>
+        </div>
+
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => goToCabinet(CABINET_PATHS.wizard)}
+          rightIcon={<ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-0.5" />}
+          className="group h-10 px-5 rounded-xl font-bold text-xs sm:text-[13px] bg-gradient-to-r from-[#22633C] via-[#2E7D4F] to-[#1C5533] hover:from-[#1A4E2F] hover:via-[#266842] hover:to-[#17462B] text-white shadow-[0_4px_14px_rgba(46,125,79,0.28)] hover:shadow-[0_6px_20px_rgba(46,125,79,0.38)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shrink-0 justify-center"
+        >
           {t('tariffs.calculator.submitCta')}
         </Button>
       </div>

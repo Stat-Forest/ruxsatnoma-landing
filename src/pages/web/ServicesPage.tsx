@@ -3,6 +3,7 @@ import { ArrowRight, Calculator as CalculatorIcon, Clock } from 'lucide-react';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { Button } from '../../components/ui/button';
 import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
+import { SERVICE_IMAGES } from '../../assets/img/services';
 import { fetchServices, type Service } from '../../api/services';
 import { pickLocalized, pickName } from '../../lib/localized';
 import { useLanguage, useT } from '../../i18n/useT';
@@ -178,15 +179,29 @@ function ServiceCard({
       className="reveal card-lift bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden flex flex-col"
       style={{ animationDelay: `${Math.min(index, 8) * 0.08}s` }}
     >
-      <div className="relative h-[196px] overflow-hidden bg-[#F0F7F1]">
+      <div className="relative h-[196px] overflow-hidden bg-[#EAF3EC]">
         <div className="thumb-zoom absolute inset-0">
-          {isSceneKind(service.code) && <Scene kind={service.code} height={196} />}
+          {isSceneKind(service.code) && (
+            <>
+              {SERVICE_IMAGES[service.code] && (
+                <img
+                  src={SERVICE_IMAGES[service.code]}
+                  alt={name}
+                  className="w-full h-full object-cover object-center"
+                  loading="lazy"
+                />
+              )}
+              <div className={SERVICE_IMAGES[service.code] ? 'hidden' : 'w-full h-full'}>
+                <Scene kind={service.code} height={196} />
+              </div>
+            </>
+          )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0C2312]/45" />
-        <div className="absolute left-4 bottom-3.5 text-xs font-extrabold tracking-[.12em] text-white/85">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />
+        <div className="absolute left-4 bottom-3.5 text-xs font-extrabold tracking-[.12em] text-white/95 drop-shadow-xs">
           {String(index + 1).padStart(2, '0')}
         </div>
-        <div className="absolute right-4 top-4 inline-flex items-center gap-1.5 bg-white/95 rounded-full px-3 py-1.5">
+        <div className="absolute right-4 top-4 inline-flex items-center gap-1.5 bg-white/95 backdrop-blur-xs rounded-full px-3 py-1.5 shadow-sm">
           <Clock className="w-3.5 h-3.5 text-[#2E7D4F]" />
           <span className="text-xs font-bold text-[#123522]">
             {service.processing_days} {t('services.card.daysUnit')}
