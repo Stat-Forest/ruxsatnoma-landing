@@ -31,7 +31,12 @@ const SLIDE_ACTIONS: { primary: string; secondary: string }[] = [
 /** Slides 2 and 3 (index 1 and 2) — `design-canvas/Main.dc.html`'s
  *  `renderVals()` `slides` array, translated. Best-effort for `kaa`, matching
  *  the approximate quality of the existing `REF_TRANSLATIONS` Karakalpak
- *  entries (`src/lib/localized.ts`) rather than a professional translation. */
+ *  entries (`src/lib/localized.ts`) rather than a professional translation.
+ *
+ *  Slide 2 no longer says the permit's contour is shown on a map: the
+ *  backend withholds `contour` behind a disclosure flag that defaults OFF
+ *  until the Agency consents in writing, so `/check` draws no map at all for
+ *  anyone today. Copy describes what the site does, not what it could. */
 const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
   uz_latn: [
     {
@@ -39,7 +44,7 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
       title: 'Ruxsatnoma haqiqiyligini',
       titleAccent: 'bir daqiqada tekshiring',
       subtitle:
-        'QR-kodni skanerlang yoki seriya va raqamni kiriting — hujjat davlat reyestri bilan solishtiriladi, kontur esa xaritada koʻrsatiladi.',
+        'QR-kodni skanerlang yoki seriya va raqamni kiriting — hujjat davlat reyestri bilan solishtiriladi va natija darhol koʻrsatiladi.',
       ctaPrimary: 'Tekshirishni boshlash',
       ctaSecondary: 'QR-kod qanday ishlaydi',
     },
@@ -59,7 +64,7 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
       title: 'Проверьте подлинность разрешения',
       titleAccent: 'за одну минуту',
       subtitle:
-        'Отсканируйте QR-код или введите серию и номер — документ сверяется с государственным реестром, а контур отображается на карте.',
+        'Отсканируйте QR-код или введите серию и номер — документ сверяется с государственным реестром, а результат показывается сразу.',
       ctaPrimary: 'Начать проверку',
       ctaSecondary: 'Как работает QR-код',
     },
@@ -79,7 +84,7 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
       title: 'Verify a permit’s authenticity',
       titleAccent: 'in under a minute',
       subtitle:
-        'Scan the QR code or enter the series and number — the document is checked against the state register, and its contour is shown on the map.',
+        'Scan the QR code or enter the series and number — the document is checked against the state register and the result is shown at once.',
       ctaPrimary: 'Start verification',
       ctaSecondary: 'How the QR code works',
     },
@@ -99,7 +104,7 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
       title: 'Рухсатнома ҳақиқийлигини',
       titleAccent: 'бир дақиқада текширинг',
       subtitle:
-        'ҚР-кодни сканерланг ёки серия ва рақамни киритинг — ҳужжат давлат реестри билан солиштирилади, контур эса харитада кўрсатилади.',
+        'ҚР-кодни сканерланг ёки серия ва рақамни киритинг — ҳужжат давлат реестри билан солиштирилади ва натижа дарҳол кўрсатилади.',
       ctaPrimary: 'Текширишни бошлаш',
       ctaSecondary: 'ҚР-код қандай ишлайди',
     },
@@ -119,7 +124,7 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
       title: 'Ruxsatnama xaqıyqıylıǵın',
       titleAccent: 'bir minuttıń ishinde tekseriń',
       subtitle:
-        'QR-kodtı skanerleń yamasa seriya hám nomerdi kiritiń — quzhat mámleket reyestri menen salıstırıladı, konturı bolsa kartada kórsetiledi.',
+        'QR-kodtı skanerleń yamasa seriya hám nomerdi kiritiń — quzhat mámleket reyestri menen salıstırıladı hám nátiyje derhal kórsetiledi.',
       ctaPrimary: 'Tekseriwdi baslaw',
       ctaSecondary: 'QR-kod qalay isleydi',
     },

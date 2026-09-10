@@ -60,6 +60,13 @@ const DASH = '—';
  * are translated locally. Everything that already had a key (the six
  * directions, the four steps, the news header, the contact widget) still
  * reads through `useT()` below, unchanged.
+ *
+ * `mapDescription` describes ONLY what `/map` does today: it lists whatever
+ * GIS layers a leshoz has marked public. It used to end "checking a permit
+ * also marks its contour on this same map" — the backend ships that behind a
+ * disclosure flag that defaults OFF until the Agency consents in writing, so
+ * for every visitor the sentence was a promise the site does not keep. It
+ * also may not claim occupancy: the public feature payload carries none.
  */
 const SECTION_TEXT: Record<
   UiLanguage,
@@ -91,7 +98,7 @@ const SECTION_TEXT: Record<
     mapBadge: 'Interaktiv xarita',
     mapTitle: 'Oʻrmon fondi yerlari xaritada',
     mapDescription:
-      'Oʻrmon xoʻjaliklari chegaralari, yaylov konturlari va ruxsat berilgan hududlar ochiq GIS qatlamlarida koʻrsatilgan. Ruxsatnomani tekshirganda uning konturi ham shu xaritada belgilanadi.',
+      'Oʻrmon xoʻjaligi ochiq deb belgilagan GIS qatlamlarini xaritada koʻrishingiz mumkin: kontur chegarasi, maydoni va nomi. Bandlik holati bu yerda koʻrsatilmaydi.',
     mapCtaPrimary: 'Xaritani ochish',
     mapCtaSecondary: 'Qatlamlar roʻyxati',
   },
@@ -107,7 +114,7 @@ const SECTION_TEXT: Record<
     mapBadge: 'Интерактивная карта',
     mapTitle: 'Земли лесного фонда на карте',
     mapDescription:
-      'Границы лесхозов, контуры пастбищ и разрешённые участки показаны на открытых ГИС-слоях. При проверке разрешения его контур также отмечается на этой карте.',
+      'На карте показаны ГИС-слои, которые лесхоз открыл для публичного доступа: границы контура, площадь и название. Сведения о занятости здесь не отображаются.',
     mapCtaPrimary: 'Открыть карту',
     mapCtaSecondary: 'Список слоёв',
   },
@@ -123,7 +130,7 @@ const SECTION_TEXT: Record<
     mapBadge: 'Interactive map',
     mapTitle: 'Forest fund land on the map',
     mapDescription:
-      'Leshoz boundaries, pasture contours and permitted areas are shown on open GIS layers. Checking a permit also marks its contour on this same map.',
+      'The map shows the GIS layers a forestry enterprise has opened to the public: contour boundaries, area and name. Occupancy is not shown here.',
     mapCtaPrimary: 'Open the map',
     mapCtaSecondary: 'Layer list',
   },
@@ -139,7 +146,7 @@ const SECTION_TEXT: Record<
     mapBadge: 'Интерактив харита',
     mapTitle: 'Ўрмон фонди ерлари харитада',
     mapDescription:
-      'Ўрмон хўжаликлари чегаралари, яйлов контурлари ва рухсат берилган ҳудудлар очиқ ГИС қатламларида кўрсатилган. Рухсатномани текширганда унинг контури ҳам шу харитада белгиланади.',
+      'Ўрмон хўжалиги очиқ деб белгилаган ГИС қатламларини харитада кўришингиз мумкин: контур чегараси, майдони ва номи. Бандлик ҳолати бу ерда кўрсатилмайди.',
     mapCtaPrimary: 'Харитани очиш',
     mapCtaSecondary: 'Қатламлар рўйхати',
   },
@@ -155,7 +162,7 @@ const SECTION_TEXT: Record<
     mapBadge: 'Interaktiv karta',
     mapTitle: 'Orman fondı jerleri kartada',
     mapDescription:
-      'Orman xojalıqlarınıń shegaraları, jaylaw konturları hám ruxsat etilgen aymaqlar ashıq GIS qatlamlarında kórsetilgen. Ruxsatnamanı tekserǵende onıń konturı da usı kartada belgilenedi.',
+      'Orman xojalıǵı ashıq dep belgilegen GIS qatlamların kartada kóriwińiz múmkin: kontur shegarası, maydanı hám atı. Bandlıq jaǵdayı bul jerde kórsetilmeydi.',
     mapCtaPrimary: 'Kartanı ashıw',
     mapCtaSecondary: 'Qatlamlar dizimi',
   },
