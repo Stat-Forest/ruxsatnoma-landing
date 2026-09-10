@@ -100,6 +100,19 @@ type FeaturesState =
  * where the mock had those two selects, since which public layer to browse
  * is the one real choice this data supports.
  */
+/**
+ * The layer a visitor lands on. The list comes back ordered by code, which
+ * puts `fire_bans` first — the exception layer, empty on any good day — so a
+ * first visit opened on "no objects in this layer" while the forest-fund
+ * boundaries sat one click away. Prefer the layer people come for; fall back
+ * to the first one when it is not published.
+ */
+export const PREFERRED_LAYER_CODE = 'forest_fund';
+
+export function initialLayerCode(layers: readonly { code: string }[]): string {
+  return layers.find((layer) => layer.code === PREFERRED_LAYER_CODE)?.code ?? layers[0].code;
+}
+
 export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
   const t = useT();
   const { language } = useLanguage();
@@ -120,7 +133,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         }
         const layers = data ?? [];
         setLayersState({ status: 'ready', layers });
-        if (layers.length > 0) setSelectedCode(layers[0].code);
+        if (layers.length > 0) setSelectedCode(initialLayerCode(layers));
       } catch {
         if (!cancelled) {
           setLayersState({

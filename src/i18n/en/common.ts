@@ -30,7 +30,7 @@ export const common = {
   'hero.trust.online': '100% Online & Secure',
 
   'footer.about':
-    'Official permit information system of the State Forestry Committee of the Republic of Uzbekistan.',
+    'Official permit information system of the Agency for Forestry and Greenery Development, Combating Desertification of the Republic of Uzbekistan.',
   'footer.services': 'Services',
   'footer.portal': 'Portal',
   'footer.contacts': 'Contacts',
@@ -42,6 +42,6 @@ export const common = {
   'footer.link.appealStatus': 'Submit & Track Appeals',
   'footer.link.documents': 'Documents & Regulations',
   'footer.link.faq': 'Frequently Asked Questions',
-  'footer.copyright': '© 2026 State Forestry Committee. All rights reserved.',
+  'footer.copyright': '© 2026 Agency for Forestry and Greenery Development, Combating Desertification. All rights reserved.',
   'footer.wcag': 'WCAG 2.2 AA Compliant Design System',
 } as const;
