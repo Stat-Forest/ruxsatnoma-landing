@@ -20,7 +20,6 @@ const fullSettings: SiteSettings = {
     hours: { uz_latn: 'Dushanba – Juma, 9:00 – 18:00', ru: '' },
     social: { telegram: null, youtube: null },
   },
-  season_windows: {},
 };
 
 const READY: SiteSettingsState = { status: 'ready', data: fullSettings };

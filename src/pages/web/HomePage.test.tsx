@@ -30,10 +30,23 @@ import { api } from '../../api/client';
 type FetchAnswers = {
   ratings?: unknown;
   ratingsFails?: boolean;
+  seasons?: unknown;
+  seasonsFails?: boolean;
 };
 
-function mockFetch({ ratings, ratingsFails }: FetchAnswers = {}) {
+/** Exactly what the dev stand answered on 2026-09-10: every activity
+ *  present, every one unconfigured. The shape that took the home page down
+ *  while it still read `season_windows` off the site settings. */
+const LIVE_SEASONS = ['grazing', 'haymaking', 'apiary', 'recreation', 'deadwood', 'science'].map(
+  (code) => ({ activity_type_code: code, windows: [], season_source: 'none', is_default: true }),
+);
+
+function mockFetch({ ratings, ratingsFails, seasons, seasonsFails }: FetchAnswers = {}) {
   const fetchMock = vi.fn((url: string) => {
+    if (url.includes('/activity-seasons')) {
+      if (seasonsFails) return Promise.reject(new Error('network error'));
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(seasons ?? LIVE_SEASONS) });
+    }
     if (url.includes('/ratings/summary')) {
       if (ratingsFails) return Promise.reject(new Error('network error'));
       return Promise.resolve({
@@ -61,14 +74,6 @@ function readySettings(overrides: Partial<SiteSettings> = {}): SiteSettingsState
         address: { uz_latn: '', ru: '' },
         hours: { uz_latn: '', ru: '' },
         social: { telegram: null, youtube: null },
-      },
-      season_windows: {
-        grazing: [],
-        haymaking: [],
-        apiary: [],
-        recreation: [],
-        deadwood: [],
-        science: [],
       },
       ...overrides,
     },
@@ -326,28 +331,56 @@ it('says the ratings are unavailable rather than blank when the summary fails to
 });
 
 /**
- * Ruling R3: the season strip may only ever show months the settings
- * endpoint actually returned — never a fallback set invented locally.
+ * Ruling #180: the season strip reads `GET /public/activity-seasons` — the
+ * real windows, resolved by the same function the submit check uses — and
+ * never a month list invented locally or riding on some other response.
  */
-it('draws the season strip from the site-settings response', async () => {
+it('draws the season strip from the activity-seasons response', async () => {
   mockBackend();
-  renderHome(
-    readySettings({
-      season_windows: {
-        grazing: [9], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [],
-      },
-    }),
-  );
+  mockFetch({
+    seasons: [
+      { activity_type_code: 'grazing', windows: [{ from: '04-01', to: '11-30' }], season_source: 'default', is_default: true },
+      ...LIVE_SEASONS.filter((s) => s.activity_type_code !== 'grazing'),
+    ],
+  });
+  renderHome();
   expect(await screen.findByTestId('season-row-grazing')).toBeInTheDocument();
   expect(screen.getByRole('note')).toHaveTextContent(/Agentlik tomonidan tasdiqlanadi/i);
 });
 
-it('renders no season strip at all when the settings fetch fails', async () => {
+/**
+ * The outage of 2026-09-10, pinned. The stand answered every activity as
+ * unconfigured while the page still expected `season_windows` on the site
+ * settings; `undefined` walked into `windows[code]` and the whole home page
+ * became "Unexpected Application Error". The page must render — with the
+ * strip present and every row UNKNOWN — on exactly that answer.
+ */
+it('survives the answer the stand actually gave: every activity unconfigured', async () => {
   mockBackend();
-  renderHome({ status: 'error' });
+  mockFetch(); // LIVE_SEASONS
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  const grazing = await screen.findByTestId('season-row-grazing');
+  expect(grazing).toHaveTextContent(/nomaʼlum/i);
+  expect(grazing).not.toHaveTextContent(/yopiq/i);
+});
+
+it('renders no season strip at all when the seasons fetch fails', async () => {
+  mockBackend();
+  mockFetch({ seasonsFails: true });
+  renderHome();
   await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
   expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
   expect(screen.queryByRole('note')).not.toBeInTheDocument();
+});
+
+it('no longer reads seasons off the site settings at all', async () => {
+  mockBackend();
+  mockFetch({ seasonsFails: true });
+  // A settings answer that still carries the retired field must change nothing.
+  renderHome(readySettings({ season_windows: { grazing: [1, 2, 3] } } as never));
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
 });
 
 it('sends the map band to the map page', async () => {

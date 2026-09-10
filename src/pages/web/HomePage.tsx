@@ -28,7 +28,8 @@ import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
 import { fetchServices, type Service } from '../../api/services';
-import type { SiteSettingsState } from '../../api/site';
+import { fetchActivitySeasons, type SiteSettingsState } from '../../api/site';
+import { seasonsToMonthMap } from '../../lib/seasons';
 import { pickLocalized } from '../../lib/localized';
 import { DASH } from '../../lib/format';
 import type { components } from '../../api/schema';
@@ -234,12 +235,29 @@ export const HomePage: React.FC<HomePageProps> = ({
     };
   }, []);
 
-  // Site settings feed two sections at once (Task 10): the season strip's
-  // `season_windows` (ruling R3) and the support CTA's live phone/hours.
-  // Anything but `ready` means the season strip does not render at all (a
-  // calendar with no confirmed months is worse than no calendar) and the
-  // CTA's phone/hours rows do not render either, same posture as the
-  // footer's own use of this endpoint.
+  // The season strip has its own source: `GET /public/activity-seasons`,
+  // the real per-leshoz windows resolved by the same function the submit
+  // check uses (ruling #180). It used to read `season_windows` off the site
+  // settings — six invented month lists in a settings key — and kept reading
+  // that field for the hours after the backend deleted it, which is how the
+  // home page went down on the dev stand: `undefined` walked into
+  // `windows[code]`. Anything but `ready` here renders no strip at all: a
+  // calendar with no confirmed months is worse than no calendar.
+  const [seasonsState, setSeasonsState] = useState<
+    { status: 'loading' } | { status: 'error' } | { status: 'ready'; months: Record<string, number[]> }
+  >({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const seasons = await fetchActivitySeasons();
+      if (cancelled) return;
+      setSeasonsState(seasons ? { status: 'ready', months: seasonsToMonthMap(seasons) } : { status: 'error' });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
@@ -556,13 +574,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         )}
       </section>
 
-      {/* ── 4. SEASON CALENDAR (ruling R3) ──────────────────────────
-          Only when `siteSettingsState` has actually answered: a calendar
-          with no confirmed months is worse than no calendar, so a failed
-          fetch renders nothing here rather than inventing a fallback set. */}
-      {siteSettingsState.status === 'ready' && (
+      {/* ── 4. SEASON CALENDAR (ruling #180) ────────────────────────
+          Only when `/public/activity-seasons` has actually answered: a
+          calendar with no confirmed months is worse than no calendar, so a
+          failed fetch renders nothing here rather than inventing a set. An
+          activity the backend reports as unconfigured is absent from
+          `months` and the strip draws it as UNKNOWN, not as closed. */}
+      {seasonsState.status === 'ready' && (
         <section>
-          <SeasonStrip windows={siteSettingsState.data.season_windows} />
+          <SeasonStrip windows={seasonsState.months} />
         </section>
       )}
 
