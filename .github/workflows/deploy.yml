@@ -36,6 +36,9 @@ jobs:
       upload-dist: true
       api-base-url: https://dev-api.ruxsatnoma-urmon.uz
       admin-base-url: https://dev-admin.ruxsatnoma-urmon.uz
+      # OpenFreeMap (decision #187): free OSM vector tiles, no key — fine for the dev
+      # stand, a volunteer-hosted service with no SLA for production (#60.1 stays open).
+      map-style-url: https://tiles.openfreemap.org/styles/bright
 
   deploy:
     name: Ship to dev

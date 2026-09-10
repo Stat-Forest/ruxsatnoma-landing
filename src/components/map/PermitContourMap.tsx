@@ -7,6 +7,7 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // Side effect: registers the bundled worker before any `Map` exists — see worker.ts.
 import './worker';
+import { attributionOption, mapStyle } from './basemap';
 import { useT } from '../../i18n/useT';
 import { extendBounds } from './geometry';
 import type { MapGeometry } from './types';
@@ -50,12 +51,8 @@ export default function PermitContourMap({ contour }: PermitContourMapProps) {
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#E7F0E8' } }],
-      },
-      attributionControl: false,
+      style: mapStyle('#E7F0E8'),
+      attributionControl: attributionOption(),
       center: [64.5, 41.3],
       zoom: 4.5,
     });
