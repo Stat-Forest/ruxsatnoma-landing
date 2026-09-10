@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Calculator as CalculatorIcon, Clock } from 'lucide-react';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { Button } from '../../components/ui/button';
+import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { fetchServices, type Service } from '../../api/services';
-import { serviceIcon } from '../../lib/serviceIcons';
-import { pickLocalized } from '../../lib/localized';
+import { pickLocalized, pickName } from '../../lib/localized';
 import { useLanguage, useT } from '../../i18n/useT';
 
 export interface ServicesPageProps {
@@ -15,6 +15,14 @@ type PageState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; services: Service[] };
+
+/** `Scene`'s six illustrations are keyed by the same `code` the activity
+ *  catalogue returns (task 11 brief) — but a code the catalogue might one
+ *  day add before `Scene` grows a matching illustration must not crash the
+ *  page, so this stays a guarded lookup, never a bare cast. */
+function isSceneKind(code: string): code is SceneKind {
+  return (SCENE_KINDS as readonly string[]).includes(code);
+}
 
 /**
  * A2 — the full service catalogue. The six cards used to be constants here,
@@ -46,34 +54,44 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
   }, []);
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-10 font-sans">
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+        <span className="reveal inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('services.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('services.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">
+        <h1
+          className="reveal text-3xl font-bold text-[#1A1F24]"
+          style={{ animationDelay: '.06s' }}
+        >
+          {t('services.title')}
+        </h1>
+        <p
+          className="reveal text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed"
+          style={{ animationDelay: '.12s' }}
+        >
           {t('services.subtitle')}
         </p>
       </div>
 
       {state.status === 'loading' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="services-loading">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          data-testid="services-loading"
+        >
           {Array.from({ length: 6 }).map((_, idx) => (
             <div
               key={idx}
-              className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+              className="bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden flex flex-col"
             >
-              <div className="flex items-center justify-between">
-                <Skeleton height="h-12" width="w-12" className="rounded-xl" />
-                <Skeleton height="h-6" width="w-32" className="rounded-lg" />
-              </div>
-              <Skeleton height="h-6" width="w-3/4" />
-              <Skeleton height="h-4" width="w-full" />
-              <Skeleton height="h-4" width="w-4/5" />
-              <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
-                <Skeleton height="h-4" width="w-24" />
-                <Skeleton height="h-8" width="w-28" className="rounded-md" />
+              <Skeleton height="h-[196px]" className="rounded-none" />
+              <div className="p-6 space-y-4">
+                <Skeleton height="h-6" width="w-3/4" />
+                <Skeleton height="h-4" width="w-full" />
+                <Skeleton height="h-4" width="w-4/5" />
+                <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+                  <Skeleton height="h-4" width="w-20" />
+                  <Skeleton height="h-8" width="w-28" className="rounded-md" />
+                </div>
               </div>
             </div>
           ))}
@@ -96,11 +114,45 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate }) => {
       )}
 
       {state.status === 'ready' && state.services.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {state.services.map((svc) => (
-            <ServiceCard key={svc.id} service={svc} language={language} onNavigate={onNavigate} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {state.services.map((svc, idx) => (
+              <ServiceCard
+                key={svc.id}
+                index={idx}
+                service={svc}
+                language={language}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
+
+          {/* The calculator lives on the home page as its own section
+              (`routes.tsx`'s own `CALCULATOR_PATH` docstring: "a SECTION of
+              the home page, not a page") — this card links there through the
+              same `onNavigate('calculator')` contract the header CTA uses,
+              rather than embedding a second `PriceCalculator` instance. */}
+          <div className="reveal bg-[#123522] rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row">
+              <div className="p-3 bg-white/10 rounded-xl text-[#9CE3AE] shrink-0">
+                <CalculatorIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">{t('tariffs.calculator.heading')}</h2>
+                <p className="text-sm text-[#C4D8C9] mt-1">{t('tariffs.calculator.description')}</p>
+              </div>
+            </div>
+            <Button
+              variant="primary"
+              size="lg"
+              rightIcon={<ArrowRight className="w-4 h-4" />}
+              onClick={() => onNavigate?.('calculator')}
+              className="shrink-0"
+            >
+              {t('tariffs.calculator.submitCta')}
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
@@ -110,46 +162,61 @@ function ServiceCard({
   service,
   language,
   onNavigate,
+  index,
 }: {
   service: Service;
   language: string;
   onNavigate?: (page: string, params?: any) => void;
+  index: number;
 }) {
   const t = useT();
-  const Icon = serviceIcon(service.code);
+  const name = pickName(service.name, language, service.code);
   const description = pickLocalized(service.description, language);
 
   return (
-    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
-      <div className="space-y-3">
-        <div className="p-3 bg-[#F0F7F1] rounded-xl w-fit">
-          <Icon className="w-6 h-6 text-[#2E7D4F]" />
+    <div
+      className="reveal card-lift bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden flex flex-col"
+      style={{ animationDelay: `${Math.min(index, 8) * 0.08}s` }}
+    >
+      <div className="relative h-[196px] overflow-hidden bg-[#F0F7F1]">
+        <div className="thumb-zoom absolute inset-0">
+          {isSceneKind(service.code) && <Scene kind={service.code} height={196} />}
         </div>
-        <h3 className="text-lg font-bold text-[#1A1F24]">{pickLocalized(service.name, language)}</h3>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0C2312]/45" />
+        <div className="absolute left-4 bottom-3.5 text-xs font-extrabold tracking-[.12em] text-white/85">
+          {String(index + 1).padStart(2, '0')}
+        </div>
+        <div className="absolute right-4 top-4 inline-flex items-center gap-1.5 bg-white/95 rounded-full px-3 py-1.5">
+          <Clock className="w-3.5 h-3.5 text-[#2E7D4F]" />
+          <span className="text-xs font-bold text-[#123522]">
+            {service.processing_days} {t('services.card.daysUnit')}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-6 flex flex-col flex-grow gap-3">
+        <h3 className="text-lg font-bold text-[#123522] leading-snug">{name}</h3>
         {/* `description` is nullable (two of six rows have none, on purpose —
             see `api/services.ts`); no placeholder sentence stands in for it. */}
         {description && (
-          <p data-testid={`service-desc-${service.id}`} className="text-xs text-[#5A646D] leading-relaxed">
+          <p
+            data-testid={`service-desc-${service.id}`}
+            className="text-sm text-[#5A646D] leading-relaxed flex-grow"
+          >
             {description}
           </p>
         )}
-      </div>
-
-      <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-        <span className="text-[#767F87]">
-          {t('services.card.termLabel')}{' '}
-          <b className="text-[#1A1F24]">
-            {service.processing_days} {t('services.card.daysUnit')}
-          </b>
-        </span>
-        <Button
-          variant="primary"
-          size="sm"
-          rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-          onClick={() => onNavigate?.('applicant_wizard', { activity: service.id })}
-        >
-          {t('services.card.apply')}
-        </Button>
+        <div className="pt-4 mt-auto border-t border-[#E4E7EA]">
+          <Button
+            variant="primary"
+            size="sm"
+            fullWidth
+            rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            onClick={() => onNavigate?.('applicant_wizard', { activity: service.id })}
+          >
+            {t('services.card.apply')}
+          </Button>
+        </div>
       </div>
     </div>
   );
