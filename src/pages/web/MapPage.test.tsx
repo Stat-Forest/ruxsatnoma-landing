@@ -34,6 +34,8 @@ const { addSource, addLayer, fitBounds, project, MapMock } = vi.hoisted(() => {
 vi.mock('maplibre-gl', () => ({
   Map: MapMock,
   NavigationControl: vi.fn(),
+  // `worker.ts` registers the bundled worker at import time; the mock only has to accept it.
+  setWorkerUrl: vi.fn(),
   LngLatBounds: vi.fn().mockImplementation(function () {
     return { extend: vi.fn(), isEmpty: () => false };
   }),

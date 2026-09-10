@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 // idiom as `ContourMap.tsx` beside it.
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side effect: registers the bundled worker before any `Map` exists — see worker.ts.
+import './worker';
 import { useT } from '../../i18n/useT';
 import { extendBounds } from './geometry';
 import type { MapGeometry } from './types';

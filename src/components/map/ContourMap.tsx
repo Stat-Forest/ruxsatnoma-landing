@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 // `PermitContourMap.tsx` beside it.
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side effect: registers the bundled worker before any `Map` exists — see worker.ts.
+import './worker';
 import { extendBounds, firstCoordinate } from './geometry';
 import type { OpenDataFeatureCollection } from './types';
 
