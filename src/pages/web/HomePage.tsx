@@ -465,50 +465,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </section>
       </div>
 
-      {/* ── 2. STATISTICS + RATING ──────────────────────────────────── */}
-      <section className="reveal">
-        <div className="max-w-xl mb-8">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
-            {sectionText.statsBadge}
-          </span>
-          <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-[#123522] tracking-tight">
-            {sectionText.statsTitle}
-          </h2>
-          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">
-            {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
-            <b className="text-[#1A1F24]">
-              {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
-            </b>{' '}
-            {t('home.opendata.kAnonymity.after')}
-          </p>
-          {statsState.status === 'error' && (
-            <p className="mt-2 text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {stats.map((st) => (
-            <div
-              key={st.testId}
-              data-testid={st.testId}
-              className="card-lift bg-gradient-to-b from-white to-[#F7FBF8] border border-[#E4E7EA] rounded-2xl px-6 pt-6 pb-6"
-            >
-              <div className="w-11 h-11 rounded-xl bg-[#F0F7F1] flex items-center justify-center mb-4">{st.icon}</div>
-              <div
-                className={`font-serif text-4xl font-black tracking-tight ${st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'}`}
-              >
-                {st.value}
-              </div>
-              <div className="mt-2.5 text-sm font-bold text-[#1A1F24]">{st.label}</div>
-              <div className="mt-1 text-xs text-[#767F87]">{st.note}</div>
-            </div>
-          ))}
-        </div>
-
-        <RatingBand state={ratingState} />
-      </section>
-
-      {/* ── 3. SIX DIRECTIONS ───────────────────────────────────────── */}
+      {/* ── 2. SIX DIRECTIONS ───────────────────────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
@@ -578,6 +535,49 @@ export const HomePage: React.FC<HomePageProps> = ({
             ))}
           </div>
         )}
+      </section>
+
+      {/* ── 3. STATISTICS + RATING ──────────────────────────────────── */}
+      <section className="reveal">
+        <div className="max-w-xl mb-8">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
+            {sectionText.statsBadge}
+          </span>
+          <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-[#123522] tracking-tight">
+            {sectionText.statsTitle}
+          </h2>
+          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">
+            {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
+            <b className="text-[#1A1F24]">
+              {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
+            </b>{' '}
+            {t('home.opendata.kAnonymity.after')}
+          </p>
+          {statsState.status === 'error' && (
+            <p className="mt-2 text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {stats.map((st) => (
+            <div
+              key={st.testId}
+              data-testid={st.testId}
+              className="card-lift bg-gradient-to-b from-white to-[#F7FBF8] border border-[#E4E7EA] rounded-2xl px-6 pt-6 pb-6"
+            >
+              <div className="w-11 h-11 rounded-xl bg-[#F0F7F1] flex items-center justify-center mb-4">{st.icon}</div>
+              <div
+                className={`font-serif text-4xl font-black tracking-tight ${st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'}`}
+              >
+                {st.value}
+              </div>
+              <div className="mt-2.5 text-sm font-bold text-[#1A1F24]">{st.label}</div>
+              <div className="mt-1 text-xs text-[#767F87]">{st.note}</div>
+            </div>
+          ))}
+        </div>
+
+        <RatingBand state={ratingState} />
       </section>
 
       {/* ── 4. SEASON CALENDAR (ruling #180) ────────────────────────
