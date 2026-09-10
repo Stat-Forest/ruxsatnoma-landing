@@ -17,6 +17,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
+import { HeroSlider } from '../../components/home/HeroSlider';
 import { useLanguage, useT } from '../../i18n/useT';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
@@ -192,6 +193,27 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-16 font-sans">
       {inRouter && <HashScroller />}
+
+      {/* ── 0. HERO SLIDER ──────────────────────────────────────────
+          Full-bleed: `PublicLayout` (not owned by this track) wraps page
+          content in `<main className="max-w-7xl mx-auto px-6 py-10">`, but
+          the approved hero (`design-canvas/Main.dc.html`) spans the full
+          viewport width flush against the header. The classic "break out of
+          a centered container" trick (`left-1/2 -mx-[50vw] w-screen`) gets
+          there without touching a file another track owns; `-mt-10` cancels
+          the parent's own `py-10` so the hero sits flush under the header,
+          matching the negative-margin overlap the quick-check strip below it
+          needs too.
+
+          KNOWN INTEGRATION CONCERN (see track report): `PublicLayout` still
+          renders its own pre-redesign hero banner whenever `activeNav ===
+          'home'` (the `hero.*` image banner). That file is out of scope for
+          this track, so until it is removed the home page will show that
+          banner directly above this slider. */}
+      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen -mt-10">
+        <HeroSlider onNavigate={onNavigate} />
+      </div>
+
       {/* ── 1. DASHBOARD & VERIFICATION SECTION ────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

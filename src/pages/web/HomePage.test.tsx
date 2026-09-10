@@ -114,6 +114,12 @@ function renderHome() {
   );
 }
 
+it('opens with the hero slider', () => {
+  mockBackend();
+  renderHome();
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
+});
+
 it('shows the figures the aggregates endpoint returns, not constants', async () => {
   mockBackend();
   renderHome();
