@@ -3,7 +3,6 @@ import { home } from './home';
 import { services } from './services';
 import { tariffs } from './tariffs';
 import { documents } from './documents';
-import { opendata } from './opendata';
 import { faq } from './faq';
 import { news } from './news';
 import { verify } from './verify';
@@ -16,7 +15,6 @@ export const kaa = {
   ...services,
   ...tariffs,
   ...documents,
-  ...opendata,
   ...faq,
   ...news,
   ...verify,

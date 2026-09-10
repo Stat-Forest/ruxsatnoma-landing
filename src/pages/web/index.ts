@@ -3,7 +3,6 @@ export * from './ServicesPage';
 export * from './NewsPage';
 export * from './NewsItemPage';
 export * from './DocumentsPage';
-export * from './OpenDataPage';
 export * from './FaqPage';
 export * from './VerifyPage';
 export * from './AppealCheckPage';
