@@ -35,4 +35,10 @@ export const verify = {
   'verify.result.validityLabel': 'Validity Period',
   'verify.result.signaturesValid': 'Digital signatures are valid (E-IMZO)',
   'verify.result.signaturesPending': 'Digital signatures are pending final confirmation',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Contour map',
+  'verify.map.heading': 'On the map',
+  'verify.map.legend': 'Permitted contour',
 } as const;

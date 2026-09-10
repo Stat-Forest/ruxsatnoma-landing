@@ -15,13 +15,13 @@ vi.mock('../../api/applications', () => ({
 }));
 
 // This page's own tests never touch `maplibre-gl` — that is
-// `PermitContourMap.test.tsx`'s own job. The mock still reflects the
-// `contour` prop so
-// the wiring itself — drawn only when the API actually sent one — stays
-// under test here.
+// `PermitContourMap.test.tsx`'s own job. The component is `React.lazy`-d
+// here (it is the only reason `maplibre-gl` is in this build at all), so
+// this mock stands in for the dynamic import. It renders unconditionally:
+// whether the panel appears at all is now the PAGE's decision, and that is
+// what the two tests below pin.
 vi.mock('../../components/map/PermitContourMap', () => ({
-  default: ({ contour }: { contour?: unknown }) =>
-    contour ? <div data-testid="permit-contour" /> : null,
+  default: () => <div data-testid="permit-contour" />,
 }));
 
 import { api } from '../../api/client';
@@ -78,7 +78,14 @@ describe('VerifyPage — permit arm', () => {
     holder: 'A*** V***',
   };
 
-  it('draws the contour only when the API sends one', async () => {
+  /**
+   * The defect this pins: the map panel used to mount whatever the API sent.
+   * `contour` is withheld until the Agency's disclosure setting is on — off
+   * in production — so what a citizen actually got was a blank green
+   * rectangle with zoom buttons and a legend for an invisible boundary.
+   * No geometry, no panel, and no map title either.
+   */
+  it('mounts no map panel at all when the API sends no contour', async () => {
     (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       data: foundPermit,
       error: undefined,
@@ -90,6 +97,9 @@ describe('VerifyPage — permit arm', () => {
 
     expect(await screen.findByText(/амалда/i)).toBeInTheDocument();
     expect(screen.queryByTestId('permit-contour')).not.toBeInTheDocument();
+    expect(screen.queryByText('Kontur xaritasi')).not.toBeInTheDocument();
+    // The leshoz is still named — as text on the result card, not as a map.
+    expect(screen.getByText('Burchmulla')).toBeInTheDocument();
   });
 
   it('draws the contour when the API actually sends one', async () => {

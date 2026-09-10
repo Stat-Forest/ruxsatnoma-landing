@@ -35,4 +35,10 @@ export const verify = {
   'verify.result.validityLabel': 'Amal Qilish Muddati',
   'verify.result.signaturesValid': 'Raqamli imzolar haqiqiy (E-IMZO)',
   'verify.result.signaturesPending': 'Raqamli imzolar hali toʻliq tasdiqlanmagan',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Kontur xaritasi',
+  'verify.map.heading': 'Xaritada',
+  'verify.map.legend': 'Ruxsat etilgan kontur',
 } as const;

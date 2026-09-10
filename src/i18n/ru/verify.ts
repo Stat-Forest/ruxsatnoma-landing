@@ -35,4 +35,10 @@ export const verify = {
   'verify.result.validityLabel': 'Срок действия',
   'verify.result.signaturesValid': 'Электронные подписи действительны (E-IMZO)',
   'verify.result.signaturesPending': 'Электронные подписи ещё не полностью подтверждены',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Карта контура',
+  'verify.map.heading': 'На карте',
+  'verify.map.legend': 'Разрешённый контур',
 } as const;

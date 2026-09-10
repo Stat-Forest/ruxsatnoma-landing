@@ -126,7 +126,10 @@ it('lists contours and marks the selected one on the map', async () => {
   await userEvent.click(rows[1]);
 
   expect(rows[1]).toHaveAttribute('aria-selected', 'true');
-  expect(screen.getByTestId('map-marker')).toBeInTheDocument();
+  // `findBy`, not `getBy`: the map itself is `React.lazy`-d, so the list
+  // renders a tick or more before the map chunk resolves and the marker can
+  // exist. A synchronous query here passes or fails on machine load.
+  expect(await screen.findByTestId('map-marker')).toBeInTheDocument();
 });
 
 it('never claims a contour is free when the layer does not say so', async () => {

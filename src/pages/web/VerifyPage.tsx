@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import {
   Search,
@@ -18,16 +18,25 @@ import { Button } from '../../components/ui/button';
 import { Input, FormField } from '../../components/ui/FormControls';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import type { StatusType } from '../../components/ui/StatusBadge';
-import { Alert } from '../../components/ui/Feedback';
+import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import type { components } from '../../api/schema';
 import { useT, useLanguage } from '../../i18n/useT';
 import { pickLocalized } from '../../lib/localized';
-import PermitContourMap from '../../components/map/PermitContourMap';
 import type { MapGeometry } from '../../components/map/types';
 import { checkApplication } from '../../api/applications';
 import type { ApplicationCheckResult } from '../../api/applications';
+
+/**
+ * Module scope, and LAZY. A static `import PermitContourMap from …` here put
+ * `maplibre-gl` and its 83 KB stylesheet into `index-*.js` — roughly 1 MB
+ * raw that EVERY visitor to every page downloaded, including the ones who
+ * never open `/check`. `MapPage` was already lazy-loading its own map, and
+ * got nothing for it: the constructor was in the shared chunk regardless, so
+ * its "split" chunk came out at 2 KB. This is a rural-mobile audience.
+ */
+const LazyPermitContourMap = React.lazy(() => import('../../components/map/PermitContourMap'));
 
 type CheckCard = components['schemas']['PublicCheckCard'];
 type CheckResult = CheckCard | components['schemas']['PublicCheckMiss'];
@@ -96,7 +105,6 @@ const LOCAL_COPY = {
   appOrganizationLabel: 'Oʻrmon xoʻjaligi',
   appSubmittedLabel: 'Topshirilgan sana',
   appNextStepLabel: 'Keyingi qadam',
-  mapSectionTitle: 'Kontur xaritasi',
 } as const;
 
 /** Splits a loose permit-number string (the home page's single quick-search
@@ -506,14 +514,22 @@ export const VerifyPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Map panel — leshoz context always, the permit's own
-                  contour only when the API actually sent one. */}
-              <div className="space-y-2">
-                <span className="text-xs text-[#5A646D] uppercase font-semibold block">
-                  {LOCAL_COPY.mapSectionTitle}
-                </span>
-                <PermitContourMap organization={result.organization} contour={result.contour ?? null} />
-              </div>
+              {/* Map panel — ONLY when the API actually sent a contour.
+                  `contour` is withheld until the Agency's disclosure setting
+                  is on (off in production), so with no geometry there is
+                  nothing to draw: the panel used to render a blank rectangle
+                  with zoom buttons and a legend for an invisible boundary.
+                  The leshoz is named in the detail grid above, as text. */}
+              {result.contour && (
+                <div className="space-y-2">
+                  <span className="text-xs text-[#5A646D] uppercase font-semibold block">
+                    {t('verify.map.title')}
+                  </span>
+                  <Suspense fallback={<Skeleton height="h-72" width="w-full" />}>
+                    <LazyPermitContourMap contour={result.contour} />
+                  </Suspense>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import PermitContourMap from './PermitContourMap';
 import type { MapGeometry } from './types';
+import { I18nProvider } from '../../i18n';
 
 // `vi.mock` factories are hoisted above the rest of the module, so the mock
 // fns they reference must be created through `vi.hoisted` — a plain
@@ -52,6 +53,26 @@ const samplePolygon: MapGeometry = {
   ],
 };
 
+const otherPolygon: MapGeometry = {
+  type: 'Polygon',
+  coordinates: [
+    [
+      [70.1, 40.2],
+      [70.2, 40.2],
+      [70.2, 40.3],
+      [70.1, 40.2],
+    ],
+  ],
+};
+
+function renderMap(contour: MapGeometry) {
+  return render(
+    <I18nProvider>
+      <PermitContourMap contour={contour} />
+    </I18nProvider>,
+  );
+}
+
 describe('PermitContourMap', () => {
   // Every mock in the `vi.hoisted` block above is shared module state, not
   // reset between tests on its own — `clearAllMocks` resets call counts
@@ -60,44 +81,49 @@ describe('PermitContourMap', () => {
     vi.clearAllMocks();
   });
 
-  it('always mounts the base map, even with no contour', () => {
-    const { unmount } = render(<PermitContourMap organization="Burchmulla DOʻX" contour={null} />);
+  it('draws the contour, fits bounds to it, and names it in the legend', () => {
+    renderMap(samplePolygon);
 
     expect(MapMock).toHaveBeenCalledTimes(1);
     expect(addControl).toHaveBeenCalledTimes(2);
-
-    unmount();
-    expect(remove).toHaveBeenCalledTimes(1);
-  });
-
-  it('draws no contour layer and shows no contour badge when contour is absent', () => {
-    render(<PermitContourMap organization="Burchmulla DOʻX" contour={null} />);
-
-    expect(addSource).not.toHaveBeenCalled();
-    expect(addLayer).not.toHaveBeenCalled();
-    expect(fitBounds).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('permit-contour')).not.toBeInTheDocument();
-    // The leshoz's own name is still shown — "the leshoz boundary alone".
-    expect(screen.getByText('Burchmulla DOʻX')).toBeInTheDocument();
-  });
-
-  it('adds a contour source, fits bounds to it, and shows the badge when contour is present', () => {
-    render(<PermitContourMap organization="Burchmulla DOʻX" contour={samplePolygon} />);
-
     expect(addSource).toHaveBeenCalledTimes(1);
     expect(addLayer).toHaveBeenCalledTimes(2);
     expect(fitBounds).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('permit-contour')).toBeInTheDocument();
+    expect(screen.getByTestId('permit-contour')).toHaveTextContent('Ruxsat etilgan kontur');
+  });
+
+  /**
+   * The defect this pins: the legend used to carry a second swatch labelled
+   * with the leshoz's name, for a boundary the empty map style never drew
+   * and no public endpoint can supply. Every legend entry must name
+   * something actually on the map.
+   */
+  it('shows no legend entry for anything it does not draw', () => {
+    renderMap(samplePolygon);
+
+    // One source, one legend row: the contour, and nothing else.
+    expect(screen.getAllByTestId('permit-contour')).toHaveLength(1);
+    expect(screen.queryByText(/DOʻX|leshoz|xoʻjaligi/i)).not.toBeInTheDocument();
   });
 
   it('rebuilds the map when the contour prop changes, never stacking a stale source', () => {
-    const { rerender } = render(<PermitContourMap organization="Burchmulla DOʻX" contour={null} />);
+    const { rerender } = renderMap(samplePolygon);
     expect(MapMock).toHaveBeenCalledTimes(1);
 
-    rerender(<PermitContourMap organization="Burchmulla DOʻX" contour={samplePolygon} />);
+    rerender(
+      <I18nProvider>
+        <PermitContourMap contour={otherPolygon} />
+      </I18nProvider>,
+    );
 
     expect(remove).toHaveBeenCalledTimes(1);
     expect(MapMock).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId('permit-contour')).toBeInTheDocument();
+    expect(addSource).toHaveBeenCalledTimes(2);
+  });
+
+  it('tears the map down on unmount', () => {
+    const { unmount } = renderMap(samplePolygon);
+    unmount();
+    expect(remove).toHaveBeenCalledTimes(1);
   });
 });
