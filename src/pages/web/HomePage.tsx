@@ -3,9 +3,7 @@ import { Link, useInRouterContext, useLocation } from 'react-router';
 import {
   Search,
   QrCode,
-  ArrowRight,
   FileCheck2,
-  CheckCircle2,
   Users,
   Trees,
   ChevronRight,
@@ -18,11 +16,13 @@ import { Input } from '../../components/ui/FormControls';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { HeroSlider } from '../../components/home/HeroSlider';
+import { RatingBand, fetchRatingSummary, type RatingBandState } from '../../components/home/RatingBand';
+import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { useLanguage, useT } from '../../i18n/useT';
+import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
 import { fetchServices, type Service } from '../../api/services';
-import { serviceIcon } from '../../lib/serviceIcons';
 import { pickLocalized } from '../../lib/localized';
 import type { components } from '../../api/schema';
 
@@ -41,6 +41,120 @@ type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 're
  *  em dash is a statement that the number is not known yet, which is the
  *  honest one. Never a placeholder digit. */
 const DASH = '—';
+
+/**
+ * Copy for the redesigned sections that has no existing i18n key — this
+ * track cannot touch `src/i18n/*`, so rather than leave four of the five
+ * portal languages showing Latin Uzbek, the strings this page itself needed
+ * are translated locally. Everything that already had a key (the six
+ * directions, the four steps, the news header, the contact widget) still
+ * reads through `useT()` below, unchanged.
+ */
+const SECTION_TEXT: Record<
+  UiLanguage,
+  {
+    statsBadge: string;
+    statsTitle: string;
+    statsIntro: string;
+    quickCheckTitle: string;
+    quickCheckSubtitle: string;
+    quickCheckSeriya: string;
+    quickCheckNumber: string;
+    quickCheckButton: string;
+    mapBadge: string;
+    mapTitle: string;
+    mapDescription: string;
+    mapCtaPrimary: string;
+    mapCtaSecondary: string;
+  }
+> = {
+  uz_latn: {
+    statsBadge: 'Davlat reyestri maʼlumotlari',
+    statsTitle: 'Portal raqamlarda',
+    statsIntro: 'Koʻrsatkichlar rasmiy ochiq maʼlumotlar xizmatidan real vaqtda olinadi.',
+    quickCheckTitle: 'Ruxsatnomani tekshirish',
+    quickCheckSubtitle: 'Seriya va raqami boʻyicha',
+    quickCheckSeriya: 'Seriya',
+    quickCheckNumber: 'Raqam — masalan: 000123',
+    quickCheckButton: 'Tekshirish',
+    mapBadge: 'Interaktiv xarita',
+    mapTitle: 'Oʻrmon fondi yerlari xaritada',
+    mapDescription:
+      'Oʻrmon xoʻjaliklari chegaralari, yaylov konturlari va ruxsat berilgan hududlar ochiq GIS qatlamlarida koʻrsatilgan. Ruxsatnomani tekshirganda uning konturi ham shu xaritada belgilanadi.',
+    mapCtaPrimary: 'Xaritani ochish',
+    mapCtaSecondary: 'Qatlamlar roʻyxati',
+  },
+  ru: {
+    statsBadge: 'Данные государственного реестра',
+    statsTitle: 'Портал в цифрах',
+    statsIntro: 'Показатели поступают из официального сервиса открытых данных в реальном времени.',
+    quickCheckTitle: 'Проверка разрешения',
+    quickCheckSubtitle: 'По серии и номеру',
+    quickCheckSeriya: 'Серия',
+    quickCheckNumber: 'Номер — например: 000123',
+    quickCheckButton: 'Проверить',
+    mapBadge: 'Интерактивная карта',
+    mapTitle: 'Земли лесного фонда на карте',
+    mapDescription:
+      'Границы лесхозов, контуры пастбищ и разрешённые участки показаны на открытых ГИС-слоях. При проверке разрешения его контур также отмечается на этой карте.',
+    mapCtaPrimary: 'Открыть карту',
+    mapCtaSecondary: 'Список слоёв',
+  },
+  en: {
+    statsBadge: 'State register data',
+    statsTitle: 'The portal in numbers',
+    statsIntro: 'Figures are pulled from the official open-data service in real time.',
+    quickCheckTitle: 'Verify a permit',
+    quickCheckSubtitle: 'By series and number',
+    quickCheckSeriya: 'Series',
+    quickCheckNumber: 'Number — e.g. 000123',
+    quickCheckButton: 'Verify',
+    mapBadge: 'Interactive map',
+    mapTitle: 'Forest fund land on the map',
+    mapDescription:
+      'Leshoz boundaries, pasture contours and permitted areas are shown on open GIS layers. Checking a permit also marks its contour on this same map.',
+    mapCtaPrimary: 'Open the map',
+    mapCtaSecondary: 'Layer list',
+  },
+  uz_cyrl: {
+    statsBadge: 'Давлат реестри маълумотлари',
+    statsTitle: 'Портал рақамларда',
+    statsIntro: 'Кўрсаткичлар расмий очиқ маълумотлар хизматидан реал вақтда олинади.',
+    quickCheckTitle: 'Рухсатномани текшириш',
+    quickCheckSubtitle: 'Серия ва рақами бўйича',
+    quickCheckSeriya: 'Серия',
+    quickCheckNumber: 'Рақам — масалан: 000123',
+    quickCheckButton: 'Текшириш',
+    mapBadge: 'Интерактив харита',
+    mapTitle: 'Ўрмон фонди ерлари харитада',
+    mapDescription:
+      'Ўрмон хўжаликлари чегаралари, яйлов контурлари ва рухсат берилган ҳудудлар очиқ ГИС қатламларида кўрсатилган. Рухсатномани текширганда унинг контури ҳам шу харитада белгиланади.',
+    mapCtaPrimary: 'Харитани очиш',
+    mapCtaSecondary: 'Қатламлар рўйхати',
+  },
+  kaa: {
+    statsBadge: 'Mámleket reyestri maǵlıwmatları',
+    statsTitle: 'Portal sanlarda',
+    statsIntro: 'Kórsetkishler rásmiy ashıq maǵlıwmat xizmetinen real waqıtta alınadı.',
+    quickCheckTitle: 'Ruxsatnamanı tekseriw',
+    quickCheckSubtitle: 'Seriya hám nomeri boyınsha',
+    quickCheckSeriya: 'Seriya',
+    quickCheckNumber: 'Nomer — mısalı: 000123',
+    quickCheckButton: 'Tekseriw',
+    mapBadge: 'Interaktiv karta',
+    mapTitle: 'Orman fondı jerleri kartada',
+    mapDescription:
+      'Orman xojalıqlarınıń shegaraları, jaylaw konturları hám ruxsat etilgen aymaqlar ashıq GIS qatlamlarında kórsetilgen. Ruxsatnamanı tekserǵende onıń konturı da usı kartada belgilenedi.',
+    mapCtaPrimary: 'Kartanı ashıw',
+    mapCtaSecondary: 'Qatlamlar dizimi',
+  },
+};
+
+/** The six illustrated cards fall back to `grazing`'s scene for a code the
+ *  art set does not (yet) cover — never a blank box (Task 9's brief). */
+function sceneKindFor(code: string): SceneKind {
+  return (SCENE_KINDS as readonly string[]).includes(code) ? (code as SceneKind) : 'grazing';
+}
 
 function HashScroller() {
   const location = useLocation();
@@ -76,10 +190,30 @@ export interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const t = useT();
-  const { language } = useLanguage();
+  const { language, uiLanguage } = useLanguage();
+  const sectionText = SECTION_TEXT[uiLanguage];
   const inRouter = useInRouterContext();
-  const [quickSearchInput, setQuickSearchInput] = useState('');
+  const [quickSeries, setQuickSeries] = useState('');
+  const [quickNumber, setQuickNumber] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
+
+  // The rating band's own summary (#174) — a second anonymous endpoint,
+  // `GET /public/ratings/summary`, fetched the same way as the stats above:
+  // `null` on any failure renders as "unavailable" rather than a blank band.
+  const [ratingState, setRatingState] = useState<RatingBandState>({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const summary = await fetchRatingSummary();
+      if (!cancelled) {
+        setRatingState(summary ? { status: 'ready', summary } : { status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
@@ -155,12 +289,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   const stats = [
     {
+      testId: 'home-stat-permits',
       label: t('home.stats.activePermits.label'),
       value: statsState.status === 'ready' ? Number(statsState.data.total_active_permits).toLocaleString() : DASH,
       icon: <FileCheck2 className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.activePermits.note'),
+      muted: false,
     },
     {
+      testId: 'home-stat-area',
       label: t('home.stats.activeArea.label'),
       value:
         statsState.status === 'ready'
@@ -168,26 +305,38 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           : DASH,
       icon: <Trees className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.activeArea.note'),
+      muted: false,
     },
+    // These two ALWAYS show a dash, on purpose — `by_organization`/`by_region`
+    // are per-cut breakdowns with thin cuts already suppressed for
+    // k-anonymity (#109). Counting the array's length used to read as "how
+    // many organizations/regions exist," which is wrong in the same
+    // direction stage 7.4 kept finding defects in: it silently turns a
+    // suppressed cut into a false zero rather than an honest "not shown."
+    // Nothing this endpoint returns can honestly answer either question, so
+    // both tiles state that plainly instead.
     {
+      testId: 'home-stat-organizations',
       label: t('home.stats.organizations.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_organization?.length || 0) : DASH,
+      value: DASH,
       icon: <Users className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.organizations.note'),
+      muted: true,
     },
     {
+      testId: 'home-stat-regions',
       label: t('home.stats.regions.label'),
-      value: statsState.status === 'ready' ? String(statsState.data.by_region?.length || 0) : DASH,
+      value: DASH,
       icon: <MapPin className="w-6 h-6 text-[#2E7D4F]" />,
       note: t('home.stats.regions.note'),
+      muted: true,
     },
   ];
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (quickSearchInput.trim()) {
-      onNavigate?.('verify', { query: quickSearchInput.trim() });
-    }
+    const query = `${quickSeries.trim()} ${quickNumber.trim()}`.trim();
+    onNavigate?.('verify', query ? { query } : undefined);
   };
 
   return (
@@ -214,130 +363,101 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <HeroSlider onNavigate={onNavigate} />
       </div>
 
-      {/* ── 1. DASHBOARD & VERIFICATION SECTION ────────────────────── */}
-      <section className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-              {t('home.dashboard.badge')}
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1F24] mt-3">
-              {t('home.dashboard.title')}
-            </h2>
-            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">
-              {t('home.dashboard.subtitle')}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT SIDE: DIAGRAMS & STATISTICS DASHBOARD (lg:col-span-7) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Top 4 Metrics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {stats.map((st, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white border border-[#E4E7EA] p-5 rounded-2xl shadow-xs hover:shadow-md transition-shadow flex items-start justify-between"
-                >
-                  <div className="space-y-1">
-                    <span className="text-xs font-semibold text-[#5A646D] uppercase tracking-wider block">
-                      {st.label}
-                    </span>
-                    <div className="text-2xl font-bold text-[#1A1F24]">{st.value}</div>
-                    <span className="text-xs text-[#5A646D] font-medium">{st.note}</span>
-                  </div>
-                  <div className="p-3 bg-[#F0F7F1] rounded-xl shrink-0">{st.icon}</div>
-                </div>
-              ))}
+      {/* ── 1. QUICK CHECK STRIP ───────────────────────────────────────
+          Overlaps the hero's bottom edge, matching `Main.dc.html`'s own
+          `margin-top: -56px` treatment — this is why the hero above ends in
+          `-mt-10` rather than a plain top margin, so the two negative
+          margins compose instead of fighting. */}
+      <section className="relative z-10 -mt-14 sm:-mt-16">
+        <form
+          onSubmit={handleQuickSearch}
+          className="bg-white border border-[#E4E7EA] rounded-2xl shadow-xl px-6 py-6 sm:px-8 sm:py-7 flex flex-col lg:flex-row lg:items-center gap-5"
+        >
+          <div className="flex items-center gap-3.5 shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#F0F7F1] text-[#2E7D4F] flex items-center justify-center">
+              <QrCode className="w-6 h-6" />
             </div>
-
-            {/* Where the aggregates come from, and why some of them are blank.
-                This card replaced a four-bar "distribution diagram" whose every
-                percentage was a constant in the source (68 % grazing, 29,138
-                permits...) under a caption reading "updates in real time".
-                Nothing publishes an activity breakdown, so rather than invent
-                one again, this says where the real figures live and what hides
-                the small ones. */}
-            <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-sm space-y-4">
-              <div>
-                <h3 className="text-base font-bold text-[#1A1F24]">{t('home.opendata.title')}</h3>
-                <p className="text-xs text-[#5A646D]">{t('home.opendata.subtitle')}</p>
-              </div>
-              <p className="text-sm text-[#5A646D]">
-                {t('home.opendata.kAnonymity.before')}{' '}
-                <b className="text-[#1A1F24]">
-                  {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
-                </b>{' '}
-                {t('home.opendata.kAnonymity.after')}
-              </p>
-              {statsState.status === 'error' && (
-                <p className="text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
-              )}
-              <button
-                type="button"
-                onClick={() => onNavigate?.('opendata')}
-                className="text-sm font-semibold text-[#2E7D4F] inline-flex items-center gap-1 hover:underline"
-              >
-                {t('home.opendata.link')} <ChevronRight className="w-4 h-4" />
-              </button>
+            <div>
+              <div className="text-[15px] font-extrabold text-[#1A1F24]">{sectionText.quickCheckTitle}</div>
+              <div className="text-xs text-[#5A646D]">{sectionText.quickCheckSubtitle}</div>
             </div>
           </div>
-
-          {/* RIGHT SIDE: RUXSATNOMANI TEKSHIRISH CARD (lg:col-span-5) */}
-          <div className="lg:col-span-5">
-            <form
-              onSubmit={handleQuickSearch}
-              className="bg-white text-[#1A1F24] p-7 rounded-2xl shadow-lg border border-[#E4E7EA] space-y-5 sticky top-24"
+          <div className="flex flex-col sm:flex-row items-stretch gap-2.5 flex-1">
+            <div className="sm:w-32 shrink-0">
+              <Input
+                aria-label={sectionText.quickCheckSeriya}
+                placeholder={sectionText.quickCheckSeriya}
+                value={quickSeries}
+                onChange={(e) => setQuickSeries(e.target.value)}
+                touchSize
+              />
+            </div>
+            <div className="flex-1">
+              <Input
+                aria-label={sectionText.quickCheckNumber}
+                placeholder={sectionText.quickCheckNumber}
+                value={quickNumber}
+                onChange={(e) => setQuickNumber(e.target.value)}
+                leftIcon={<Search className="w-4 h-4" />}
+                touchSize
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="success"
+              size="lg"
+              className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F] shrink-0"
             >
-              <div className="flex items-center gap-3.5 pb-2 border-b border-[#E4E7EA]">
-                <div className="w-12 h-12 rounded-xl bg-[#F0F7F1] text-[#2E7D4F] flex items-center justify-center font-bold shadow-inner shrink-0">
-                  <QrCode className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-[#1A1F24]">{t('home.verify.title')}</h3>
-                  <p className="text-xs text-[#5A646D]">{t('home.verify.subtitle')}</p>
-                </div>
-              </div>
-
-              <p className="text-xs text-[#5A646D] leading-relaxed">
-                {t('home.verify.description')}
-              </p>
-
-              <div className="space-y-3">
-                <Input
-                  placeholder={t('home.verify.placeholder')}
-                  value={quickSearchInput}
-                  onChange={(e) => setQuickSearchInput(e.target.value)}
-                  leftIcon={<Search className="w-4 h-4" />}
-                  touchSize
-                />
-                <Button type="submit" variant="success" fullWidth size="lg" className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F]">
-                  {t('home.verify.submitButton')}
-                </Button>
-              </div>
-
-              <div className="bg-[#F8F9FA] p-4 rounded-xl border border-[#E4E7EA] space-y-2 text-xs text-[#5A646D]">
-                <div className="flex items-center gap-2 font-semibold text-[#1A1F24]">
-                  <CheckCircle2 className="w-4 h-4 text-[#15803D]" />
-                  {t('home.verify.instructionsTitle')}
-                </div>
-                <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                  <li>{t('home.verify.step1')}</li>
-                  <li>{t('home.verify.step2')}</li>
-                  <li>{t('home.verify.step3')}</li>
-                </ul>
-              </div>
-
-              <p className="text-[11px] text-[#767F87] text-center pt-1">
-                {t('home.verify.footnote')}
-              </p>
-            </form>
+              {sectionText.quickCheckButton}
+            </Button>
           </div>
-        </div>
+        </form>
       </section>
 
-      {/* ── 3. ACTIVITIES GRID ─────────────────────────────────────── */}
+      {/* ── 2. STATISTICS + RATING ──────────────────────────────────── */}
+      <section className="reveal">
+        <div className="max-w-xl mb-8">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
+            {sectionText.statsBadge}
+          </span>
+          <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-[#123522] tracking-tight">
+            {sectionText.statsTitle}
+          </h2>
+          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">
+            {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
+            <b className="text-[#1A1F24]">
+              {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
+            </b>{' '}
+            {t('home.opendata.kAnonymity.after')}
+          </p>
+          {statsState.status === 'error' && (
+            <p className="mt-2 text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {stats.map((st) => (
+            <div
+              key={st.testId}
+              data-testid={st.testId}
+              className="card-lift bg-gradient-to-b from-white to-[#F7FBF8] border border-[#E4E7EA] rounded-2xl px-6 pt-6 pb-6"
+            >
+              <div className="w-11 h-11 rounded-xl bg-[#F0F7F1] flex items-center justify-center mb-4">{st.icon}</div>
+              <div
+                className={`font-serif text-4xl font-black tracking-tight ${st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'}`}
+              >
+                {st.value}
+              </div>
+              <div className="mt-2.5 text-sm font-bold text-[#1A1F24]">{st.label}</div>
+              <div className="mt-1 text-xs text-[#767F87]">{st.note}</div>
+            </div>
+          ))}
+        </div>
+
+        <RatingBand state={ratingState} />
+      </section>
+
+      {/* ── 3. SIX DIRECTIONS ───────────────────────────────────────── */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
@@ -355,28 +475,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </Button>
         </div>
 
-        {/* The six cards below used to be constants — a title, a description
-            and a "badge" (e.g. "Most in demand") hand-typed per service, none
-            of it sourced from anywhere in the system. They now come from the
-            same catalog `ServicesPage` reads, so the two pages can never list
-            a different set of services (`api/services.ts`). */}
+        {/* The six illustrated cards below come from the same catalog
+            `ServicesPage` reads (`api/services.ts`), each keyed off the
+            activity's `code` to the matching `<Scene>` — never the reverse,
+            so the two pages can never list a different set of services. */}
         {servicesState.status === 'loading' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities-loading">
             {Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={idx}
-                className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-4"
+                className="bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden shadow-xs"
               >
-                <div className="flex items-center justify-between">
-                  <Skeleton height="h-11" width="w-11" className="rounded-xl" />
-                  <Skeleton height="h-6" width="w-24" className="rounded-full" />
-                </div>
-                <Skeleton height="h-6" width="w-3/4" />
-                <Skeleton height="h-4" width="w-full" />
-                <Skeleton height="h-4" width="w-5/6" />
-                <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
-                  <Skeleton height="h-4" width="w-28" />
-                  <Skeleton height="h-4" width="w-20" />
+                <Skeleton height="h-[178px]" className="rounded-none" />
+                <div className="p-6 space-y-3">
+                  <Skeleton height="h-6" width="w-3/4" />
+                  <Skeleton height="h-4" width="w-full" />
+                  <Skeleton height="h-4" width="w-5/6" />
                 </div>
               </div>
             ))}
@@ -401,8 +515,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
         {servicesState.status === 'ready' && servicesState.items.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities">
-            {servicesState.items.map((svc) => (
-              <ActivityCard key={svc.id} service={svc} language={language} t={t} onNavigate={onNavigate} />
+            {servicesState.items.map((svc, idx) => (
+              <DirectionCard
+                key={svc.id}
+                service={svc}
+                index={idx}
+                language={language}
+                t={t}
+                onNavigate={onNavigate}
+              />
             ))}
           </div>
         )}
@@ -528,55 +649,69 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   );
 };
 
-function ActivityCard({
+/**
+ * One of the six illustrated direction cards (Task 9). Ported from
+ * `design-canvas/Main.dc.html`'s card markup: a `<Scene>` fills the top
+ * band (keyed off the activity's own `code`, falling back to `grazing`'s
+ * scene for a code the art set does not cover — never a blank box), a
+ * processing-term pill and an index badge sit over it, then the name,
+ * description and an apply link below.
+ */
+function DirectionCard({
   service,
+  index,
   language,
   t,
   onNavigate,
 }: {
   service: Service;
+  index: number;
   language: string;
   t: (key: string) => string;
   onNavigate?: (page: string, params?: any) => void;
 }) {
-  const Icon = serviceIcon(service.code);
   const description = pickLocalized(service.description, language);
 
   return (
-    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="p-2.5 bg-[#F0F7F1] rounded-xl">
-            <Icon className="w-6 h-6 text-[#2E7D4F]" />
-          </div>
-          {/* The real processing term (`processing_days`, ruling #138) where a
-              hand-typed badge ("Most in demand", "Seasonal"...) used to sit —
-              those made no claim the system could back up. */}
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#F0F7F1] text-[#2E7D4F] border border-[#D9EBDC]">
+    <div
+      data-testid="direction-card"
+      className="card-lift reveal bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden"
+      style={{ animationDelay: `${index * 0.09}s` }}
+    >
+      <div className="relative h-[178px] overflow-hidden">
+        <div className="thumb-zoom absolute inset-0">
+          <Scene kind={sceneKindFor(service.code)} height={178} />
+        </div>
+        {/* The real processing term (`processing_days`, ruling #138) where a
+            hand-typed badge ("Most in demand", "Seasonal"...) used to sit —
+            those made no claim the system could back up. */}
+        <div className="absolute left-4 bottom-3.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 shadow-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F]" />
+          <span className="text-xs font-bold text-[#123522]">
             {service.processing_days} {t('home.activities.daysUnit')}
           </span>
         </div>
-        <h3 className="text-lg font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
-          {pickLocalized(service.name, language)}
-        </h3>
+        <div className="absolute right-3.5 top-3.5 w-8 h-8 rounded-lg bg-white/90 flex items-center justify-center text-xs font-extrabold text-[#23653F]">
+          {String(index + 1).padStart(2, '0')}
+        </div>
+      </div>
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-[#123522]">{pickLocalized(service.name, language)}</h3>
         {/* `description` is nullable (two of six rows have none, on purpose —
             see `api/services.ts`); no placeholder sentence stands in for it. */}
-        {description && <p className="text-xs text-[#5A646D] leading-relaxed">{description}</p>}
-      </div>
-
-      <div className="pt-4 border-t border-[#E4E7EA] flex items-center justify-between text-xs">
-        {/* The annual-quota line was six invented constants (85,000 head,
-            14,200 hectares, 42,000 bee colonies...) with no source
-            anywhere in the system — stage 7.3 finding F7. Removed
-            rather than replaced: nothing publishes a quota, and the
-            tariff calculator below is what a citizen actually needs. */}
-        <span className="text-[#767F87]">{t('home.activities.tariffHint')}</span>
-        <button
-          onClick={() => onNavigate?.('auth_login', { activity: service.id })}
-          className="font-bold text-[#2E7D4F] group-hover:underline inline-flex items-center gap-1"
-        >
-          {t('home.activities.applyLink')} <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+        {description && (
+          <p className="mt-2.5 text-sm leading-relaxed text-[#5A646D] min-h-[64px]">{description}</p>
+        )}
+        <div className="mt-4 pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => onNavigate?.('auth_login', { activity: service.id })}
+            className="text-sm font-bold text-[#2E7D4F] hover:underline"
+          >
+            {t('home.activities.applyLink')}
+          </button>
+          <ChevronRight className="w-4 h-4 text-[#2E7D4F]" />
+        </div>
       </div>
     </div>
   );
