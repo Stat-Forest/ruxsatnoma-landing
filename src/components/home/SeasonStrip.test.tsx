@@ -47,3 +47,26 @@ it('renders every one of the six activities, even when a window is missing', () 
     expect(screen.getByTestId(`season-row-${code}`)).toBeInTheDocument();
   }
 });
+
+/**
+ * The defect this pins: `windows[code] ?? []` collapsed "the backend never
+ * described this activity" into "closed all twelve months" — a citizen was
+ * told an activity was shut when the truth was that nobody had said. An
+ * absent key and an empty array are different answers.
+ */
+it('calls an activity the settings never mentioned unknown, not closed', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-09-15'));
+  renderStrip({ grazing: [9], haymaking: [] });
+
+  const missing = screen.getByTestId('season-row-apiary');
+  expect(within(missing).getByText(/nomaʼlum/i)).toBeInTheDocument();
+  expect(within(missing).queryByText(/yopiq/i)).not.toBeInTheDocument();
+
+  // An empty array is a real answer, and that answer is "closed".
+  const empty = screen.getByTestId('season-row-haymaking');
+  expect(within(empty).getByText(/yopiq/i)).toBeInTheDocument();
+
+  const open = screen.getByTestId('season-row-grazing');
+  expect(within(open).getByText(/ochiq/i)).toBeInTheDocument();
+});

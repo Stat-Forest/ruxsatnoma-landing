@@ -35,6 +35,7 @@ const TEXT: Record<
     noteRest: string;
     open: string;
     closed: string;
+    unknown: string;
   }
 > = {
   uz_latn: {
@@ -48,6 +49,7 @@ const TEXT: Record<
       'Mavsum oylari Agentlik tomonidan tasdiqlanadi va hududga qarab farq qilishi mumkin — yakuniy sanalar tasdiqlangach shu yerda koʻrsatiladi.',
     open: 'Ochiq',
     closed: 'Yopiq',
+    unknown: 'Nomaʼlum',
   },
   ru: {
     badge: 'Календарь сезонов',
@@ -60,6 +62,7 @@ const TEXT: Record<
       'Месяцы сезонов утверждаются Агентством и могут отличаться по регионам — окончательные даты появятся здесь после утверждения.',
     open: 'Открыто',
     closed: 'Закрыто',
+    unknown: 'Неизвестно',
   },
   en: {
     badge: 'Season calendar',
@@ -72,6 +75,7 @@ const TEXT: Record<
       'Season months are confirmed by the Agency and may differ by region — the final dates will appear here once approved.',
     open: 'Open',
     closed: 'Closed',
+    unknown: 'Unknown',
   },
   uz_cyrl: {
     badge: 'Мавсумлар жадвали',
@@ -84,6 +88,7 @@ const TEXT: Record<
       'Мавсум ойлари Агентлик томонидан тасдиқланади ва ҳудудга қараб фарқ қилиши мумкин — якуний саналар тасдиқлангач шу ерда кўрсатилади.',
     open: 'Очиқ',
     closed: 'Ёпиқ',
+    unknown: 'Номаълум',
   },
   kaa: {
     badge: 'Máwsim kestesi',
@@ -96,6 +101,7 @@ const TEXT: Record<
       'Máwsim aylar Agentlik tárepinen tastıyıqlanadı hám aymaqqa qaray parıq etiwi múmkin — juwmaqlawshı sánreler tastıyıqlanǵannan keyin usı jerde kórsetiledi.',
     open: 'Ashıq',
     closed: 'Jabıq',
+    unknown: 'Belgisiz',
   },
 };
 
@@ -143,6 +149,13 @@ const MONTHS: Record<UiLanguage, { short: string[]; full: string[] }> = {
  * `windows` prop the page reads off `GET /public/site-settings`. Always
  * carries the provisional banner (`role="note"`) — the months are not
  * confirmed by the Agency and this strip may never present them as fact.
+ *
+ * Each of the six rows is in one of THREE states, and the third is the one
+ * that matters: an activity `season_windows` does not mention at all is
+ * UNKNOWN, not closed. It used to be closed — `windows[code] ?? []` turned a
+ * missing key into twelve grey cells and a "Yopiq" badge, which tells a
+ * citizen an activity is shut when nobody has said so. An empty array is
+ * still closed; only an absent key is unknown.
  */
 export function SeasonStrip({ windows }: SeasonStripProps) {
   const { uiLanguage } = useLanguage();
@@ -193,8 +206,15 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
 
           <div className="mt-3 flex flex-col gap-2.5">
             {ROWS.map(({ code, color }) => {
-              const openMonths = windows[code] ?? [];
-              const isOpenNow = openMonths.includes(currentMonth);
+              // THREE states, not two. `windows[code] ?? []` used to collapse
+              // "the backend never described this activity" into "closed all
+              // twelve months" — twelve grey cells and a "Yopiq" badge
+              // telling a citizen an activity is shut when the truth is that
+              // nobody knows. An absent key and an empty array are different
+              // answers, and only the second one means closed.
+              const openMonths = windows[code];
+              const known = Array.isArray(openMonths);
+              const isOpenNow = known && openMonths.includes(currentMonth);
               return (
                 <div
                   key={code}
@@ -205,14 +225,20 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                   <div className="text-sm font-bold text-[#1A1F24]">{pickName(undefined, uiLanguage, code)}</div>
                   <div className="grid grid-cols-12 gap-1.5">
                     {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
-                      const open = openMonths.includes(month);
+                      const open = known && openMonths.includes(month);
                       const isCurrent = month === currentMonth;
                       return (
                         <div
                           key={month}
                           className="h-[26px] rounded-md"
                           style={{
-                            background: open ? color : '#F1F3F4',
+                            // An unknown row is hatched, so it cannot be read
+                            // at a glance as the flat grey of a closed one.
+                            background: open
+                              ? color
+                              : known
+                                ? '#F1F3F4'
+                                : 'repeating-linear-gradient(45deg, #E9ECEE 0 3px, #F8F9FA 3px 6px)',
                             boxShadow: isCurrent ? '0 0 0 2px #123522' : undefined,
                           }}
                         />
@@ -220,7 +246,11 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                     })}
                   </div>
                   <div className="text-right">
-                    {isOpenNow ? (
+                    {!known ? (
+                      <span className="inline-flex px-2.5 py-1 rounded-full bg-white border border-dashed border-[#C9D0D6] text-xs font-bold text-[#767F87]">
+                        {text.unknown}
+                      </span>
+                    ) : isOpenNow ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold text-[#23653F]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F]" />
                         {text.open}
