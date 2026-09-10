@@ -30,7 +30,7 @@ export const common = {
   'hero.trust.online': '100% Onlayn hám qawipsiz',
 
   'footer.about':
-    'Ózbekstan Respublikası Orman xojalıǵı mámleketlik komitetiniń rásmiy ruxsatnamalar málimleme sisteması.',
+    'Ózbekstan Respublikası Orman hám jasıl aymaqlardı kóbeytiw, shólistanıwǵa qarsı gúresiw agentliginiń rásmiy ruxsatnamalar málimleme sisteması.',
   'footer.services': 'Xızmetler',
   'footer.portal': 'Portal',
   'footer.contacts': 'Baylanıs',
@@ -42,6 +42,6 @@ export const common = {
   'footer.link.appealStatus': 'Múrjat jiberiw hám tekseriw',
   'footer.link.documents': 'Hújjetler hám normalar',
   'footer.link.faq': 'Kóp beriletuǵın sorawlar',
-  'footer.copyright': '© 2026 Orman xojalıǵı mámleketlik komiteti. Barlıq huqıqlar qorǵalǵan.',
+  'footer.copyright': '© 2026 Orman hám jasıl aymaqlardı kóbeytiw, shólistanıwǵa qarsı gúresiw agentligi. Barlıq huqıqlar qorǵalǵan.',
   'footer.wcag': 'WCAG 2.2 AA Saykes dizayn-sisteması',
 } as const;
