@@ -60,8 +60,11 @@ it('sends each slide’s primary and secondary action through onNavigate', async
   const onNavigate = vi.fn();
   renderSlider(onNavigate);
 
+  // The wizard, not the cabinet's front door: `applicant_wizard` is what
+  // every other "Ariza topshirish" on this site opens, and the adminka
+  // decides on arrival whether a sign-in is needed first.
   await userEvent.click(screen.getByRole('button', { name: /Ariza topshirish/i }));
-  expect(onNavigate).toHaveBeenCalledWith('auth_login');
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard');
 
   await userEvent.click(screen.getByRole('button', { name: /Narxni hisoblash/i }));
   expect(onNavigate).toHaveBeenCalledWith('calculator');
