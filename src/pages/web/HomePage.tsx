@@ -159,10 +159,13 @@ const SECTION_TEXT: Record<
   },
 };
 
-/** The six illustrated cards fall back to `grazing`'s scene for a code the
- *  art set does not (yet) cover — never a blank box (Task 9's brief). */
-function sceneKindFor(code: string): SceneKind {
-  return (SCENE_KINDS as readonly string[]).includes(code) ? (code as SceneKind) : 'grazing';
+/** An activity code the art set does not cover gets NO illustration, which
+ *  is what `ServicesPage` has always done for the same catalogue. Falling
+ *  back to `grazing`'s scene meant a seventh service — say beekeeping
+ *  equipment, or a felling permit — would be illustrated with cattle, which
+ *  is worse than an empty band: it states something about the service. */
+function isSceneKind(code: string): code is SceneKind {
+  return (SCENE_KINDS as readonly string[]).includes(code);
 }
 
 function HashScroller() {
@@ -374,21 +377,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       {inRouter && <HashScroller />}
 
       {/* ── 0. HERO SLIDER ──────────────────────────────────────────
-          Full-bleed: `PublicLayout` (not owned by this track) wraps page
-          content in `<main className="max-w-7xl mx-auto px-6 py-10">`, but
-          the approved hero (`design-canvas/Main.dc.html`) spans the full
-          viewport width flush against the header. The classic "break out of
-          a centered container" trick (`left-1/2 -mx-[50vw] w-screen`) gets
-          there without touching a file another track owns; `-mt-10` cancels
-          the parent's own `py-10` so the hero sits flush under the header,
-          matching the negative-margin overlap the quick-check strip below it
-          needs too.
-
-          KNOWN INTEGRATION CONCERN (see track report): `PublicLayout` still
-          renders its own pre-redesign hero banner whenever `activeNav ===
-          'home'` (the `hero.*` image banner). That file is out of scope for
-          this track, so until it is removed the home page will show that
-          banner directly above this slider. */}
+          Full-bleed: `PublicLayout` wraps page content in
+          `<main className="max-w-7xl mx-auto px-6 py-10">`, but the approved
+          hero (`design-canvas/Main.dc.html`) spans the full viewport width
+          flush against the header. The classic "break out of a centered
+          container" trick (`left-1/2 -mx-[50vw] w-screen`) gets there;
+          `-mt-10` cancels the parent's own `py-10` so the hero sits flush
+          under the header, matching the negative-margin overlap the
+          quick-check strip below it needs too. `PublicLayout` renders no
+          hero of its own — this is the only one on the page. */}
       <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen -mt-10">
         <HeroSlider onNavigate={onNavigate} />
       </div>
@@ -807,10 +804,14 @@ export const HomePage: React.FC<HomePageProps> = ({
 /**
  * One of the six illustrated direction cards (Task 9). Ported from
  * `design-canvas/Main.dc.html`'s card markup: a `<Scene>` fills the top
- * band (keyed off the activity's own `code`, falling back to `grazing`'s
- * scene for a code the art set does not cover — never a blank box), a
- * processing-term pill and an index badge sit over it, then the name,
- * description and an apply link below.
+ * band (keyed off the activity's own `code`, and drawn only when the art
+ * set actually covers it), a processing-term pill and an index badge sit
+ * over it, then the name, description and an apply link below.
+ *
+ * The apply link opens `applicant_wizard`, the same page `ServicesPage`'s
+ * own card opens. The two used to differ — this one went to `auth_login`,
+ * which lands a visitor on the cabinet's front door instead of the form
+ * they pressed a button to reach.
  */
 function DirectionCard({
   service,
@@ -833,9 +834,9 @@ function DirectionCard({
       className="card-lift reveal bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden"
       style={{ animationDelay: `${index * 0.09}s` }}
     >
-      <div className="relative h-[178px] overflow-hidden">
+      <div className="relative h-[178px] overflow-hidden bg-[#F0F7F1]">
         <div className="thumb-zoom absolute inset-0">
-          <Scene kind={sceneKindFor(service.code)} height={178} />
+          {isSceneKind(service.code) && <Scene kind={service.code} height={178} />}
         </div>
         {/* The real processing term (`processing_days`, ruling #138) where a
             hand-typed badge ("Most in demand", "Seasonal"...) used to sit —
@@ -860,7 +861,7 @@ function DirectionCard({
         <div className="mt-4 pt-4 border-t border-[#E4E7EA] flex items-center justify-between">
           <button
             type="button"
-            onClick={() => onNavigate?.('auth_login', { activity: service.id })}
+            onClick={() => onNavigate?.('applicant_wizard', { activity: service.id })}
             className="text-sm font-bold text-[#2E7D4F] hover:underline"
           >
             {t('home.activities.applyLink')}

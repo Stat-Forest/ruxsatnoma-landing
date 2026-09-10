@@ -405,6 +405,28 @@ it('renders six direction cards, each with its own illustration', async () => {
   expect(new Set(svgIds).size).toBe(6);
 });
 
+/**
+ * The defect this pins: an unknown activity code fell back to `grazing`'s
+ * illustration, so a seventh service the art set does not cover would have
+ * been drawn with cattle — a statement about the service, not a neutral
+ * placeholder. `ServicesPage` draws nothing for the same case, and now so
+ * does this.
+ */
+it('draws no illustration at all for an activity code the art set does not cover', async () => {
+  mockBackend({
+    services: [
+      { id: 'a9', code: 'felling', name: { uz_latn: 'Kesish' }, description: null, processing_days: 15 },
+    ],
+  });
+  renderHome();
+
+  const cards = await screen.findAllByTestId('direction-card');
+  expect(cards).toHaveLength(1);
+  // `linearGradient` is what every `<Scene>` opens with — the test above
+  // counts them to prove the six cards get six different illustrations.
+  expect(cards[0].querySelector('linearGradient')).toBeNull();
+});
+
 const sampleActivities = [
   {
     id: '0198f100-0001-7000-8000-000000000001',
@@ -446,6 +468,10 @@ it('fetches and renders every activity type the public API returns', async () =>
 // needs to identify the activity type (`PriceCalculator` submits the same
 // catalog's `id` as `activity_type_id`). A login started from this link
 // must receive the real id, not a string the API never promised as a key.
+//
+// The page id is `applicant_wizard`, the same one `ServicesPage`'s own card
+// sends. This one used to send `auth_login`, which lands a visitor on the
+// cabinet's front door instead of the form they pressed a button to reach.
 it('passes the real backend activity UUID when apply link is clicked', async () => {
   mockBackend({ services: sampleActivities });
 
@@ -464,7 +490,7 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
   expect(applyButtons.length).toBe(3);
   applyButtons[1].click();
 
-  expect(onNavigate).toHaveBeenCalledWith('auth_login', {
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard', {
     activity: '0198f100-0001-7000-8000-000000000005',
   });
 });
