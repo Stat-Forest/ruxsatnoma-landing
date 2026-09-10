@@ -1,4 +1,12 @@
-/** Faq page. */
+/** FAQ fallback copy — rendered by `AboutPage`'s accordion only when
+ *  `GET /help/faq` returns nothing.
+ *
+ *  Carries NO review period and NO renewal window: "3 working days" and
+ *  "10 days before expiry" were invented figures (the same class of defect
+ *  `api/services.ts` records for the service cards' own "up to 3 working
+ *  days"). The real review term is per-activity `processing_days`, and no
+ *  renewal window has been fixed at all.
+ */
 export const faq = {
   'faq.badge': 'Savollar va Javoblar',
   'faq.title': 'Koʻp Beriladigan Savollar (FAQ)',
@@ -8,7 +16,7 @@ export const faq = {
 
   'faq.item1.question': 'Oʻrmon xoʻjaligida chorva mollarini boqish uchun ruxsatnoma qanday olinadi?',
   'faq.item1.answer':
-    'Ariza topshirish uchun OneID yoki E-IMZO orqali portalga kirasiz, oʻrmon xoʻjaligi konturini va chorva sonini tanlab arizani yuborasiz. Arizangiz 3 ish kunida koʻrib chiqiladi.',
+    'Ariza topshirish uchun OneID yoki E-IMZO orqali portalga kirasiz, oʻrmon xoʻjaligi konturini va chorva sonini tanlab arizani yuborasiz.',
 
   'faq.item2.question': 'Toʻlov summasi qanday hisoblanadi?',
   'faq.item2.answer':
@@ -20,5 +28,5 @@ export const faq = {
 
   'faq.item4.question': 'Ruxsatnoma muddati tugaganda uni uzaytirish mumkinmi?',
   'faq.item4.answer':
-    'Ha, ruxsatnoma muddati tugashiga 10 kun qolganda shaxsiy kabinet orqali ruxsatnomani onlayn uzaytirish arizasini topshirishingiz mumkin.',
+    'Ha, ruxsatnoma muddati tugashidan oldin shaxsiy kabinet orqali ruxsatnomani onlayn uzaytirish arizasini topshirishingiz mumkin.',
 } as const;

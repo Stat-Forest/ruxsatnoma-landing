@@ -16,9 +16,7 @@ export const common = {
   'action.submitApplication': 'Ariza topshirish',
   'action.language': 'Til',
 
-  'announcement.prefix': 'Kuzgi mavsum arizalari',
-  'announcement.deadline': '1-oktabrgacha',
-  'announcement.suffix': 'qabul qilinmoqda',
+  'announcement.text': 'Oʻrmon fondi yerlaridan foydalanish uchun arizalar onlayn qabul qilinadi',
   'announcement.cta': 'Batafsil',
   'announcement.appealStatus': 'Murojaat holati',
 

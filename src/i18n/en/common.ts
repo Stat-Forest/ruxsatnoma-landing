@@ -16,9 +16,7 @@ export const common = {
   'action.submitApplication': 'Submit Application',
   'action.language': 'Language',
 
-  'announcement.prefix': 'Autumn-season applications are being accepted until',
-  'announcement.deadline': 'October 1',
-  'announcement.suffix': 'inclusive',
+  'announcement.text': 'Applications for the use of forest fund lands are accepted online',
   'announcement.cta': 'Learn More',
   'announcement.appealStatus': 'Appeal Status',
 

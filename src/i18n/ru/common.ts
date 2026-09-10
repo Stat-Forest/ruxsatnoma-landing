@@ -16,9 +16,7 @@ export const common = {
   'action.submitApplication': 'Подать заявку',
   'action.language': 'Язык',
 
-  'announcement.prefix': 'Приём заявок осеннего сезона продолжается до',
-  'announcement.deadline': '1 октября',
-  'announcement.suffix': 'включительно',
+  'announcement.text': 'Заявки на пользование землями лесного фонда принимаются онлайн',
   'announcement.cta': 'Подробнее',
   'announcement.appealStatus': 'Статус обращения',
 

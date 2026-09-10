@@ -1,4 +1,12 @@
-/** Faq page. */
+/** FAQ fallback copy — rendered by `AboutPage`'s accordion only when
+ *  `GET /help/faq` returns nothing.
+ *
+ *  Carries NO review period and NO renewal window: "3 working days" and
+ *  "10 days before expiry" were invented figures (the same class of defect
+ *  `api/services.ts` records for the service cards' own "up to 3 working
+ *  days"). The real review term is per-activity `processing_days`, and no
+ *  renewal window has been fixed at all.
+ */
 export const faq = {
   'faq.badge': 'Вопросы и ответы',
   'faq.title': 'Часто задаваемые вопросы (FAQ)',
@@ -8,7 +16,7 @@ export const faq = {
 
   'faq.item1.question': 'Как получить разрешение на выпас скота на землях лесного хозяйства?',
   'faq.item1.answer':
-    'Для подачи заявки вы входите на портал через OneID или E-IMZO, выбираете контур лесного хозяйства и количество скота, после чего отправляете заявку. Ваша заявка рассматривается в течение 3 рабочих дней.',
+    'Для подачи заявки вы входите на портал через OneID или E-IMZO, выбираете контур лесного хозяйства и количество скота, после чего отправляете заявку.',
 
   'faq.item2.question': 'Как рассчитывается сумма платежа?',
   'faq.item2.answer':
@@ -20,5 +28,5 @@ export const faq = {
 
   'faq.item4.question': 'Можно ли продлить разрешение по истечении срока действия?',
   'faq.item4.answer':
-    'Да, за 10 дней до истечения срока действия разрешения вы можете подать заявку на его онлайн-продление через личный кабинет.',
+    'Да, до истечения срока действия разрешения вы можете подать заявку на его онлайн-продление через личный кабинет.',
 } as const;

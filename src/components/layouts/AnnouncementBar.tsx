@@ -13,6 +13,12 @@ export interface AnnouncementBarProps {
  * The 38px strip above the main header row (`design-canvas/Main.dc.html`).
  * Its own copy is editorial, not fetched — no endpoint serves it yet — so it
  * comes from i18n; only the phone number is live data.
+ *
+ * The prototype's copy named a seasonal deadline ("1-oktabrgacha") and set a
+ * pulsing `.live` dot beside it. The Agency has confirmed there is NO
+ * seasonal date, so the line is now static and dateless, and the dot no
+ * longer pulses: `.live` is the vocabulary for something actually updating,
+ * and editorial copy is not. Never state a date this site cannot source.
  */
 export function AnnouncementBar({ phone, onNavigate }: AnnouncementBarProps) {
   const t = useT();
@@ -21,12 +27,8 @@ export function AnnouncementBar({ phone, onNavigate }: AnnouncementBarProps) {
     <div className="h-[38px] bg-[#0E2A16] border-b border-white/10 flex items-center text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex items-center justify-between gap-6">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="live w-[7px] h-[7px] rounded-full bg-[#4ADE80] shrink-0" aria-hidden="true" />
-          <span className="text-[12.5px] text-[#C4D8C9] truncate">
-            {t('announcement.prefix')}{' '}
-            <span className="text-white font-bold">{t('announcement.deadline')}</span>{' '}
-            {t('announcement.suffix')}
-          </span>
+          <span className="w-[7px] h-[7px] rounded-full bg-[#4ADE80] shrink-0" aria-hidden="true" />
+          <span className="text-[12.5px] text-[#C4D8C9] truncate">{t('announcement.text')}</span>
           <button
             type="button"
             onClick={() => onNavigate?.('news')}

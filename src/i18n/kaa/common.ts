@@ -16,9 +16,7 @@ export const common = {
   'action.submitApplication': 'Arza tapsırıw',
   'action.language': 'Til',
 
-  'announcement.prefix': 'Kúzgi mavsum arizaları',
-  'announcement.deadline': '1-oktyabrge shekem',
-  'announcement.suffix': 'qabıl etilmekte',
+  'announcement.text': 'Orman fondı jerlerinen paydalanıw ushın arzalar onlayn qabıl etiledi',
   'announcement.cta': 'Tolıǵıraq',
   'announcement.appealStatus': 'Múrjat jaǵdayı',
 

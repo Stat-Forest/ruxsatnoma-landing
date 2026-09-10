@@ -16,9 +16,7 @@ export const common = {
   'action.submitApplication': 'Ариза топшириш',
   'action.language': 'Тил',
 
-  'announcement.prefix': 'Кузги мавсум аризалари',
-  'announcement.deadline': '1-октябргача',
-  'announcement.suffix': 'қабул қилинмоқда',
+  'announcement.text': 'Ўрмон фонди ерларидан фойдаланиш учун аризалар онлайн қабул қилинади',
   'announcement.cta': 'Батафсил',
   'announcement.appealStatus': 'Мурожаат ҳолати',
 
