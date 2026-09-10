@@ -21,6 +21,8 @@ import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { HeroSlider } from '../../components/home/HeroSlider';
 import { RatingBand, fetchRatingSummary, type RatingBandState } from '../../components/home/RatingBand';
+import { Band } from '../../components/home/Band';
+import { HayfieldBackdrop, HillsBackdrop, IsolinesBackdrop } from '../../components/art/Backdrops';
 import { SeasonStrip } from '../../components/home/SeasonStrip';
 import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { useLanguage, useT } from '../../i18n/useT';
@@ -538,7 +540,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ── 3. STATISTICS + RATING ──────────────────────────────────── */}
-      <section className="reveal">
+      <Band tone="moss" art={<IsolinesBackdrop />} className="reveal">
         <div className="max-w-xl mb-8">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
             {sectionText.statsBadge}
@@ -578,7 +580,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <RatingBand state={ratingState} />
-      </section>
+      </Band>
 
       {/* ── 4. SEASON CALENDAR (ruling #180) ────────────────────────
           Only when `/public/activity-seasons` has actually answered: a
@@ -593,7 +595,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       )}
 
       {/* ── 5. HOW IT WORKS — FOUR STEPS ─────────────────────────────── */}
-      <section>
+      <Band tone="white" art={<HillsBackdrop />} innerClassName="pb-28 sm:pb-32">
         <div className="max-w-xl mb-10">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
             {t('home.steps.sectionBadge')}
@@ -607,10 +609,24 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="relative">
-          <div
-            className="hidden sm:block absolute left-[60px] right-[60px] top-[34px] h-px"
-            style={{ backgroundImage: 'repeating-linear-gradient(90deg, #D9EBDC 0 10px, transparent 10px 20px)' }}
-          />
+          {/* The trail between the steps: a gentle wave, dashed like a
+              footpath on a map, behind the icons. */}
+          <svg
+            className="hidden lg:block absolute left-[60px] right-[60px] top-[14px] h-10 w-[calc(100%-120px)]"
+            viewBox="0 0 1000 40"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M0 20 C 83 -2, 250 42, 333 20 S 583 -2, 667 20 S 917 42, 1000 20"
+              fill="none"
+              stroke="#A8D1B2"
+              strokeWidth="2"
+              strokeDasharray="8 8"
+              strokeLinecap="round"
+            />
+          </svg>
           <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { Icon: UserRound, bg: '#123522' },
@@ -634,24 +650,26 @@ export const HomePage: React.FC<HomePageProps> = ({
             ))}
           </div>
         </div>
-      </section>
+      </Band>
 
       {/* ── 5b. PRICE CALCULATOR ───────────────────────────────────── */}
       {/* Was its own `/tariffs` screen until the news register took that slot
           in the header. It is one form over two anonymous endpoints, and a
           visitor who wants a figure now gets it without leaving the page. */}
-      <section aria-labelledby="calculator-heading" className="space-y-6">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
-            {t('tariffs.header.badge')}
-          </span>
-          <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
-            {t('tariffs.header.title')}
-          </h2>
-          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('tariffs.header.subtitle')}</p>
+      <Band tone="hay" art={<HayfieldBackdrop />} aria-labelledby="calculator-heading">
+        <div className="space-y-6">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">
+              {t('tariffs.header.badge')}
+            </span>
+            <h2 id="calculator-heading" className="text-2xl font-bold text-[#1A1F24]">
+              {t('tariffs.header.title')}
+            </h2>
+            <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('tariffs.header.subtitle')}</p>
+          </div>
+          <PriceCalculator />
         </div>
-        <PriceCalculator />
-      </section>
+      </Band>
 
       {/* ── 6. MAP BAND ──────────────────────────────────────────────
           Decorative preview only — the interactive map (maplibre, the real

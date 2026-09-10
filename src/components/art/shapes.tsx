@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 
 /**
- * The objects two illustrations share: the activity cards (`Scene`) and the
- * home page hero (`HeroPanorama`) scatter the same sheep, hives, bales and
- * logs so they read as one set. Each is drawn in its own local box and placed
- * with `translate`/`scale`; the caller picks the colours.
+ * The pieces the illustrations share — the activity cards (`Scene`), the home
+ * page hero (`HeroPanorama`) and the section backdrops (`Backdrops`) draw the
+ * same sheep, hives, bales, logs and map isolines so they read as one set.
+ * Each is drawn in its own local box and placed with `translate`/`scale`;
+ * the caller picks the colours.
  */
 
 /** A sheep facing left, feet on y=36 of its local box; `flip` mirrors it. */
@@ -62,4 +63,25 @@ export function Log({
       <circle cx={x + w - h / 2} cy={y + h / 2} r={h / 2 - 1.4} fill="none" stroke={ring} strokeWidth="1.3" />
     </g>
   );
+}
+
+/** Topographic isolines — `n` wobbly rings around (cx, cy), the map motif the
+ *  permit system is built on, kept faint enough to read as sky texture. */
+export function Isolines({
+  cx, cy, n, r0, dr, stroke, opacity,
+}: { cx: number; cy: number; n: number; r0: number; dr: number; stroke: string; opacity: number }): ReactNode {
+  const rings: ReactNode[] = [];
+  for (let k = 0; k < n; k++) {
+    const r = r0 + k * dr;
+    let d = '';
+    for (let i = 0; i <= 36; i++) {
+      const a = (i / 36) * Math.PI * 2;
+      const w = 1 + 0.1 * Math.sin(a * 3 + k * 0.7) + 0.06 * Math.sin(a * 5 + k * 1.3) + 0.04 * Math.cos(a * 7 + k);
+      const x = cx + Math.cos(a) * r * w * 1.35;
+      const y = cy + Math.sin(a) * r * w;
+      d += `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)} `;
+    }
+    rings.push(<path key={k} d={`${d}Z`} stroke={stroke} strokeWidth="1" fill="none" opacity={opacity} />);
+  }
+  return <>{rings}</>;
 }
