@@ -120,9 +120,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 class list carries `inline-flex`, and two display utilities in
                 the same layer do not reliably override one another. `Kabinet`
                 is a plain link into the adminka (decision: no session check on
-                this site) — dropping it below 2xl costs no reachable action,
-                since the mobile menu carries its own copy. */}
-            <div className="hidden 2xl:block">
+                this site). It appears wherever the desktop nav does — it was
+                inherited at `2xl` from the old `Kirish` button, which shared a
+                destination with the CTA beside it and so cost nothing when
+                hidden; this one is the entry to the cabinet Odilxon asked for,
+                and a button nobody can see is the same as a button nobody
+                asked for. Below `lg` the mobile menu carries its own copy. */}
+            <div className="hidden lg:block">
               <Button
                 variant="outline"
                 size="sm"
