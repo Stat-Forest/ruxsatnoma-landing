@@ -4,8 +4,7 @@ import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
 import { AnnouncementBar } from './AnnouncementBar';
-import { fetchSiteSettings } from '../../api/site';
-import type { SiteSettings } from '../../api/site';
+import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 
@@ -14,33 +13,27 @@ export interface PublicLayoutProps {
   onCheckPermit?: (permitNo: string) => void;
   onNavigate?: (page: string, params?: any) => void;
   activeNav?: string;
+  /** Fetched ONCE by `routes.tsx`'s `Layout` and handed down — this
+   *  component used to call `fetchSiteSettings()` itself, as did `HomePage`
+   *  and `ContactPage`, so one page view made the request two or three
+   *  times. Defaults to `loading`, which renders the same footer a failure
+   *  does: no contacts, never a placeholder. */
+  siteSettings?: SiteSettingsState;
 }
 
 export const PublicLayout: React.FC<PublicLayoutProps> = ({
   children,
   onNavigate,
   activeNav = 'home',
+  siteSettings = { status: 'loading' },
 }) => {
   const t = useT();
   const { language, setLanguage, uiLanguage } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null);
 
   React.useEffect(() => {
     setMobileMenuOpen(false);
   }, [activeNav]);
-
-  // `null` on any failure (`fetchSiteSettings`'s own contract) — the footer
-  // and announcement strip simply render without contacts rather than break.
-  React.useEffect(() => {
-    let cancelled = false;
-    fetchSiteSettings().then((settings) => {
-      if (!cancelled) setSiteSettings(settings);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const navLinks = [
     { id: 'home', labelKey: 'nav.home', page: 'home' },
@@ -51,7 +44,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
     { id: 'contact', labelKey: 'nav.contact', page: 'contact' },
   ];
 
-  const contacts = siteSettings?.contacts;
+  // Anything but `ready` renders without contacts rather than break — the
+  // footer shows no row at all for a value it does not have, never a
+  // placeholder (decision: never invent a number or a contact).
+  const contacts = siteSettings.status === 'ready' ? siteSettings.data.contacts : null;
   const address = contacts ? pickLocalized(contacts.address, uiLanguage) : '';
   const hours = contacts ? pickLocalized(contacts.hours, uiLanguage) : '';
 

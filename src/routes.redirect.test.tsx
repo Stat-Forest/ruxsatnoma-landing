@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routeConfig } from './routes';
@@ -12,12 +12,16 @@ vi.mock('./api/client', () => ({
   BASE_URL: 'http://localhost:8000',
 }));
 
-// `PublicLayout` also calls `fetchSiteSettings()` (`src/api/site.ts`), which
+// The `Layout` also calls `fetchSiteSettings()` (`src/api/site.ts`), which
 // goes through the bare `fetch` global rather than the mocked client above
 // (the endpoint isn't in `schema.d.ts` yet) — stub it too, so no test in this
-// file makes a real network call.
+// file makes a real network call. Kept in a variable so the last test can
+// count how many times it was reached.
+let fetchMock: ReturnType<typeof vi.fn>;
+
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('no network in tests')));
+  fetchMock = vi.fn().mockRejectedValue(new Error('no network in tests'));
+  vi.stubGlobal('fetch', fetchMock);
 });
 
 afterEach(() => {
@@ -65,4 +69,30 @@ it('reserves /map, /about and /contact for the tracks that will fill them in', a
 
   renderAt('/contact');
   expect(await screen.findByTestId('contact-page')).toBeInTheDocument();
+});
+
+/**
+ * The defect this pins: `PublicLayout`, `HomePage` and `ContactPage` each
+ * called `fetchSiteSettings()` with no shared state, so a single visit to
+ * `/` made the same request twice and `/contact` twice again. It is fetched
+ * once, in `Layout`, and handed down through the outlet context.
+ */
+describe('site settings', () => {
+  function settingsCalls() {
+    return fetchMock.mock.calls.filter(([url]) => String(url).includes('/site-settings'));
+  }
+
+  it('is read exactly once on the home page', async () => {
+    renderAt('/');
+    await screen.findByRole('heading', { level: 1 });
+    await waitFor(() => expect(settingsCalls().length).toBeGreaterThan(0));
+    expect(settingsCalls()).toHaveLength(1);
+  });
+
+  it('is read exactly once on the contact page', async () => {
+    renderAt('/contact');
+    await screen.findByTestId('contact-page');
+    await waitFor(() => expect(settingsCalls().length).toBeGreaterThan(0));
+    expect(settingsCalls()).toHaveLength(1);
+  });
 });

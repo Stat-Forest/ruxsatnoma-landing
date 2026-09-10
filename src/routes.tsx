@@ -1,8 +1,11 @@
+import React from 'react';
 import type { RouteObject } from 'react-router';
 import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
 import { CALCULATOR_ANCHOR } from './components/calculator/PriceCalculator';
+import { fetchSiteSettings } from './api/site';
+import type { SiteSettingsState } from './api/site';
 import {
   HomePage,
   ServicesPage,
@@ -17,6 +20,13 @@ import {
 } from './pages/web';
 
 export type NavigateFn = (page: string, params?: Record<string, unknown>) => void;
+
+/** What `<Outlet context={…}>` carries, and therefore what a route wrapper
+ *  below can hand a page. */
+export interface LandingOutletContext {
+  onNavigate: NavigateFn;
+  siteSettings: SiteSettingsState;
+}
 
 /** Legacy page-id -> real path. Every existing page still calls
  * `onNavigate?.('services')` the way it did under the old `useState` build
@@ -83,6 +93,24 @@ function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ONE fetch per page view. `PublicLayout`, `HomePage` and `ContactPage`
+  // each called `fetchSiteSettings()` for themselves, with no shared state,
+  // so a visit to `/` made the same request twice and a visit to `/contact`
+  // twice again. It is fetched here, where both the chrome and the page can
+  // be handed the same answer.
+  const [siteSettings, setSiteSettings] = React.useState<SiteSettingsState>({ status: 'loading' });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    void fetchSiteSettings().then((data) => {
+      if (cancelled) return;
+      setSiteSettings(data ? { status: 'ready', data } : { status: 'error' });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const onNavigate: NavigateFn = (page, params) => {
     const cabinetPath = CABINET_ENTRIES[page];
     if (cabinetPath) {
@@ -115,14 +143,18 @@ function Layout() {
     : (PATH_TO_PAGE[location.pathname] ?? 'home');
 
   return (
-    <PublicLayout onNavigate={onNavigate} activeNav={activeNav}>
-      <Outlet context={{ onNavigate } satisfies { onNavigate: NavigateFn }} />
+    <PublicLayout onNavigate={onNavigate} activeNav={activeNav} siteSettings={siteSettings}>
+      <Outlet context={{ onNavigate, siteSettings } satisfies LandingOutletContext} />
     </PublicLayout>
   );
 }
 
+function useLandingContext(): LandingOutletContext {
+  return useOutletContext<LandingOutletContext>();
+}
+
 function useLandingNavigate(): NavigateFn {
-  return useOutletContext<{ onNavigate: NavigateFn }>().onNavigate;
+  return useLandingContext().onNavigate;
 }
 
 /**
@@ -134,7 +166,8 @@ function useLandingNavigate(): NavigateFn {
  * from this list fails a test instead of a click.
  */
 function HomeRoute() {
-  return <HomePage onNavigate={useLandingNavigate()} />;
+  const { onNavigate, siteSettings } = useLandingContext();
+  return <HomePage onNavigate={onNavigate} siteSettings={siteSettings} />;
 }
 
 function ServicesRoute() {
@@ -146,7 +179,8 @@ function AboutRoute() {
 }
 
 function ContactRoute() {
-  return <ContactPage onNavigate={useLandingNavigate()} />;
+  const { onNavigate, siteSettings } = useLandingContext();
+  return <ContactPage onNavigate={onNavigate} siteSettings={siteSettings} />;
 }
 
 function MapRoute() {

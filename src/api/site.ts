@@ -26,6 +26,23 @@ export interface SiteSettings {
 }
 
 /**
+ * What a consumer sees. The endpoint is fetched EXACTLY ONCE per page view,
+ * by `routes.tsx`'s `Layout`, and handed down to the header/footer as a prop
+ * and to the page through the outlet context. `PublicLayout`, `HomePage` and
+ * `ContactPage` each used to call `fetchSiteSettings()` on their own, so a
+ * single visit to `/` or `/contact` made the same request two or three
+ * times.
+ *
+ * `loading` is distinct from `error` on purpose: the season strip may render
+ * nothing while the answer is outstanding but must also render nothing if it
+ * never comes, and a page cannot tell those apart from `null` alone.
+ */
+export type SiteSettingsState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; data: SiteSettings };
+
+/**
  * `null` on ANY failure — network error, non-2xx, or a body that fails to
  * parse — so the footer renders without contacts rather than breaking the
  * page (decision: never invent a number or a contact).

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '../../i18n';
+import type { SiteSettings, SiteSettingsState } from '../../api/site';
 
 vi.mock('../../api/client', () => ({
   api: { GET: vi.fn() },
@@ -13,25 +14,25 @@ vi.mock('../../api/client', () => ({
 import { api } from '../../api/client';
 
 /**
- * Two more anonymous endpoints reach the page through the bare `fetch`
- * global rather than the typed `api.GET` client, because neither is in
- * `schema.d.ts` yet (`src/api/site.ts`'s own docstring explains why for
- * `/site-settings`; `RatingBand.tsx`'s does the same for `/ratings/summary`).
- * This mirrors `PublicLayout.test.tsx`'s own `mockSiteSettingsFetch` idiom —
- * this project has no `msw` dependency (see the foundation track's report),
- * so a bare-fetch endpoint is stubbed with `vi.stubGlobal('fetch', ...)`
- * rather than `server.use(http.get(...))`. Defaults to a network failure for
- * both routes so a test that doesn't care sees the honest "unavailable"
- * shape, same as a real outage.
+ * `GET /public/ratings/summary` reaches the page through the bare `fetch`
+ * global rather than the typed `api.GET` client, because it is not in
+ * `schema.d.ts` yet (`RatingBand.tsx`'s own docstring explains why). This
+ * project has no `msw` dependency (see the foundation track's report), so a
+ * bare-fetch endpoint is stubbed with `vi.stubGlobal('fetch', ...)` rather
+ * than `server.use(http.get(...))`. Defaults to a published: false summary,
+ * so a test that doesn't care sees the honest "not enough ratings" shape.
+ *
+ * `/public/site-settings` is NOT here any more: `routes.tsx`'s `Layout`
+ * fetches it once per page view and hands the answer down as a prop, where
+ * this page and `PublicLayout` above it each used to fetch it separately.
+ * The tests that care pass `siteSettings` to `renderHome` instead.
  */
 type FetchAnswers = {
   ratings?: unknown;
   ratingsFails?: boolean;
-  siteSettings?: unknown;
-  siteSettingsFails?: boolean;
 };
 
-function mockFetch({ ratings, ratingsFails, siteSettings, siteSettingsFails }: FetchAnswers = {}) {
+function mockFetch({ ratings, ratingsFails }: FetchAnswers = {}) {
   const fetchMock = vi.fn((url: string) => {
     if (url.includes('/ratings/summary')) {
       if (ratingsFails) return Promise.reject(new Error('network error'));
@@ -43,36 +44,35 @@ function mockFetch({ ratings, ratingsFails, siteSettings, siteSettingsFails }: F
           ),
       });
     }
-    if (url.includes('/site-settings')) {
-      if (siteSettingsFails) return Promise.reject(new Error('network error'));
-      return Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve(
-            siteSettings ?? {
-              contacts: {
-                phone: '',
-                email: '',
-                address: { uz_latn: '', ru: '' },
-                hours: { uz_latn: '', ru: '' },
-                social: { telegram: null, youtube: null },
-              },
-              season_windows: {
-                grazing: [],
-                haymaking: [],
-                apiary: [],
-                recreation: [],
-                deadwood: [],
-                science: [],
-              },
-            },
-          ),
-      });
-    }
     return Promise.reject(new Error(`unexpected fetch: ${url}`));
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
+}
+
+/** As `routes.tsx`'s `Layout` hands them down. */
+function readySettings(overrides: Partial<SiteSettings> = {}): SiteSettingsState {
+  return {
+    status: 'ready',
+    data: {
+      contacts: {
+        phone: '',
+        email: '',
+        address: { uz_latn: '', ru: '' },
+        hours: { uz_latn: '', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: {
+        grazing: [],
+        haymaking: [],
+        apiary: [],
+        recreation: [],
+        deadwood: [],
+        science: [],
+      },
+      ...overrides,
+    },
+  };
 }
 
 /**
@@ -173,11 +173,11 @@ afterEach(() => {
 
 /** The page links to `/news/:id` and reads `#calculator` off the location, so
  *  it only renders inside a router — as it does in the app. */
-function renderHome() {
+function renderHome(siteSettings: SiteSettingsState = readySettings()) {
   return render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage />
+        <HomePage siteSettings={siteSettings} />
       </I18nProvider>
     </MemoryRouter>,
   );
@@ -195,7 +195,7 @@ it('sends the quick-check strip to the verify page with what was typed', async (
   render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage onNavigate={onNavigate} />
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
       </I18nProvider>
     </MemoryRouter>,
   );
@@ -331,26 +331,20 @@ it('says the ratings are unavailable rather than blank when the summary fails to
  */
 it('draws the season strip from the site-settings response', async () => {
   mockBackend();
-  mockFetch({
-    siteSettings: {
-      contacts: {
-        phone: '', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: '', ru: '' },
-        social: { telegram: null, youtube: null },
-      },
+  renderHome(
+    readySettings({
       season_windows: {
         grazing: [9], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [],
       },
-    },
-  });
-  renderHome();
+    }),
+  );
   expect(await screen.findByTestId('season-row-grazing')).toBeInTheDocument();
   expect(screen.getByRole('note')).toHaveTextContent(/Agentlik tomonidan tasdiqlanadi/i);
 });
 
 it('renders no season strip at all when the settings fetch fails', async () => {
   mockBackend();
-  mockFetch({ siteSettingsFails: true });
-  renderHome();
+  renderHome({ status: 'error' });
   await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
   expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
   expect(screen.queryByRole('note')).not.toBeInTheDocument();
@@ -362,7 +356,7 @@ it('sends the map band to the map page', async () => {
   render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage onNavigate={onNavigate} />
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
       </I18nProvider>
     </MemoryRouter>,
   );
@@ -372,23 +366,20 @@ it('sends the map band to the map page', async () => {
 
 it('shows the live phone in the support CTA once site-settings answers', async () => {
   mockBackend();
-  mockFetch({
-    siteSettings: {
+  renderHome(
+    readySettings({
       contacts: {
         phone: '+998 71 000 00 00', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: 'Dushanba – juma', ru: '' },
         social: { telegram: null, youtube: null },
       },
-      season_windows: { grazing: [], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [] },
-    },
-  });
-  renderHome();
+    }),
+  );
   expect(await screen.findByText('+998 71 000 00 00')).toBeInTheDocument();
 });
 
 it('hides the CTA phone row rather than inventing one when contacts are unavailable', async () => {
   mockBackend();
-  mockFetch({ siteSettingsFails: true });
-  renderHome();
+  renderHome({ status: 'error' });
   await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
   expect(screen.queryByText(/^\+998/)).not.toBeInTheDocument();
 });
@@ -462,7 +453,7 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
   render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage onNavigate={onNavigate} />
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
       </I18nProvider>
     </MemoryRouter>,
   );

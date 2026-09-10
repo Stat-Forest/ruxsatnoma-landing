@@ -28,7 +28,7 @@ import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
 import { fetchServices, type Service } from '../../api/services';
-import { fetchSiteSettings, type SiteSettings } from '../../api/site';
+import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
 import type { components } from '../../api/schema';
 
@@ -42,11 +42,6 @@ type StatsState =
 type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
 
 type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: Service[] };
-
-type SiteSettingsState =
-  | { status: 'loading' }
-  | { status: 'error' }
-  | { status: 'ready'; data: SiteSettings };
 
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
@@ -204,9 +199,16 @@ const SafeLink: React.FC<React.ComponentProps<typeof Link>> = ({ to, children, .
 
 export interface HomePageProps {
   onNavigate?: (page: string, params?: any) => void;
+  /** Fetched ONCE by `routes.tsx`'s `Layout` and handed down. This page used
+   *  to call `fetchSiteSettings()` itself while `PublicLayout` above it did
+   *  the same, so every visit to `/` made the request twice. */
+  siteSettings?: SiteSettingsState;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+export const HomePage: React.FC<HomePageProps> = ({
+  onNavigate,
+  siteSettings: siteSettingsState = { status: 'loading' },
+}) => {
   const t = useT();
   const { language, uiLanguage } = useLanguage();
   const sectionText = SECTION_TEXT[uiLanguage];
@@ -235,24 +237,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   // Site settings feed two sections at once (Task 10): the season strip's
   // `season_windows` (ruling R3) and the support CTA's live phone/hours.
-  // `null` on any failure — the season strip then does not render at all
-  // (a calendar with no confirmed months is worse than no calendar) and the
-  // CTA's phone/hours rows simply do not render either, same posture as the
-  // footer's own use of this endpoint (`PublicLayout`, Task 7).
-  const [siteSettingsState, setSiteSettingsState] = useState<SiteSettingsState>({ status: 'loading' });
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const data = await fetchSiteSettings();
-      if (!cancelled) {
-        setSiteSettingsState(data ? { status: 'ready', data } : { status: 'error' });
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Anything but `ready` means the season strip does not render at all (a
+  // calendar with no confirmed months is worse than no calendar) and the
+  // CTA's phone/hours rows do not render either, same posture as the
+  // footer's own use of this endpoint.
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading

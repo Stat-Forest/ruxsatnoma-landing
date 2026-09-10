@@ -1,52 +1,42 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PublicLayout } from './PublicLayout';
 import { I18nProvider } from '../../i18n';
 import { navigation } from '../../lib/cabinet';
+import type { SiteSettings, SiteSettingsState } from '../../api/site';
 
-function renderLayout(onNavigate = vi.fn()) {
+/**
+ * This component NO LONGER FETCHES. `routes.tsx`'s `Layout` reads
+ * `/public/site-settings` once per page view and hands the answer down —
+ * `PublicLayout`, `HomePage` and `ContactPage` each used to call it for
+ * themselves, so one visit made the same request two or three times. There
+ * is consequently no `fetch` to stub here: an unwired settings prop means a
+ * footer with no contacts, exactly as a real outage does.
+ */
+function renderLayout(
+  onNavigate = vi.fn(),
+  siteSettings: SiteSettingsState = { status: 'error' },
+) {
   return render(
     <I18nProvider>
-      <PublicLayout onNavigate={onNavigate}>
+      <PublicLayout onNavigate={onNavigate} siteSettings={siteSettings}>
         <div>Main content</div>
       </PublicLayout>
     </I18nProvider>
   );
 }
 
-/**
- * `fetchSiteSettings()` (`src/api/site.ts`) calls the bare `fetch` global —
- * the endpoint isn't in `schema.d.ts` yet, so it cannot go through the typed
- * `api.GET` client the rest of this project mocks by path. Stubbing `fetch`
- * itself is this file's equivalent of that. Defaults to a network failure so
- * tests that don't care about contacts see the footer in its "nothing to
- * show" shape, same as a real outage.
- */
-function mockSiteSettingsFetch(
-  outcome: 'network-error' | { status: number; body?: unknown } = 'network-error',
-) {
-  const fetchMock = vi.fn();
-  if (outcome === 'network-error') {
-    fetchMock.mockRejectedValue(new Error('network error'));
-  } else {
-    fetchMock.mockResolvedValue({
-      ok: outcome.status >= 200 && outcome.status < 300,
-      status: outcome.status,
-      json: () => Promise.resolve(outcome.body ?? {}),
-    });
-  }
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
-}
-
-beforeEach(() => {
-  mockSiteSettingsFetch('network-error');
-});
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
+const settings: SiteSettings = {
+  contacts: {
+    phone: '+998 71 000 00 00',
+    email: 'test@urmon.uz',
+    address: { uz_latn: 'Toshkent sh., Test 1', ru: 'г. Ташкент, Тест 1' },
+    hours: { uz_latn: 'Dushanba – juma', ru: 'Пн – Пт' },
+    social: { telegram: 'https://t.me/urmon', youtube: null },
+  },
+  season_windows: { grazing: [9], haymaking: [6, 7, 8], apiary: [], recreation: [], deadwood: [], science: [] },
+};
 
 it('opens and closes mobile menu on hamburger button click', async () => {
   const onNavigate = vi.fn();
@@ -96,21 +86,8 @@ it('sends the Kabinet button to the cabinet, not to a login form', async () => {
   expect(assign).toHaveBeenCalledWith(expect.stringContaining('/login'));
 });
 
-it('draws footer contacts from the API', async () => {
-  mockSiteSettingsFetch({
-    status: 200,
-    body: {
-      contacts: {
-        phone: '+998 71 000 00 00',
-        email: 'test@urmon.uz',
-        address: { uz_latn: 'Toshkent sh., Test 1', ru: 'г. Ташкент, Тест 1' },
-        hours: { uz_latn: 'Dushanba – juma', ru: 'Пн – Пт' },
-        social: { telegram: 'https://t.me/urmon', youtube: null },
-      },
-      season_windows: { grazing: [9], haymaking: [6, 7, 8], apiary: [], recreation: [], deadwood: [], science: [] },
-    },
-  });
-  renderLayout();
+it('draws footer contacts from the settings it is given', async () => {
+  renderLayout(vi.fn(), { status: 'ready', data: settings });
   // Scoped to the footer landmark: the same phone number is also live in the
   // announcement strip above the main nav (`AnnouncementBar`), so an
   // unscoped query would match both.
@@ -119,10 +96,16 @@ it('draws footer contacts from the API', async () => {
   expect(footer.getByText('Toshkent sh., Test 1')).toBeInTheDocument();
 });
 
-it('renders a footer with no contacts rather than a broken one when the API fails', async () => {
-  mockSiteSettingsFetch('network-error');
-  renderLayout();
-  expect(await screen.findByRole('contentinfo')).toBeInTheDocument();
+it('renders a footer with no contacts rather than a broken one when the fetch failed', async () => {
+  renderLayout(vi.fn(), { status: 'error' });
+  const footer = within(await screen.findByRole('contentinfo'));
+  expect(footer.queryByText(/^\+998/)).not.toBeInTheDocument();
+});
+
+it('renders a footer with no contacts while the fetch is still outstanding', async () => {
+  renderLayout(vi.fn(), { status: 'loading' });
+  const footer = within(await screen.findByRole('contentinfo'));
+  expect(footer.queryByText(/^\+998/)).not.toBeInTheDocument();
 });
 
 it('has no dead footer links left', () => {

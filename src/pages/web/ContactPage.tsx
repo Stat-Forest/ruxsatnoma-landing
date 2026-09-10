@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ArrowRight, Clock, Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { fetchSiteSettings } from '../../api/site';
-import type { SiteSettings } from '../../api/site';
+import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
 import { useLanguage } from '../../i18n/useT';
 import { AppealForm } from './AppealCheckPage';
 
 export interface ContactPageProps {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void;
+  /** Fetched ONCE by `routes.tsx`'s `Layout` and handed down. This page used
+   *  to call `fetchSiteSettings()` itself while `PublicLayout` above it did
+   *  the same, so every visit to `/contact` made the request twice. */
+  siteSettings?: SiteSettingsState;
 }
 
 /** Tailwind v4 scans source for literal class names — a template-built
@@ -35,24 +38,14 @@ const CARD_GRID_CLASS: Record<number, string> = {
  * SLA), so this page renders neither card nor line rather than a
  * placeholder standing in for a real value.
  */
-export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
+export const ContactPage: React.FC<ContactPageProps> = ({
+  onNavigate,
+  siteSettings = { status: 'loading' },
+}) => {
   const { uiLanguage } = useLanguage();
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchSiteSettings().then((result) => {
-      if (cancelled) return;
-      setSettings(result);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const contacts = settings?.contacts;
+  const contacts = siteSettings.status === 'ready' ? siteSettings.data.contacts : null;
+  const loaded = siteSettings.status !== 'loading';
   const address = contacts ? pickLocalized(contacts.address, uiLanguage) : '';
   const hours = contacts ? pickLocalized(contacts.hours, uiLanguage) : '';
 
