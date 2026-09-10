@@ -77,14 +77,56 @@ function Conifers({
   );
 }
 
-/* ── grazing: pasture with cattle on open hills ─────────────────────────── */
+/* ── grazing: a flock of sheep and a goat on open hills ─────────────────── */
 
-function Cow({ x, y, s, fill }: { x: number; y: number; s: number; fill: string }): ReactNode {
+/**
+ * Every animal is drawn in its own local box facing left, feet on y=36, and
+ * placed with `translate`/`scale` (`flip` mirrors it). Keep feet at or above
+ * y≈158 on the canvas: the card crops the 400×200 drawing to roughly y 40–160
+ * at desktop widths, so anything lower loses its legs.
+ */
+function Sheep({
+  x, y, s, fleece, dark, flip = false,
+}: { x: number; y: number; s: number; fleece: string; dark: string; flip?: boolean }): ReactNode {
   return (
-    <g transform={`translate(${x} ${y}) scale(${s})`} fill={fill}>
-      <path d="M0 0 h30 a4 4 0 0 1 4 4 v9 a3 3 0 0 1-3 3 h-2 l-1 7 h-3 l-1-7 h-15 l-1 7 h-3 l-1-7 h-2 a4 4 0 0 1-4-4 v-8 a4 4 0 0 1 2-4 Z" />
-      <path d="M31 2 l7-3 a3 3 0 0 1 4 3 v5 a3 3 0 0 1-3 3 h-8 Z" />
-      <path d="M38 -1 l3-4 M42 0 l4-3" stroke={fill} strokeWidth="1.6" fill="none" strokeLinecap="round" />
+    <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`}>
+      <rect x={10} y={26} width={3.4} height={10} rx={1.5} fill={dark} />
+      <rect x={16} y={26} width={3.4} height={10} rx={1.5} fill={dark} />
+      <rect x={30} y={26} width={3.4} height={10} rx={1.5} fill={dark} />
+      <rect x={36} y={26} width={3.4} height={10} rx={1.5} fill={dark} />
+      <path
+        d="M8 20 C 4 14, 8 8, 14 9 C 16 4, 24 3, 28 7 C 34 4, 42 8, 40 15 C 45 18, 43 27, 36 28 L 12 28 C 6 28, 5 23, 8 20 Z"
+        fill={fleece}
+      />
+      <path d="M9 16 C 4 17, 1 22, 3 27 C 4 30, 8 31, 10 29 C 12 27, 13 20, 9 16 Z" fill={dark} />
+      <path d="M8 17 L 3 15 L 5 20 Z" fill={dark} />
+    </g>
+  );
+}
+
+function Goat({
+  x, y, s, fill, flip = false,
+}: { x: number; y: number; s: number; fill: string; flip?: boolean }): ReactNode {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`} fill={fill}>
+      <rect x={14} y={10} width={30} height={15} rx={6} />
+      <path d="M18 11 L 10 2 L 6 3 L 12 20 L 20 22 Z" />
+      <path d="M0 6 C 0 3, 3 1, 7 1 L 12 0 L 13 6 L 8 9 C 4 10, 1 9, 0 6 Z" />
+      <path d="M4 9 L 3 14 L 7 10 Z" />
+      <path d="M9 1 C 12 -4, 16 -6, 19 -4" stroke={fill} strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <path
+        d="M12 1 C 15 -3, 19 -4, 21 -2"
+        stroke={fill}
+        strokeWidth="1.4"
+        fill="none"
+        strokeLinecap="round"
+        opacity=".85"
+      />
+      <rect x={17} y={23} width={4} height={13} rx={1.8} />
+      <rect x={22} y={23} width={4} height={13} rx={1.8} />
+      <rect x={35} y={23} width={4} height={13} rx={1.8} />
+      <rect x={40} y={23} width={4} height={13} rx={1.8} />
+      <path d="M43 12 L 49 6 L 47 14 Z" />
     </g>
   );
 }
@@ -98,9 +140,12 @@ function Grazing({ uid }: { uid: string }): ReactNode {
       <Conifers y={118} xs={[26, 52, 78, 356, 380]} scale={0.62} fill="#5E9E72" opacity=".7" />
       <path d="M0 134 C 90 118, 180 144, 268 130 S 360 112, 400 128 L400 200 L0 200 Z" fill="#6FAE81" />
       <path d="M0 160 C 110 148, 220 172, 320 158 S 388 150, 400 156 L400 200 L0 200 Z" fill="#4E8C62" />
-      <Cow x={112} y={138} s={1.05} fill="#2C4A36" />
-      <Cow x={214} y={150} s={0.82} fill="#33553D" />
-      <Cow x={286} y={132} s={0.66} fill="#3A5F45" />
+      <Sheep x={60} y={118} s={0.95} fleece="#F1E9D4" dark="#2C4A36" />
+      <Sheep x={122} y={124} s={0.85} fleece="#F1E9D4" dark="#2C4A36" flip />
+      <Sheep x={174} y={128} s={0.7} fleece="#EFE6CF" dark="#33553D" />
+      <Sheep x={238} y={126} s={0.62} fleece="#EFE6CF" dark="#33553D" />
+      <Sheep x={288} y={130} s={0.52} fleece="#EDE3C9" dark="#3A5F45" flip />
+      <Goat x={318} y={122} s={0.5} fill="#3A5F45" />
       <rect width={W} height={92} fill={`url(#haze-${uid})`} />
     </>
   );
