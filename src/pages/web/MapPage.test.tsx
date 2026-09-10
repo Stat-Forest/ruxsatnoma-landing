@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MapPage } from './MapPage';
 import { I18nProvider } from '../../i18n';
@@ -146,7 +146,10 @@ it('falls back to the first layer when the forest-fund layer is not published', 
 it('positions the map container inline, where MapLibre\'s own stylesheet cannot unset it', async () => {
   mockApi();
   renderMap();
-  await screen.findAllByText('K-14');
+  // The map is `React.lazy`: the list can be on screen a tick before the map
+  // chunk resolves and the constructor runs (CI saw exactly that), so wait
+  // for the construction itself, not for the list.
+  await waitFor(() => expect(MapMock).toHaveBeenCalled());
   // Same guard as `PermitContourMap.test.tsx`: the class-based `absolute inset-0`
   // lost to `.maplibregl-map { position: relative }` in the production bundle.
   const container = (MapMock.mock.calls[0][0] as { container: HTMLElement }).container;
