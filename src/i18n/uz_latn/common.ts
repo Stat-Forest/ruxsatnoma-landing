@@ -30,7 +30,7 @@ export const common = {
   'hero.trust.online': '100% Onlayn va xavfsiz',
 
   'footer.about':
-    'Oʻzbekiston Respublikasi Oʻrmon xoʻjaligi davlat qoʻmitasining rasmiy ruxsatnomalar axborot tizimi.',
+    'Oʻzbekiston Respublikasi Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligining rasmiy ruxsatnomalar axborot tizimi.',
   'footer.services': 'Xizmatlar',
   'footer.portal': 'Portal',
   'footer.contacts': 'Aloqa',
@@ -42,6 +42,6 @@ export const common = {
   'footer.link.appealStatus': 'Murojaat yuborish va tekshirish',
   'footer.link.documents': 'Hujjatlar va normalar',
   'footer.link.faq': 'Koʻp beriladigan savollar',
-  'footer.copyright': '© 2026 Oʻrmon xoʻjaligi davlat qoʻmitasi. Barcha huquqlar himoyalangan.',
+  'footer.copyright': '© 2026 Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-sistemasi',
 } as const;
