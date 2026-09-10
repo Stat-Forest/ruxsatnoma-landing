@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Pause, Play } from 'lucide-react';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 
@@ -148,7 +148,26 @@ const DOT_LABEL: Record<UiLanguage, (n: number) => string> = {
   en: (n) => `Slide ${n}`,
 };
 
+/** The pause control's accessible name, in both states. Local for the same
+ *  reason `DOT_LABEL` and `EXTRA_SLIDES` are. */
+const PLAYBACK_LABEL: Record<UiLanguage, { pause: string; play: string }> = {
+  uz_latn: { pause: 'Slaydlarni toʻxtatish', play: 'Slaydlarni davom ettirish' },
+  uz_cyrl: { pause: 'Слайдларни тўхтатиш', play: 'Слайдларни давом эттириш' },
+  ru: { pause: 'Остановить слайды', play: 'Продолжить слайды' },
+  kaa: { pause: 'Slaydlardı toqtatıw', play: 'Slaydlardı dawam etiw' },
+  en: { pause: 'Pause the slides', play: 'Resume the slides' },
+};
+
 const SLIDE_DELAY_MS = 5200;
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+/** `matchMedia` is missing in some test environments and in any non-browser
+ *  render, and a hero that throws is worse than one that moves. */
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
 
 /** Slide 1: forest ridges. Ported from `design-canvas/Main.dc.html`'s slide-1
  *  `<svg>`, attributes translated to React's camelCase. */
@@ -286,21 +305,52 @@ function Atmosphere() {
 
 /**
  * The redesigned home page's hero (task 8): three cross-fading slides with a
- * shared atmosphere layer, auto-advancing every 5.2s (matching
+ * shared atmosphere layer, advancing every 5.2s (matching
  * `design-canvas/Main.dc.html`'s own `setInterval(..., 5200)`), driven by
  * real `<button>` dots.
+ *
+ * WCAG 2.2.2 (level A) requires a pause mechanism for anything that
+ * auto-updates for more than five seconds, and the footer of this site
+ * claims WCAG 2.2 AA. This one ran an unstoppable interval, and its slide
+ * transition was an inline style, so `motion.css`'s reduced-motion block
+ * could not reach it either. Three things now hold it to that claim:
+ *
+ * - the interval does not start at all under `prefers-reduced-motion`, and
+ *   stops the moment the preference changes;
+ * - it pauses on hover and on keyboard focus anywhere in the hero, so a
+ *   reader is never moved out from under a link they are reaching for;
+ * - a real pause/resume button, beside the dots, for everyone else.
+ *
+ * The transition itself is now the `.hero-slide` class, which lives in
+ * `motion.css` where the media block governs it.
  */
 export function HeroSlider({ onNavigate }: HeroSliderProps) {
   const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
   const t = useT();
   const { uiLanguage } = useLanguage();
 
+  // The preference can change while the page is open (a viewer flipping the
+  // OS setting), and a carousel that only reads it once ignores that.
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const query = window.matchMedia(REDUCED_MOTION_QUERY);
+    const onChange = () => setReducedMotion(query.matches);
+    query.addEventListener?.('change', onChange);
+    return () => query.removeEventListener?.('change', onChange);
+  }, []);
+
+  const autoplay = !reducedMotion && !paused && !hovered;
+
+  useEffect(() => {
+    if (!autoplay) return;
     const id = setInterval(() => {
       setSlide((current) => (current + 1) % 3);
     }, SLIDE_DELAY_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [autoplay]);
 
   const copy: SlideCopy =
     slide === 0
@@ -316,17 +366,28 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
   const actions = SLIDE_ACTIONS[slide];
   const dotLabel = DOT_LABEL[uiLanguage];
+  const playbackLabel = PLAYBACK_LABEL[uiLanguage];
 
   return (
-    <section className="relative overflow-hidden bg-[#0C2312] h-[460px] sm:h-[560px] lg:h-[620px]">
+    <section
+      className="relative overflow-hidden bg-[#0C2312] h-[460px] sm:h-[560px] lg:h-[620px]"
+      // Hover and keyboard focus both pause: a reader must never be moved
+      // out from under the link they are reaching for. `onFocus`/`onBlur`
+      // bubble in React, so focus anywhere inside the hero counts.
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+    >
       {[Slide1Art, Slide2Art, Slide3Art].map((Art, i) => (
         <div
           key={i}
-          className="absolute inset-0"
+          // `.hero-slide` carries the transition — an inline `transition:`
+          // here was unreachable by `motion.css`'s reduced-motion block.
+          className="hero-slide absolute inset-0"
           style={{
             opacity: slide === i ? 1 : 0,
             transform: slide === i ? 'scale(1.07)' : 'scale(1)',
-            transition: 'opacity 1.1s ease, transform 7s linear',
           }}
         >
           <Art />
@@ -411,17 +472,31 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
             className="flex items-center px-1"
           >
             <span
+              // `.hero-dot`, for the same reason as `.hero-slide` above.
+              className="hero-dot block rounded-full"
               style={{
                 height: '5px',
                 width: slide === i ? '46px' : '18px',
                 background: slide === i ? '#FFFFFF' : 'rgba(255,255,255,.34)',
-                borderRadius: '999px',
-                transition: 'width .45s ease, background .45s ease',
               }}
             />
           </button>
         ))}
-        <span className="ml-2 text-[11px] font-semibold text-white/55 tracking-wider">{`0${slide + 1} / 03`}</span>
+
+        {/* WCAG 2.2.2: a mechanism to pause anything auto-updating for more
+            than five seconds. Hover and focus pause it too, but neither is a
+            "mechanism" a touch or switch user can reach. */}
+        <button
+          type="button"
+          aria-label={paused ? playbackLabel.play : playbackLabel.pause}
+          aria-pressed={paused}
+          onClick={() => setPaused((current) => !current)}
+          className="ml-1 flex h-11 w-11 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/10"
+        >
+          {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+        </button>
+
+        <span className="text-[11px] font-semibold text-white/55 tracking-wider">{`0${slide + 1} / 03`}</span>
       </div>
     </section>
   );
