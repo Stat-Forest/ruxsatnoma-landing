@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Bale, Hive, Log, Sheep } from './shapes';
+import { Bale, Hive, Isolines, Log, Sheep } from './shapes';
 
 /**
  * The home page hero's three backgrounds: one layered mountain-and-forest
@@ -64,27 +64,6 @@ function ForestBand({
     trees.push(<Conifer key={trees.length} x={x} y={y + rnd() * 6} h={h} fill={fill} />);
   }
   return <g opacity={opacity}>{trees}</g>;
-}
-
-/** Topographic isolines — `n` wobbly rings around (cx, cy), the map motif the
- *  permit system is built on, kept faint enough to read as sky texture. */
-function Isolines({
-  cx, cy, n, r0, dr, stroke, opacity,
-}: { cx: number; cy: number; n: number; r0: number; dr: number; stroke: string; opacity: number }): ReactNode {
-  const rings: ReactNode[] = [];
-  for (let k = 0; k < n; k++) {
-    const r = r0 + k * dr;
-    let d = '';
-    for (let i = 0; i <= 36; i++) {
-      const a = (i / 36) * Math.PI * 2;
-      const w = 1 + 0.1 * Math.sin(a * 3 + k * 0.7) + 0.06 * Math.sin(a * 5 + k * 1.3) + 0.04 * Math.cos(a * 7 + k);
-      const x = cx + Math.cos(a) * r * w * 1.35;
-      const y = cy + Math.sin(a) * r * w;
-      d += `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)} `;
-    }
-    rings.push(<path key={k} d={`${d}Z`} stroke={stroke} strokeWidth="1" fill="none" opacity={opacity} />);
-  }
-  return <>{rings}</>;
 }
 
 /** A ranger's lookout tower on the ridge; base centred at (x, y). */
