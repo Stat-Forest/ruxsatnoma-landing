@@ -1,0 +1,380 @@
+/* ==========================================================================
+   O'rmon Xo'jaligi Portal - Redesign Color System & Theme
+   ==========================================================================
+   Color Tokens:
+   - Primary Deep Green:        #0F3D2E
+   - Accent Bright Green:       #2ECC71 and #3CCB7F
+   - Secondary Earth Tone:      #8B6F47
+   - Background Tint:           #F4F9F6
+   - Card Background:           #EFF7F2
+   - Text:                      #1C2B24
+   - Green-to-Teal Gradient:    #0F3D2E -> #166D56 -> #2ECC71 / #3CCB7F
+   ========================================================================== */
+
+:root,
+.theme-redesign {
+  /* ------------------------------------------------------------------------
+     1. Primary Deep Green (#0F3D2E)
+     Core portal brand color representing lush forest depth and stability.
+     ------------------------------------------------------------------------ */
+  --primary-deep-green: #0F3D2E;
+  --color-primary-deep: #0F3D2E;
+  --color-primary: #0F3D2E;
+  --primary: #0F3D2E;
+  --color-primary-deep-rgb: 15, 61, 46;
+  --color-primary-deep-hover: #154c3a;
+  --color-primary-deep-active: #0a291f;
+  --color-primary-deep-subtle: rgba(15, 61, 46, 0.08);
+
+  /* ------------------------------------------------------------------------
+     2. Accent Bright Green (#2ECC71 and #3CCB7F)
+     High-energy botanical accents for buttons, glowing indicators, badges,
+     and interactive state highlights.
+     ------------------------------------------------------------------------ */
+  /* Accent Bright Green (Primary Accent) */
+  --accent-bright-green: #2ECC71;
+  --color-accent-bright: #2ECC71;
+  --color-accent: #2ECC71;
+  --accent: #2ECC71;
+  --color-accent-bright-rgb: 46, 204, 113;
+  --color-accent-bright-hover: #27ae60;
+  --color-accent-bright-active: #229954;
+  --color-accent-bright-subtle: rgba(46, 204, 113, 0.12);
+
+  /* Accent Bright Green Alternate (Emerald Accent) */
+  --accent-bright-green-alt: #3CCB7F;
+  --accent-bright-green-emerald: #3CCB7F;
+  --color-accent-emerald: #3CCB7F;
+  --color-accent-bright-alt: #3CCB7F;
+  --color-accent-emerald-rgb: 60, 203, 127;
+  --color-accent-emerald-hover: #32b56f;
+  --color-accent-emerald-active: #289e5f;
+  --color-accent-emerald-subtle: rgba(60, 203, 127, 0.12);
+
+  /* ------------------------------------------------------------------------
+     3. Secondary Earth Tone (#8B6F47)
+     Warm organic earth / soil tone for botanical context, regional badges,
+     secondary chips, and forestry grounding.
+     ------------------------------------------------------------------------ */
+  --secondary-earth-tone: #8B6F47;
+  --color-secondary-earth: #8B6F47;
+  --color-secondary: #8B6F47;
+  --color-earth-tone: #8B6F47;
+  --secondary-earth: #8B6F47;
+  --color-secondary-earth-rgb: 139, 111, 71;
+  --color-secondary-earth-hover: #795f3b;
+  --color-secondary-earth-active: #664f30;
+  --color-secondary-earth-subtle: rgba(139, 111, 71, 0.12);
+
+  /* ------------------------------------------------------------------------
+     4. Background Tint (#F4F9F6)
+     Delicate botanical tint for full-page backgrounds and section canvases.
+     ------------------------------------------------------------------------ */
+  --background-tint: #F4F9F6;
+  --color-background-tint: #F4F9F6;
+  --color-bg-tint: #F4F9F6;
+  --bg-tint: #F4F9F6;
+  --color-bg-tint-rgb: 244, 249, 246;
+
+  /* ------------------------------------------------------------------------
+     5. Card Background (#EFF7F2)
+     Fresh, subtle card and surface tone delivering clean depth and contrast.
+     ------------------------------------------------------------------------ */
+  --card-background: #EFF7F2;
+  --color-card-background: #EFF7F2;
+  --color-card-bg: #EFF7F2;
+  --card-bg: #EFF7F2;
+  --color-card-bg-rgb: 239, 247, 242;
+  --color-card-bg-hover: #e6f2eb;
+
+  /* ------------------------------------------------------------------------
+     6. Text (#1C2B24)
+     Deep forest charcoal text providing high contrast, readability, and warmth.
+     ------------------------------------------------------------------------ */
+  --text: #1C2B24;
+  --text-color: #1C2B24;
+  --color-text: #1C2B24;
+  --color-text-primary: #1C2B24;
+  --color-text-main: #1C2B24;
+  --color-text-rgb: 28, 43, 36;
+  --color-text-muted: #4B5A52;
+  --color-text-subtle: #708076;
+  --color-text-inverse: #FFFFFF;
+
+  /* ------------------------------------------------------------------------
+     7. Green-to-Teal Gradients
+     Organic transitions connecting Deep Green (#0F3D2E) to Bright Green / Teal.
+     ------------------------------------------------------------------------ */
+  --gradient-green-to-teal: linear-gradient(135deg, #0F3D2E 0%, #156B52 50%, #2ECC71 100%);
+  --gradient-green-teal: linear-gradient(135deg, #0F3D2E 0%, #166D56 50%, #3CCB7F 100%);
+  --gradient-green-teal-h: linear-gradient(90deg, #0F3D2E 0%, #156B52 50%, #2ECC71 100%);
+  --gradient-green-teal-v: linear-gradient(180deg, #0F3D2E 0%, #156B52 60%, #2ECC71 100%);
+  --gradient-green-teal-soft: linear-gradient(135deg, rgba(15, 61, 46, 0.95) 0%, rgba(21, 107, 82, 0.9) 50%, rgba(46, 204, 113, 0.85) 100%);
+  --gradient-teal-green: linear-gradient(135deg, #3CCB7F 0%, #166D56 50%, #0F3D2E 100%);
+  --gradient-radial-green-teal: radial-gradient(circle at top right, #3CCB7F 0%, #166D56 45%, #0F3D2E 100%);
+
+  /* Borders & Shadows */
+  --border-forest-subtle: rgba(15, 61, 46, 0.08);
+  --border-forest-medium: rgba(15, 61, 46, 0.16);
+  --border-accent-glow: rgba(46, 204, 113, 0.35);
+  --shadow-redesign-sm: 0 1px 3px rgba(15, 61, 46, 0.06), 0 1px 2px rgba(15, 61, 46, 0.04);
+  --shadow-redesign-md: 0 4px 14px -1px rgba(15, 61, 46, 0.08), 0 2px 6px -1px rgba(15, 61, 46, 0.04);
+  --shadow-redesign-lg: 0 12px 28px -4px rgba(15, 61, 46, 0.12), 0 4px 10px -2px rgba(15, 61, 46, 0.06);
+  --shadow-accent-glow: 0 0 20px rgba(46, 204, 113, 0.35);
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* Background Utilities */
+.bg-primary-deep {
+  background-color: var(--color-primary-deep) !important;
+}
+
+.bg-accent-bright {
+  background-color: var(--color-accent-bright) !important;
+}
+
+.bg-accent-emerald,
+.bg-accent-bright-alt {
+  background-color: var(--color-accent-emerald) !important;
+}
+
+.bg-secondary-earth {
+  background-color: var(--color-secondary-earth) !important;
+}
+
+.bg-background-tint,
+.bg-tint {
+  background-color: var(--color-bg-tint) !important;
+}
+
+.bg-card-background,
+.bg-card-redesign {
+  background-color: var(--color-card-bg) !important;
+}
+
+/* Text Color Utilities */
+.text-primary-deep {
+  color: var(--color-primary-deep) !important;
+}
+
+.text-accent-bright {
+  color: var(--color-accent-bright) !important;
+}
+
+.text-accent-emerald,
+.text-accent-bright-alt {
+  color: var(--color-accent-emerald) !important;
+}
+
+.text-secondary-earth {
+  color: var(--color-secondary-earth) !important;
+}
+
+.text-brand,
+.text-body-dark {
+  color: var(--color-text) !important;
+}
+
+.text-brand-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.text-brand-subtle {
+  color: var(--color-text-subtle) !important;
+}
+
+/* Border Color Utilities */
+.border-primary-deep {
+  border-color: var(--color-primary-deep) !important;
+}
+
+.border-accent-bright {
+  border-color: var(--color-accent-bright) !important;
+}
+
+.border-accent-emerald,
+.border-accent-bright-alt {
+  border-color: var(--color-accent-emerald) !important;
+}
+
+.border-secondary-earth {
+  border-color: var(--color-secondary-earth) !important;
+}
+
+.border-forest-subtle {
+  border-color: var(--border-forest-subtle) !important;
+}
+
+.border-forest-medium {
+  border-color: var(--border-forest-medium) !important;
+}
+
+/* Gradient Background Utilities */
+.bg-gradient-green-to-teal,
+.bg-gradient-green-teal {
+  background-image: var(--gradient-green-to-teal) !important;
+}
+
+.bg-gradient-green-teal-h {
+  background-image: var(--gradient-green-teal-h) !important;
+}
+
+.bg-gradient-green-teal-v {
+  background-image: var(--gradient-green-teal-v) !important;
+}
+
+.bg-gradient-green-teal-soft {
+  background-image: var(--gradient-green-teal-soft) !important;
+}
+
+.bg-gradient-teal-green {
+  background-image: var(--gradient-teal-green) !important;
+}
+
+/* Gradient Text Clipping */
+.text-gradient-green-teal {
+  background-image: var(--gradient-green-to-teal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ==========================================================================
+   Component Surface & Interaction Presets
+   ========================================================================== */
+
+/* Redesign Card Surface */
+.card-redesign {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--border-forest-subtle);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-redesign-sm);
+  color: var(--color-text);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-redesign:hover {
+  background-color: var(--color-card-bg-hover);
+  border-color: var(--border-forest-medium);
+  box-shadow: var(--shadow-redesign-md);
+  transform: translateY(-2px);
+}
+
+/* Redesign Badges */
+.badge-accent-bright {
+  background-color: var(--color-accent-bright-subtle);
+  color: var(--color-primary-deep);
+  border: 1px solid rgba(46, 204, 113, 0.28);
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.badge-earth-tone {
+  background-color: var(--color-secondary-earth-subtle);
+  color: var(--color-secondary-earth);
+  border: 1px solid rgba(139, 111, 71, 0.28);
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Redesign Button Presets */
+.btn-redesign-primary {
+  background-color: var(--color-primary-deep);
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.18s ease-in-out;
+  box-shadow: var(--shadow-redesign-sm);
+  cursor: pointer;
+}
+
+.btn-redesign-primary:hover {
+  background-color: var(--color-primary-deep-hover);
+  box-shadow: var(--shadow-redesign-md);
+  transform: translateY(-1px);
+}
+
+.btn-redesign-primary:active {
+  background-color: var(--color-primary-deep-active);
+  transform: translateY(0);
+}
+
+.btn-redesign-accent {
+  background-color: var(--color-accent-bright);
+  color: #0F3D2E;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  transition: all 0.18s ease-in-out;
+  box-shadow: 0 2px 10px rgba(46, 204, 113, 0.25);
+  cursor: pointer;
+}
+
+.btn-redesign-accent:hover {
+  background-color: var(--color-accent-bright-hover);
+  box-shadow: var(--shadow-accent-glow);
+  transform: translateY(-1px);
+}
+
+.btn-redesign-accent:active {
+  background-color: var(--color-accent-bright-active);
+  transform: translateY(0);
+}
+
+.btn-redesign-earth {
+  background-color: var(--color-secondary-earth);
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.18s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-redesign-earth:hover {
+  background-color: var(--color-secondary-earth-hover);
+  transform: translateY(-1px);
+}
+
+.btn-redesign-earth:active {
+  background-color: var(--color-secondary-earth-active);
+  transform: translateY(0);
+}
+
+.btn-redesign-gradient {
+  background-image: var(--gradient-green-to-teal);
+  color: #FFFFFF;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  transition: all 0.18s ease-in-out;
+  box-shadow: 0 4px 14px rgba(15, 61, 46, 0.2);
+  cursor: pointer;
+}
+
+.btn-redesign-gradient:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-redesign-gradient:active {
+  transform: translateY(0);
+}

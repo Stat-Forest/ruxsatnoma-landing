@@ -1,7 +1,13 @@
 /** Header, footer and anything shared by more than one page — Karakalpak copy. */
 export const common = {
-  'brand.name': 'ruxsatnoma-urmon.uz',
-  'brand.tagline': 'Orman xojalıǵı mámleketlik portali',
+  'brand.name':
+    'ÓZBEKSTAN RESPUBLIKASÍ EKOLOGIYA, QORSHAǴAN ORTALÍQTÍ QORǴAW HÁM ÍQLÍM ÓZGERISI MINISTRLIGI QASÍNDAǴÍ ORMAN HÁM JASPÍL AYMAQLARDÍ KÓBEYTIW, SHÓLLESIWGE QARSÍ GÚRESIW AGENTLIGI RUXSATNAMA ALÍW PORTALÍ',
+  'brand.ministry':
+    'Ózbekstan Respublikası Ekologiya, qorshaǵan ortalıqtı qorǵaw hám ıqlım ózgerisi ministrligi qasındaǵı',
+  'brand.agency':
+    'Orman hám jaspıl aymaqlardı kóbeytiw, shóllesiwge qarsı gúresiw agentligi',
+  'brand.portal': 'Ruxsatnama alıw portalı',
+  'brand.tagline': 'Ruxsatnama alıw portalı',
 
   'nav.home': 'Bas bet',
   'nav.services': 'Xızmetler',

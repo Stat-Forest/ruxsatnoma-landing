@@ -164,57 +164,78 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
   const currentMonth = new Date().getMonth() + 1;
 
   return (
-    <div className="border border-[#E4E7EA] rounded-[20px] p-6 sm:p-10">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-        <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
+    <div className="relative bg-white/95 backdrop-blur-md border border-[#D6E6DB] rounded-2xl p-4 sm:p-6 shadow-[0_8px_28px_rgba(18,53,34,0.05)] overflow-hidden transition-all duration-300">
+      {/* ── Top Ambient Accent & Glow ── */}
+      <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#2E7D4F]/50 to-transparent" />
+      <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#2E7D4F]/5 rounded-full blur-2xl pointer-events-none" />
+
+      {/* ── Header Section ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-lg">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
             {text.badge}
           </span>
-          <h2 className="mt-4 text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
+          <h2 className="mt-1.5 text-lg sm:text-xl font-black text-[#123522] tracking-tight">
             {text.title}
           </h2>
-          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">{text.subtitle}</p>
+          <p className="mt-1 text-[11.5px] sm:text-xs leading-relaxed text-[#5A646D]">{text.subtitle}</p>
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-xs font-extrabold uppercase tracking-wider text-[#767F87]">
-            {text.currentMonthLabel}
+
+        {/* Compact Dynamic Current Month Card */}
+        <div className="flex items-center gap-2.5 bg-gradient-to-br from-[#F0F8F3] to-[#E3F3E8] border border-[#C6E6CF] px-3 py-1.5 rounded-xl shadow-xs shrink-0 self-start sm:self-auto">
+          <div className="w-8 h-8 rounded-lg bg-white flex flex-col items-center justify-center shadow-xs border border-[#D1EBD8]">
+            <span className="text-[7.5px] font-black text-[#2E7D4F] uppercase leading-none">
+              {months.short[currentMonth - 1]}
+            </span>
+            <span className="text-xs font-black text-[#123522] leading-none mt-0.5">
+              {new Date().getDate()}
+            </span>
           </div>
-          <div data-testid="season-current-month" className="mt-1.5 text-2xl sm:text-[28px] font-black text-[#123522]">
-            {months.full[currentMonth - 1]}
+          <div>
+            <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#23653F]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#16A34A]" />
+              </span>
+              {text.currentMonthLabel}
+            </div>
+            <div data-testid="season-current-month" className="text-sm sm:text-base font-black text-[#123522] tracking-tight leading-tight">
+              {months.full[currentMonth - 1]}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 overflow-x-auto">
-        <div className="min-w-[720px]">
-          <div className="grid gap-3" style={{ gridTemplateColumns: '200px 1fr 92px' }}>
-            <div />
-            <div className="grid grid-cols-12 gap-1.5">
-              {months.short.map((label, idx) => (
-                <div
-                  key={label}
-                  className={`text-center text-[11px] uppercase tracking-wide ${
-                    idx + 1 === currentMonth ? 'font-extrabold text-[#123522]' : 'font-semibold text-[#767F87]'
-                  }`}
-                >
-                  {label}
-                </div>
-              ))}
+      {/* ── Compact Table Matrix ── */}
+      <div className="mt-4 overflow-x-auto pb-1">
+        <div className="min-w-[680px]">
+          {/* Months Header Row */}
+          <div className="grid gap-2.5 items-center mb-2 px-2.5" style={{ gridTemplateColumns: '175px 1fr 78px' }}>
+            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">Yoʻnalish</div>
+            <div className="grid grid-cols-12 gap-1">
+              {months.short.map((label, idx) => {
+                const isCurrent = idx + 1 === currentMonth;
+                return (
+                  <div key={label} className="flex justify-center">
+                    {isCurrent ? (
+                      <span className="px-1.5 py-0.5 rounded bg-[#123522] text-[#9CE3AE] font-black text-[9px] uppercase tracking-wider shadow-xs animate-pulse">
+                        {label}
+                      </span>
+                    ) : (
+                      <span className="text-center text-[10px] font-bold text-[#767F87] hover:text-[#123522] uppercase tracking-wide transition-colors">
+                        {label}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div />
+            <div className="text-right text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">Holat</div>
           </div>
 
-          <div className="mt-3 flex flex-col gap-2.5">
+          {/* Compact Activity Rows */}
+          <div className="flex flex-col gap-1">
             {ROWS.map(({ code, color }) => {
-              // THREE states, not two. `windows[code] ?? []` used to collapse
-              // "the backend never described this activity" into "closed all
-              // twelve months" — twelve grey cells and a "Yopiq" badge
-              // telling a citizen an activity is shut when the truth is that
-              // nobody knows. An absent key and an empty array are different
-              // answers, and only the second one means closed.
-              // `windows` itself is defended too: the day the backend moved
-              // the seasons to their own route, this read got `undefined`
-              // for the whole map and took the home page down with it.
               const openMonths = windows?.[code];
               const known = Array.isArray(openMonths);
               const isOpenNow = known && openMonths.includes(currentMonth);
@@ -222,44 +243,60 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                 <div
                   key={code}
                   data-testid={`season-row-${code}`}
-                  className="grid gap-3 items-center"
-                  style={{ gridTemplateColumns: '200px 1fr 92px' }}
+                  className="group/row grid gap-2.5 items-center px-2.5 py-1.5 rounded-lg hover:bg-[#F2F8F4] transition-all duration-150"
+                  style={{ gridTemplateColumns: '175px 1fr 78px' }}
                 >
-                  <div className="text-sm font-bold text-[#1A1F24]">{pickName(undefined, uiLanguage, code)}</div>
-                  <div className="grid grid-cols-12 gap-1.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#1A1F24] group-hover/row:text-[#123522] transition-colors">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0 shadow-xs transition-transform duration-150 group-hover/row:scale-125"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="truncate">{pickName(undefined, uiLanguage, code)}</span>
+                  </div>
+                  <div className="grid grid-cols-12 gap-1">
                     {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
                       const open = known && openMonths.includes(month);
                       const isCurrent = month === currentMonth;
                       return (
                         <div
                           key={month}
-                          className="h-[26px] rounded-md"
+                          title={`${pickName(undefined, uiLanguage, code)} — ${months.full[month - 1]}: ${open ? text.open : text.closed}`}
+                          className={`h-[21px] rounded-md transition-all duration-150 relative group/cell cursor-pointer ${
+                            isCurrent ? 'scale-[1.08] z-10' : 'hover:scale-110 hover:z-10'
+                          }`}
                           style={{
-                            // An unknown row is hatched, so it cannot be read
-                            // at a glance as the flat grey of a closed one.
                             background: open
                               ? color
                               : known
-                                ? '#F1F3F4'
+                                ? '#EFF2F4'
                                 : 'repeating-linear-gradient(45deg, #E9ECEE 0 3px, #F8F9FA 3px 6px)',
-                            boxShadow: isCurrent ? '0 0 0 2px #123522' : undefined,
+                            boxShadow: isCurrent
+                              ? '0 0 0 2px #123522, 0 2px 8px rgba(18,53,34,0.22)'
+                              : undefined,
                           }}
-                        />
+                        >
+                          {open && (
+                            <div className="absolute inset-0 rounded-md bg-gradient-to-b from-white/20 via-transparent to-black/10 pointer-events-none" />
+                          )}
+                        </div>
                       );
                     })}
                   </div>
                   <div className="text-right">
                     {!known ? (
-                      <span className="inline-flex px-2.5 py-1 rounded-full bg-white border border-dashed border-[#C9D0D6] text-xs font-bold text-[#767F87]">
+                      <span className="inline-flex px-2 py-0.5 rounded-full bg-white border border-dashed border-[#C9D0D6] text-[10.5px] font-semibold text-[#767F87]">
                         {text.unknown}
                       </span>
                     ) : isOpenNow ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold text-[#23653F]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F]" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] border border-[#BDE5CB] text-[10.5px] font-extrabold text-[#1E6B3D] shadow-xs group-hover/row:border-[#2E7D4F] transition-all">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#22C55E]" />
+                        </span>
                         {text.open}
                       </span>
                     ) : (
-                      <span className="inline-flex px-2.5 py-1 rounded-full bg-[#F8F9FA] border border-[#E4E7EA] text-xs font-bold text-[#9AA3AB]">
+                      <span className="inline-flex px-2.5 py-0.5 rounded-full bg-[#F4F6F5] border border-[#E1E6E3] text-[10.5px] font-medium text-[#8F9AA2]">
                         {text.closed}
                       </span>
                     )}
@@ -271,9 +308,10 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
         </div>
       </div>
 
-      <div role="note" className="mt-6 flex items-start gap-2.5 px-4 py-3.5 rounded-xl bg-[#FEF7ED] border border-[#F5DEB8]">
-        <AlertCircle className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
-        <span className="text-[13px] leading-relaxed text-[#3F4A52]">
+      {/* ── Compact Note Banner ── */}
+      <div role="note" className="mt-3.5 flex items-start gap-2.5 px-3 py-2 rounded-xl bg-[#FEF8F0] border border-[#F6E1C3] shadow-xs">
+        <AlertCircle className="w-3.5 h-3.5 text-[#C05621] shrink-0 mt-0.5" />
+        <span className="text-[11px] leading-relaxed text-[#5C4535]">
           <span className="font-bold text-[#1A1F24]">{text.noteBold}</span> {text.noteRest}
         </span>
       </div>

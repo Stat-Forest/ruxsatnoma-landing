@@ -1,7 +1,13 @@
 /** Header, footer and anything shared by more than one page — English copy. */
 export const common = {
-  'brand.name': 'ruxsatnoma-urmon.uz',
-  'brand.tagline': 'State Forestry Portal',
+  'brand.name':
+    'PERMIT PORTAL OF THE FORESTRY AND GREEN AREAS EXPANSION, COMBATING DESERTIFICATION AGENCY UNDER THE MINISTRY OF ECOLOGY, ENVIRONMENTAL PROTECTION AND CLIMATE CHANGE OF THE REPUBLIC OF UZBEKISTAN',
+  'brand.ministry':
+    'Ministry of Ecology, Environmental Protection and Climate Change of the Republic of Uzbekistan',
+  'brand.agency':
+    'Forestry and Green Areas Expansion, Combating Desertification Agency',
+  'brand.portal': 'Permit Issuance Portal',
+  'brand.tagline': 'Permit issuance portal',
 
   'nav.home': 'Home',
   'nav.services': 'Services',

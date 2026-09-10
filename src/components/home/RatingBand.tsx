@@ -3,6 +3,7 @@ import { useLanguage } from '../../i18n/useT';
 import { BASE_URL } from '../../api/client';
 import { DASH } from '../../lib/format';
 import type { UiLanguage } from '../../i18n/context';
+import ratingBgImg from '../../assets/img/rating-bg.jpg';
 
 /**
  * `GET /api/v1/public/ratings/summary` — NOT YET MERGED into `dev` at the
@@ -126,9 +127,27 @@ export function RatingBand({ state }: RatingBandProps) {
     return (
       <div
         data-testid="home-rating"
-        className="mt-5 rounded-2xl border border-[#D9EBDC] bg-[#123522] px-6 py-7 sm:px-9"
+        className="group relative mt-5 rounded-2xl border border-[#2E7D4F]/50 shadow-[0_16px_40px_rgba(10,35,20,0.18)] px-6 py-7 sm:px-9 overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #0D2617 0%, #143A26 50%, #0A1F13 100%)',
+        }}
       >
-        <p className="text-sm text-[#C4D8C9]">{text.unavailable}</p>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img
+            src={ratingBgImg}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center opacity-30 mix-blend-luminosity"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(13,38,23,0.92) 0%, rgba(18,53,34,0.85) 50%, rgba(10,31,19,0.92) 100%)',
+            }}
+          />
+        </div>
+        <p className="relative z-10 text-sm text-[#C4D8C9]">{text.unavailable}</p>
       </div>
     );
   }
@@ -139,9 +158,27 @@ export function RatingBand({ state }: RatingBandProps) {
     return (
       <div
         data-testid="home-rating"
-        className="mt-5 rounded-2xl border border-[#D9EBDC] bg-[#123522] px-6 py-7 sm:px-9"
+        className="group relative mt-5 rounded-2xl border border-[#2E7D4F]/50 shadow-[0_16px_40px_rgba(10,35,20,0.18)] px-6 py-7 sm:px-9 overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #0D2617 0%, #143A26 50%, #0A1F13 100%)',
+        }}
       >
-        <p className="text-sm leading-relaxed text-[#C4D8C9]">{text.suppressed}</p>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img
+            src={ratingBgImg}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center opacity-30 mix-blend-luminosity"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(13,38,23,0.92) 0%, rgba(18,53,34,0.85) 50%, rgba(10,31,19,0.92) 100%)',
+            }}
+          />
+        </div>
+        <p className="relative z-10 text-sm leading-relaxed text-[#C4D8C9]">{text.suppressed}</p>
       </div>
     );
   }
@@ -152,21 +189,53 @@ export function RatingBand({ state }: RatingBandProps) {
   return (
     <div
       data-testid="home-rating"
-      className="mt-5 rounded-2xl border border-[#D9EBDC] bg-[#123522] px-6 py-7 sm:px-9 sm:py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-8"
+      className="group relative mt-5 rounded-2xl border border-[#2E7D4F]/60 shadow-[0_16px_40px_rgba(10,35,20,0.22)] px-6 py-7 sm:px-9 sm:py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-8 overflow-hidden transition-all duration-300"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+      {/* ── Panoramic Real Forest Nature Photo Background ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <img
+          src={ratingBgImg}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover object-center brightness-[0.82] contrast-[1.08] scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
+        {/* Directional contrast gradient: deeper on edges, open in center for mountain view */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(7,24,14,0.86) 0%, rgba(7,24,14,0.52) 42%, rgba(7,24,14,0.38) 68%, rgba(7,24,14,0.80) 100%)',
+          }}
+        />
+        {/* Subtle top/bottom edge shadow */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(7,24,14,0.35) 0%, transparent 40%, rgba(7,24,14,0.5) 100%)',
+          }}
+        />
+        {/* Soft glowing ambient emerald orbs for richness */}
+        <div className="absolute -top-12 -left-12 w-48 h-48 bg-[#2ECC71]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-[#34D399]/20 rounded-full blur-3xl pointer-events-none" />
+        {/* Top edge glass sheen */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      </div>
+
+      {/* ── Foreground Content ── */}
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
         <div>
           <div className="flex items-baseline gap-2.5">
-            <span className="font-serif text-4xl sm:text-5xl font-black text-white tracking-tight">
+            <span className="font-serif text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
               {averageDisplay}
             </span>
-            <span className="text-sm font-bold text-[#9CE3AE]">/ 5</span>
+            <span className="text-sm font-bold text-[#A7F3D0] drop-shadow-sm">/ 5</span>
           </div>
           <div className="mt-3 flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <Star
                 key={n}
-                className="w-[18px] h-[18px]"
+                className="w-[18px] h-[18px] drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]"
                 fill={n <= filled ? '#FBBF24' : 'none'}
                 stroke="#FBBF24"
                 strokeWidth={1.6}
@@ -174,23 +243,25 @@ export function RatingBand({ state }: RatingBandProps) {
             ))}
           </div>
         </div>
-        <div className="hidden sm:block w-px h-14 bg-white/15" />
+        <div className="hidden sm:block w-px h-14 bg-white/25" />
         <div className="max-w-md">
-          <div className="text-base font-extrabold text-white">{text.title}</div>
-          <div className="mt-1.5 text-sm leading-relaxed text-[#C4D8C9]">
+          <div className="text-base font-extrabold text-white tracking-tight drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
+            {text.title}
+          </div>
+          <div className="mt-1.5 text-sm leading-relaxed text-[#E1EFE3] drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
             {text.description(summary.count)}
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-1.5 w-full md:w-64">
+      <div className="relative z-10 flex flex-col gap-1.5 w-full md:w-64 bg-black/35 backdrop-blur-md p-3.5 rounded-xl border border-white/15 shadow-md">
         {SCORES.map((score) => {
           const value = summary.histogram?.[String(score)] ?? 0;
           const pct = summary.count > 0 ? Math.round((value / summary.count) * 100) : 0;
           return (
             <div key={score} className="flex items-center gap-2.5">
-              <span className="w-3 text-xs font-semibold text-[#C4D8C9]">{score}</span>
-              <div className="flex-1 h-[7px] rounded-full bg-white/15">
-                <div className="h-[7px] rounded-full" style={{ width: `${pct}%`, background: barColor(score) }} />
+              <span className="w-3 text-xs font-bold text-[#E1EFE3] drop-shadow-xs">{score}</span>
+              <div className="flex-1 h-[7px] rounded-full bg-white/20 overflow-hidden">
+                <div className="h-[7px] rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: barColor(score) }} />
               </div>
             </div>
           );

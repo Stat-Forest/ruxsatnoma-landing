@@ -46,22 +46,38 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
+      - name: Check for deploy credentials
+        id: check_creds
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "DEPLOY_SSH_KEY is not configured — skipping dev deployment."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # Checkout first — it wipes the workspace, which would delete an artifact downloaded
       # before it.
       - uses: actions/checkout@v4
+        if: steps.check_creds.outputs.skip != 'true'
 
       - name: Download the bundle
+        if: steps.check_creds.outputs.skip != 'true'
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Load the SSH key
+        if: steps.check_creds.outputs.skip != 'true'
         uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Trust the server host key
+        if: steps.check_creds.outputs.skip != 'true'
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
@@ -70,6 +86,7 @@ jobs:
           ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Ship dist, deploy/ and the compose file
+        if: steps.check_creds.outputs.skip != 'true'
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -85,6 +102,7 @@ jobs:
                 "tar -xzf - -C '$DEPLOY_PATH'"
 
       - name: Rebuild and roll
+        if: steps.check_creds.outputs.skip != 'true'
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -102,6 +120,7 @@ jobs:
           REMOTE
 
       - name: Verify the public endpoint
+        if: steps.check_creds.outputs.skip != 'true'
         # Behind a Kerio gateway that terminates TLS with an expired certificate and does
         # not yet publish this hostname — -k skirts the cert, but a failure here may still
         # be unrelated to the deploy, so it must not fail the workflow.
