@@ -325,6 +325,74 @@ it('says the ratings are unavailable rather than blank when the summary fails to
   expect(await screen.findByTestId('home-rating')).toHaveTextContent(/vaqtincha mavjud emas/i);
 });
 
+/**
+ * Ruling R3: the season strip may only ever show months the settings
+ * endpoint actually returned — never a fallback set invented locally.
+ */
+it('draws the season strip from the site-settings response', async () => {
+  mockBackend();
+  mockFetch({
+    siteSettings: {
+      contacts: {
+        phone: '', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: '', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: {
+        grazing: [9], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [],
+      },
+    },
+  });
+  renderHome();
+  expect(await screen.findByTestId('season-row-grazing')).toBeInTheDocument();
+  expect(screen.getByRole('note')).toHaveTextContent(/Agentlik tomonidan tasdiqlanadi/i);
+});
+
+it('renders no season strip at all when the settings fetch fails', async () => {
+  mockBackend();
+  mockFetch({ siteSettingsFails: true });
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
+  expect(screen.queryByRole('note')).not.toBeInTheDocument();
+});
+
+it('sends the map band to the map page', async () => {
+  mockBackend();
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: /Xaritani ochish/i }));
+  expect(onNavigate).toHaveBeenCalledWith('map');
+});
+
+it('shows the live phone in the support CTA once site-settings answers', async () => {
+  mockBackend();
+  mockFetch({
+    siteSettings: {
+      contacts: {
+        phone: '+998 71 000 00 00', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: 'Dushanba – juma', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: { grazing: [], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [] },
+    },
+  });
+  renderHome();
+  expect(await screen.findByText('+998 71 000 00 00')).toBeInTheDocument();
+});
+
+it('hides the CTA phone row rather than inventing one when contacts are unavailable', async () => {
+  mockBackend();
+  mockFetch({ siteSettingsFails: true });
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByText(/^\+998/)).not.toBeInTheDocument();
+});
+
 /** As `GET /public/refs/activity-types` might one day answer with the full
  *  catalogue — one row per `Scene` kind, in that component's own order. */
 const sixActivities = [

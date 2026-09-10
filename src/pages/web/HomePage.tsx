@@ -3,6 +3,7 @@ import { Link, useInRouterContext, useLocation } from 'react-router';
 import {
   Search,
   QrCode,
+  ArrowRight,
   FileCheck2,
   Users,
   Trees,
@@ -10,6 +11,9 @@ import {
   PhoneCall,
   ExternalLink,
   MapPin,
+  UserRound,
+  Map as MapIcon,
+  Calculator as CalculatorIcon,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
@@ -17,12 +21,14 @@ import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { HeroSlider } from '../../components/home/HeroSlider';
 import { RatingBand, fetchRatingSummary, type RatingBandState } from '../../components/home/RatingBand';
+import { SeasonStrip } from '../../components/home/SeasonStrip';
 import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
 import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../../api/news';
 import { fetchServices, type Service } from '../../api/services';
+import { fetchSiteSettings, type SiteSettings } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
 import type { components } from '../../api/schema';
 
@@ -36,6 +42,11 @@ type StatsState =
 type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
 
 type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: Service[] };
+
+type SiteSettingsState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; data: SiteSettings };
 
 /** Shown instead of a figure until the aggregates endpoint has answered — an
  *  em dash is a statement that the number is not known yet, which is the
@@ -215,6 +226,27 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     };
   }, []);
 
+  // Site settings feed two sections at once (Task 10): the season strip's
+  // `season_windows` (ruling R3) and the support CTA's live phone/hours.
+  // `null` on any failure — the season strip then does not render at all
+  // (a calendar with no confirmed months is worse than no calendar) and the
+  // CTA's phone/hours rows simply do not render either, same posture as the
+  // footer's own use of this endpoint (`PublicLayout`, Task 7).
+  const [siteSettingsState, setSiteSettingsState] = useState<SiteSettingsState>({ status: 'loading' });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const data = await fetchSiteSettings();
+      if (!cancelled) {
+        setSiteSettingsState(data ? { status: 'ready', data } : { status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
   // "real-time monitoring" while the system held two active permits (stage 7.3
@@ -338,6 +370,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     const query = `${quickSeries.trim()} ${quickNumber.trim()}`.trim();
     onNavigate?.('verify', query ? { query } : undefined);
   };
+
+  // The support CTA's live phone/hours (Task 10) — same `siteSettingsState`
+  // the season strip below reads, so one fetch feeds both. Renders nothing
+  // per row when the value is missing, same posture as the footer.
+  const ctaContacts = siteSettingsState.status === 'ready' ? siteSettingsState.data.contacts : null;
+  const ctaPhone = ctaContacts?.phone ?? '';
+  const ctaHours = ctaContacts ? pickLocalized(ctaContacts.hours, language) : '';
 
   return (
     <div className="space-y-16 font-sans">
@@ -529,31 +568,61 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         )}
       </section>
 
-      {/* ── 4. HOW IT WORKS TIMELINE ───────────────────────────────── */}
-      <section className="bg-white border border-[#E4E7EA] rounded-2xl p-8 shadow-xs space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.steps.sectionBadge')}</span>
-          <h2 className="text-2xl font-bold text-[#1A1F24]">{t('home.steps.sectionTitle')}</h2>
-          <p className="text-sm text-[#5A646D] pt-1 leading-relaxed">{t('home.steps.sectionSubtitle')}</p>
+      {/* ── 4. SEASON CALENDAR (ruling R3) ──────────────────────────
+          Only when `siteSettingsState` has actually answered: a calendar
+          with no confirmed months is worse than no calendar, so a failed
+          fetch renders nothing here rather than inventing a fallback set. */}
+      {siteSettingsState.status === 'ready' && (
+        <section>
+          <SeasonStrip windows={siteSettingsState.data.season_windows} />
+        </section>
+      )}
+
+      {/* ── 5. HOW IT WORKS — FOUR STEPS ─────────────────────────────── */}
+      <section>
+        <div className="max-w-xl mb-10">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
+            {t('home.steps.sectionBadge')}
+          </span>
+          <h2 className="mt-4 text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
+            {t('home.steps.sectionTitle')}
+          </h2>
+          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">
+            {t('home.steps.sectionSubtitle')}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-          {[
-            { step: '01', title: t('home.steps.01.title'), desc: t('home.steps.01.desc') },
-            { step: '02', title: t('home.steps.02.title'), desc: t('home.steps.02.desc') },
-            { step: '03', title: t('home.steps.03.title'), desc: t('home.steps.03.desc') },
-            { step: '04', title: t('home.steps.04.title'), desc: t('home.steps.04.desc') },
-          ].map((st, idx) => (
-            <div key={idx} className="relative space-y-3 p-4 bg-[#F8F9FA] border border-[#E4E7EA] rounded-xl">
-              <span className="text-2xl font-black font-mono text-[#2E7D4F]">{st.step}</span>
-              <h3 className="text-base font-bold text-[#1A1F24]">{st.title}</h3>
-              <p className="text-xs text-[#5A646D] leading-relaxed">{st.desc}</p>
-            </div>
-          ))}
+        <div className="relative">
+          <div
+            className="hidden sm:block absolute left-[60px] right-[60px] top-[34px] h-px"
+            style={{ backgroundImage: 'repeating-linear-gradient(90deg, #D9EBDC 0 10px, transparent 10px 20px)' }}
+          />
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { Icon: UserRound, bg: '#123522' },
+              { Icon: MapIcon, bg: '#1B4A2E' },
+              { Icon: CalculatorIcon, bg: '#237443' },
+              { Icon: QrCode, bg: '#2E7D4F' },
+            ].map(({ Icon, bg }, idx) => (
+              <div key={idx}>
+                <div
+                  className="w-[68px] h-[68px] rounded-[20px] flex items-center justify-center shadow-lg"
+                  style={{ background: bg }}
+                >
+                  <Icon className="w-7 h-7 text-[#9CE3AE]" />
+                </div>
+                <div className="mt-5 text-xs font-extrabold text-[#7FB98A] tracking-widest">
+                  {String(idx + 1).padStart(2, '0')}
+                </div>
+                <h3 className="mt-2 text-[19px] font-bold text-[#123522]">{t(`home.steps.0${idx + 1}.title`)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#5A646D]">{t(`home.steps.0${idx + 1}.desc`)}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── 4b. PRICE CALCULATOR ───────────────────────────────────── */}
+      {/* ── 5b. PRICE CALCULATOR ───────────────────────────────────── */}
       {/* Was its own `/tariffs` screen until the news register took that slot
           in the header. It is one form over two anonymous endpoints, and a
           visitor who wants a figure now gets it without leaving the page. */}
@@ -570,74 +639,169 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <PriceCalculator />
       </section>
 
-      {/* ── 5. NEWS & ANNOUNCEMENTS ───────────────────────────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs space-y-6">
-          <div className="flex items-center justify-between border-b border-[#E4E7EA] pb-4">
-            <h3 className="text-lg font-bold text-[#1A1F24]">{t('home.news.sectionTitle')}</h3>
-            <SafeLink
-              to="/news"
-              className="text-xs font-bold text-[#2E7D4F] hover:underline flex items-center gap-1"
+      {/* ── 6. MAP BAND ──────────────────────────────────────────────
+          Decorative preview only — the interactive map (maplibre, the real
+          contours) lives at `/map`, a screen a different track owns. */}
+      <section className="rounded-[20px] overflow-hidden border border-[#E4E7EA] grid grid-cols-1 lg:grid-cols-2">
+        <div className="p-8 sm:p-12 bg-[#123522]">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider text-[#9CE3AE]">
+            {sectionText.mapBadge}
+          </span>
+          <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight">
+            {sectionText.mapTitle}
+          </h2>
+          <p className="mt-4 text-sm sm:text-[15.5px] leading-relaxed text-[#C4D8C9]">{sectionText.mapDescription}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => onNavigate?.('map')}
+              className="inline-flex items-center gap-2 h-12 px-5 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold transition-colors"
             >
-              {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
-            </SafeLink>
+              <span>{sectionText.mapCtaPrimary}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('map')}
+              className="inline-flex items-center h-12 px-5 rounded-xl border border-white/30 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+            >
+              {sectionText.mapCtaSecondary}
+            </button>
           </div>
+        </div>
+        <div className="relative bg-[#DCE9DE] min-h-[260px] sm:min-h-[372px]">
+          <svg
+            viewBox="0 0 640 372"
+            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+          >
+            <rect width="640" height="372" fill="#E7F0E8" />
+            <g stroke="#C6D9C9" strokeWidth="1">
+              <path d="M0 60h640M0 130h640M0 200h640M0 270h640M0 340h640" />
+              <path d="M80 0v372M180 0v372M280 0v372M380 0v372M480 0v372M580 0v372" />
+            </g>
+            <path
+              d="M60 250 C 120 200, 180 260, 240 230 S 340 150, 420 190 S 560 150, 610 200 L 610 340 L 60 330 Z"
+              fill="#B9D6BE"
+              stroke="#7FB98A"
+              strokeWidth="2"
+            />
+            <path
+              d="M150 90 C 210 60, 300 70, 350 110 S 420 170, 360 190 S 220 170, 170 140 Z"
+              fill="#9CCBA4"
+              stroke="#2E7D4F"
+              strokeWidth="2"
+            />
+            <path
+              d="M240 205 C 280 185, 330 195, 348 220 S 320 262, 275 258 S 220 232, 240 205 Z"
+              fill="#2E7D4F"
+              fillOpacity=".38"
+              stroke="#23653F"
+              strokeWidth="2.4"
+              strokeDasharray="6 4"
+            />
+            <circle cx="294" cy="228" r="7" fill="#23653F" />
+            <circle cx="294" cy="228" r="15" fill="none" stroke="#23653F" strokeWidth="2" opacity=".45" />
+          </svg>
+        </div>
+      </section>
 
-          <div className="space-y-4 divide-y divide-[#E4E7EA]" data-testid="home-news">
-            {newsState.status === 'loading' && (
-              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.loading')}</p>
-            )}
-            {newsState.status === 'error' && (
-              <p className="text-xs text-[#92400E] pt-4 first:pt-0">{t('home.news.failed')}</p>
-            )}
-            {newsState.status === 'ready' && (newsState.items ?? []).length === 0 && (
-              <p className="text-xs text-[#5A646D] pt-4 first:pt-0">{t('home.news.empty')}</p>
-            )}
-            {newsState.status === 'ready' &&
-              (newsState.items ?? []).map((item) => (
+      {/* ── 7. NEWS & ANNOUNCEMENTS ──────────────────────────────────── */}
+      <section>
+        <div className="flex items-end justify-between mb-7">
+          <div>
+            <h2 className="text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
+              {t('home.news.sectionTitle')}
+            </h2>
+          </div>
+          <SafeLink
+            to="/news"
+            className="shrink-0 inline-flex items-center gap-2 text-sm font-bold text-[#2E7D4F] hover:underline"
+          >
+            {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
+          </SafeLink>
+        </div>
+
+        <div data-testid="home-news">
+          {newsState.status === 'loading' && <p className="text-xs text-[#5A646D]">{t('home.news.loading')}</p>}
+          {newsState.status === 'error' && <p className="text-xs text-[#92400E]">{t('home.news.failed')}</p>}
+          {newsState.status === 'ready' && (newsState.items ?? []).length === 0 && (
+            <p className="text-xs text-[#5A646D]">{t('home.news.empty')}</p>
+          )}
+          {newsState.status === 'ready' && (newsState.items ?? []).length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(newsState.items ?? []).map((item) => (
                 <SafeLink
                   key={item.id}
                   to={`/news/${item.id}`}
                   data-testid={`home-news-${item.id}`}
-                  className="block pt-4 first:pt-0 space-y-1 group"
+                  className="card-lift block bg-white border border-[#E4E7EA] rounded-2xl overflow-hidden"
                 >
-                  <span className="text-[11px] font-mono text-[#767F87]">
-                    {formatNewsDate(item.publish_from)}
-                  </span>
-                  <h4 className="text-base font-bold text-[#1A1F24] group-hover:text-[#2E7D4F] transition-colors">
-                    {pickLocalized(item.title, language)}
-                  </h4>
-                  <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">
-                    {pickLocalized(item.body, language)}
-                  </p>
+                  <div className="h-2 bg-[#2E7D4F]" />
+                  <div className="p-6">
+                    <span className="text-[12.5px] text-[#767F87]">{formatNewsDate(item.publish_from)}</span>
+                    <h3 className="mt-3.5 text-lg leading-snug font-bold text-[#123522]">
+                      {pickLocalized(item.title, language)}
+                    </h3>
+                    <p className="mt-2.5 text-sm leading-relaxed text-[#5A646D] line-clamp-3">
+                      {pickLocalized(item.body, language)}
+                    </p>
+                  </div>
                 </SafeLink>
               ))}
-          </div>
-        </div>
-
-        {/* Support & Contact Widget */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-[#123522] text-white rounded-2xl p-6 shadow-md space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-[#2E7D4F] rounded-xl">
-                <PhoneCall className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-bold text-base">{t('home.contact.title')}</h4>
-                <p className="text-xs text-gray-300">{t('home.contact.subtitle')}</p>
-              </div>
             </div>
+          )}
+        </div>
+      </section>
 
-            <div className="text-2xl font-bold font-mono text-[#7FB98A]">+998 (71) 207-88-77</div>
-
-            <p className="text-xs text-gray-300 leading-relaxed">
+      {/* ── 8. SUPPORT CTA ───────────────────────────────────────────── */}
+      <section
+        className="relative overflow-hidden rounded-[20px] p-8 sm:p-12"
+        style={{ background: 'linear-gradient(112deg, #17331B 0%, #235C39 100%)' }}
+      >
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(255,255,255,.14) 1px, transparent 1px)',
+            backgroundSize: '4px 4px',
+          }}
+        />
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+          <div className="max-w-xl">
+            {ctaHours && (
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider text-[#DCF5E3]">
+                <span className="live w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
+                {ctaHours}
+              </span>
+            )}
+            <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight">
+              {t('home.contact.title')}
+            </h2>
+            <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#C4D8C9]">
               {t('home.contact.description')}
             </p>
-
+          </div>
+          <div className="flex flex-col gap-3 w-full lg:w-80 shrink-0">
+            {ctaPhone && (
+              <div className="flex items-center gap-3.5 rounded-2xl border border-white/20 bg-white/10 px-5 py-4">
+                <div className="w-10 h-10 rounded-[11px] bg-white/15 flex items-center justify-center shrink-0">
+                  <PhoneCall className="w-5 h-5 text-[#9CE3AE]" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold tracking-wide text-[#9CE3AE]">{t('home.contact.subtitle')}</div>
+                  <a href={`tel:${ctaPhone.replace(/[^\d+]/g, '')}`} className="mt-0.5 block text-lg font-extrabold text-white">
+                    {ctaPhone}
+                  </a>
+                </div>
+              </div>
+            )}
             <Button
-              variant="outline"
+              type="button"
+              variant="success"
               fullWidth
-              className="border-white/30 text-white hover:bg-white/10"
+              className="bg-[#2E7D4F] hover:bg-[#23653F]"
+              rightIcon={<ArrowRight className="w-4 h-4" />}
               onClick={() => onNavigate?.('feedback')}
             >
               {t('home.contact.button')}
