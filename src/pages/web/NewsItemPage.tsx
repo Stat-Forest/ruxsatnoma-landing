@@ -46,7 +46,7 @@ export const NewsItemPage: React.FC = () => {
     <article className="max-w-3xl mx-auto space-y-6 font-sans">
       <Link
         to="/news"
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2E7D4F] hover:underline"
+        className="reveal inline-flex items-center gap-1.5 text-xs font-bold text-[#2E7D4F] hover:underline"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> {t('news.backToList')}
       </Link>
@@ -71,7 +71,10 @@ export const NewsItemPage: React.FC = () => {
       )}
 
       {state.status === 'ready' && (
-        <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 space-y-5 shadow-xs">
+        <div
+          className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 space-y-5 shadow-xs"
+          style={{ animationDelay: '0.06s' }}
+        >
           <div className="space-y-2 border-b border-[#E4E7EA] pb-4">
             <span className="text-[11px] font-mono text-[#767F87]">
               {formatNewsDate(state.item.publish_from)}
@@ -85,7 +88,7 @@ export const NewsItemPage: React.FC = () => {
               editor typed are kept; nothing here interprets HTML or Markdown,
               because an editor's paragraph must never be able to inject markup
               into a government page. */}
-          <p className="text-sm text-[#1A1F24] leading-relaxed whitespace-pre-line">
+          <p className="text-[15px] text-[#2F3941] leading-[1.78] whitespace-pre-line">
             {pickLocalized(state.item.body, language)}
           </p>
 
@@ -101,7 +104,7 @@ export const NewsItemPage: React.FC = () => {
                       href={newsFileUrl(state.item.id, file.id)}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-2 p-3 rounded-xl border border-[#E4E7EA] hover:border-[#2E7D4F] hover:bg-[#F0F7F1] transition-colors text-sm text-[#1A1F24]"
+                      className="card-lift flex items-center gap-2 p-3 rounded-xl border border-[#E4E7EA] hover:bg-[#F0F7F1] text-sm text-[#1A1F24]"
                     >
                       <FileText className="w-4 h-4 text-[#2E7D4F] shrink-0" />
                       <span className="flex-1 truncate">{file.filename}</span>

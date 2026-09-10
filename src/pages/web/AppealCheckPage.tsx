@@ -123,7 +123,7 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
   };
 
   return (
-    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
       <div>
         <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.file.title')}</h2>
         <p className="text-xs text-[#5A646D]">{t('appeal.file.subtitle')}</p>
@@ -277,11 +277,21 @@ export const AppealCheckPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
       <div className="text-center space-y-3">
-        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+        <span className="reveal inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('appeal.header.badge')}
         </span>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">{t('appeal.header.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">{t('appeal.header.subtitle')}</p>
+        <h1
+          className="reveal text-2xl sm:text-3xl font-bold text-[#1A1F24]"
+          style={{ animationDelay: '0.06s' }}
+        >
+          {t('appeal.header.title')}
+        </h1>
+        <p
+          className="reveal text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed"
+          style={{ animationDelay: '0.12s' }}
+        >
+          {t('appeal.header.subtitle')}
+        </p>
       </div>
 
       <AppealForm
@@ -292,7 +302,10 @@ export const AppealCheckPage: React.FC = () => {
         }}
       />
 
-      <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+      <div
+        className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6"
+        style={{ animationDelay: '0.06s' }}
+      >
         <div>
           <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.check.title')}</h2>
           <p className="text-xs text-[#5A646D]">{t('appeal.check.subtitle')}</p>
@@ -349,7 +362,7 @@ export const AppealCheckPage: React.FC = () => {
       )}
 
       {status === 'found' && result && (
-        <div className="bg-white border border-[#E4E7EA] rounded-2xl shadow-md p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+        <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl shadow-md p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs text-[#5A646D] uppercase font-semibold block">

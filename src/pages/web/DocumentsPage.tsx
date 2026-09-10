@@ -52,11 +52,16 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
   return (
     <div className="space-y-8 font-sans max-w-4xl mx-auto">
       <div className="text-center space-y-3">
-        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+        <span className="reveal inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('documents.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#1A1F24]">{t('documents.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">
+        <h1 className="reveal text-3xl font-bold text-[#1A1F24]" style={{ animationDelay: '0.06s' }}>
+          {t('documents.title')}
+        </h1>
+        <p
+          className="reveal text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed"
+          style={{ animationDelay: '0.12s' }}
+        >
           {t('documents.subtitle')}
         </p>
       </div>
@@ -78,7 +83,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
       {state.status === 'ready' && state.items.length === 0 && (
         <div
           data-testid="documents-empty"
-          className="bg-white border border-[#E4E7EA] rounded-2xl p-10 text-center space-y-2"
+          className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-10 text-center space-y-2"
         >
           <FileText className="w-8 h-8 mx-auto text-[#9AA3AB]" />
           <p className="text-sm text-[#5A646D]">{t('documents.empty')}</p>
@@ -87,13 +92,14 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
 
       {state.status === 'ready' && state.items.length > 0 && (
         <div className="space-y-4">
-          {state.items.map((item) => (
+          {state.items.map((item, idx) => (
             <DocumentRow
               key={item.id}
               item={item}
               language={language}
               downloadLabel={t('documents.download')}
               sourceLabel={t('documents.openSource')}
+              delaySeconds={idx * 0.07}
             />
           ))}
         </div>
@@ -107,11 +113,13 @@ function DocumentRow({
   language,
   downloadLabel,
   sourceLabel,
+  delaySeconds,
 }: {
   item: LegalDocument;
   language: string;
   downloadLabel: string;
   sourceLabel: string;
+  delaySeconds: number;
 }) {
   // The backend refuses to publish a row with neither, so exactly one of these
   // two is always there; the file wins when both are.
@@ -120,9 +128,12 @@ function DocumentRow({
   const external = !file;
 
   return (
-    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs hover:border-[#7FB98A] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div
+      className="reveal card-lift bg-white border border-[#E4E7EA] rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      style={{ animationDelay: `${delaySeconds}s` }}
+    >
       <div className="flex items-start gap-4">
-        <div className="p-3 bg-[#F0F7F1] rounded-xl text-[#2E7D4F] shrink-0">
+        <div className="thumb-zoom p-3 bg-[#F0F7F1] rounded-xl text-[#2E7D4F] shrink-0">
           <FileText className="w-6 h-6" />
         </div>
         <div className="space-y-1">
