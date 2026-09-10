@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 // `maplibre-gl` ships ESM-only with no default export (only named exports —
 // `Map`, `NavigationControl`, `ScaleControl`, `LngLatBounds`, …), so this is
 // a namespace import, not `import maplibregl from 'maplibre-gl'` — same
-// idiom as `LayerMapView`.
+// idiom as `ContourMap.tsx` beside it.
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { extendBounds } from './geometry';
+import type { MapGeometry } from './types';
 
 /**
  * The result card's map panel on the `/check` page's "Ruxsatnoma" arm
@@ -20,43 +22,16 @@ import 'maplibre-gl/dist/maplibre-gl.css';
  * polygon neither field can back.
  */
 
-/** Typed loosely on purpose: `@types/geojson` isn't pulled into this
- *  project's `tsconfig` (`types: ["vite/client"]`) — same tradeoff
- *  `LayerMapView` documents on its own GeoJSON source spec. */
-export interface PermitContourGeometry {
-  type: string;
-  coordinates: unknown;
-}
-
 export interface PermitContourMapProps {
   /** The leshoz's own reference name, exactly as the permit already prints
    *  it (`PublicCheckCard.organization`). */
   organization: string;
   /** The permit's own contour. Present only when the backend's disclosure
    *  setting is on; `null`/`undefined` must draw no contour layer at all. */
-  contour?: PermitContourGeometry | null;
+  contour?: MapGeometry | null;
 }
 
 const CONTOUR_SOURCE_ID = 'permit-contour-source';
-
-/** Walks a GeoJSON geometry's (arbitrarily nested) coordinate array and
- *  extends `bounds` with every `[lng, lat]` pair found — a `Polygon`'s
- *  coordinates nest three deep, a `MultiPolygon`'s four; this doesn't care
- *  which, it just recurses until it finds numbers. */
-function extendBoundsWithGeometry(bounds: maplibregl.LngLatBounds, coordinates: unknown): void {
-  if (!Array.isArray(coordinates)) return;
-  if (
-    coordinates.length >= 2 &&
-    typeof coordinates[0] === 'number' &&
-    typeof coordinates[1] === 'number'
-  ) {
-    bounds.extend([coordinates[0], coordinates[1]]);
-    return;
-  }
-  for (const item of coordinates) {
-    extendBoundsWithGeometry(bounds, item);
-  }
-}
 
 export default function PermitContourMap({ organization, contour }: PermitContourMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -103,7 +78,7 @@ export default function PermitContourMap({ organization, contour }: PermitContou
       });
 
       const bounds = new maplibregl.LngLatBounds();
-      extendBoundsWithGeometry(bounds, contour.coordinates);
+      extendBounds(bounds, contour.coordinates);
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, { padding: 32, maxZoom: 15 });
       }

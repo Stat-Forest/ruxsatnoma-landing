@@ -24,8 +24,8 @@ import { apiError } from '../../api/errors';
 import type { components } from '../../api/schema';
 import { useT, useLanguage } from '../../i18n/useT';
 import { pickLocalized } from '../../lib/localized';
-import PermitContourMap from '../../components/maps/PermitContourMap';
-import type { PermitContourGeometry } from '../../components/maps/PermitContourMap';
+import PermitContourMap from '../../components/map/PermitContourMap';
+import type { MapGeometry } from '../../components/map/types';
 import { checkApplication } from '../../api/applications';
 import type { ApplicationCheckResult } from '../../api/applications';
 
@@ -40,7 +40,7 @@ type CheckResult = CheckCard | components['schemas']['PublicCheckMiss'];
  * field yet, so it is added here as a loosely-typed extension rather than
  * hand-edited into the generated file.
  */
-type CheckCardWithContour = CheckCard & { contour?: PermitContourGeometry | null };
+type CheckCardWithContour = CheckCard & { contour?: MapGeometry | null };
 
 /** `PublicStatus` (`permits/schemas.py`) mapped to this page's existing
  * `StatusBadge` variants — the four words the backend actually returns,

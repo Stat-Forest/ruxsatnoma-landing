@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 // `maplibre-gl` ships ESM-only with no default export (only named exports —
 // `Map`, `NavigationControl`, `LngLatBounds`, …), so this is a namespace
 // import, not `import maplibregl from 'maplibre-gl'` — same idiom as
-// `src/components/maps/LayerMapView.tsx`.
+// `PermitContourMap.tsx` beside it.
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { extendBounds, firstCoordinate } from './geometry';
 import type { OpenDataFeatureCollection } from './types';
 
 export interface ContourMapProps {
@@ -14,44 +15,8 @@ export interface ContourMapProps {
   selectedId: string | null;
 }
 
-/** GeoJSON coordinate arrays nest to arbitrary depth ending in a `[lng, lat]`
- * pair. Walks any of them and extends `bounds` with every pair found. */
-function extendBoundsWithCoordinates(bounds: maplibregl.LngLatBounds, coordinates: unknown): void {
-  if (!Array.isArray(coordinates)) return;
-  if (
-    coordinates.length >= 2 &&
-    typeof coordinates[0] === 'number' &&
-    typeof coordinates[1] === 'number'
-  ) {
-    bounds.extend([coordinates[0], coordinates[1]]);
-    return;
-  }
-  for (const item of coordinates) {
-    extendBoundsWithCoordinates(bounds, item);
-  }
-}
-
-/** The first `[lng, lat]` pair in a geometry — enough to anchor a selection
- *  marker without a full centroid computation (this map never edits
- *  geometry, only points at a row the visitor already picked from a list). */
-function firstCoordinate(coordinates: unknown): [number, number] | null {
-  if (!Array.isArray(coordinates)) return null;
-  if (
-    coordinates.length >= 2 &&
-    typeof coordinates[0] === 'number' &&
-    typeof coordinates[1] === 'number'
-  ) {
-    return [coordinates[0], coordinates[1]];
-  }
-  for (const item of coordinates) {
-    const found = firstCoordinate(item);
-    if (found) return found;
-  }
-  return null;
-}
-
 /**
- * The free-contour map (task 13). Same no-basemap idiom as `LayerMapView`
+ * The free-contour map (task 13). Same no-basemap idiom as `PermitContourMap`
  * (decision #60.1 leaves tile hosting open) — real projection, pan/zoom and
  * a `fitBounds` to the data, drawn on a plain background. What is unique to
  * this screen is the marker overlay: a plain positioned `<div>` kept in sync
@@ -111,7 +76,7 @@ export default function ContourMap({ collection, selectedId }: ContourMapProps) 
       const bounds = new maplibregl.LngLatBounds();
       for (const feature of collection.features) {
         if (!feature.geometry) continue;
-        extendBoundsWithCoordinates(bounds, feature.geometry.coordinates);
+        extendBounds(bounds, feature.geometry.coordinates);
       }
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, { padding: 32, maxZoom: 15 });
@@ -124,7 +89,7 @@ export default function ContourMap({ collection, selectedId }: ContourMapProps) 
     };
     // The map is torn down and rebuilt whenever a new collection arrives
     // (switching layers) — simplest correct lifecycle for a handful of
-    // re-selections per visit, same trade-off `LayerMapView` makes.
+    // re-selections per visit, same trade-off `PermitContourMap` makes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collection]);
 

@@ -11,7 +11,7 @@ vi.mock('../../api/client', () => ({
 
 import { api } from '../../api/client';
 
-// Same construct-vs-arrow-function pitfall as `LayerMapView.test.tsx`:
+// Same construct-vs-arrow-function pitfall as `PermitContourMap.test.tsx`:
 // `new maplibregl.Map(...)` needs a real `[[Construct]]`, so every class the
 // component instantiates is a `vi.fn().mockImplementation(function () {...})`,
 // and the mock fns a factory closes over must go through `vi.hoisted`.

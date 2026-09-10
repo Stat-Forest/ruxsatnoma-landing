@@ -15,11 +15,11 @@ vi.mock('../../api/applications', () => ({
 }));
 
 // This page's own tests never touch `maplibre-gl` — that is
-// `PermitContourMap.test.tsx`'s own job (same idiom `OpenDataPage.test.tsx`
-// uses for `LayerMapView`). The mock still reflects the `contour` prop so
+// `PermitContourMap.test.tsx`'s own job. The mock still reflects the
+// `contour` prop so
 // the wiring itself — drawn only when the API actually sent one — stays
 // under test here.
-vi.mock('../../components/maps/PermitContourMap', () => ({
+vi.mock('../../components/map/PermitContourMap', () => ({
   default: ({ contour }: { contour?: unknown }) =>
     contour ? <div data-testid="permit-contour" /> : null,
 }));

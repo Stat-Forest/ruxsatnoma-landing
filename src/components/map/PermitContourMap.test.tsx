@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import PermitContourMap from './PermitContourMap';
-import type { PermitContourGeometry } from './PermitContourMap';
+import type { MapGeometry } from './types';
 
 // `vi.mock` factories are hoisted above the rest of the module, so the mock
 // fns they reference must be created through `vi.hoisted` — a plain
 // top-level `const` here would throw "Cannot access before initialization".
-// Same idiom as `LayerMapView.test.tsx`.
+// Same idiom as `MapPage.test.tsx`'s own maplibre mock.
 const { addControl, addSource, addLayer, fitBounds, remove, extend, MapMock } = vi.hoisted(() => {
   const addControl = vi.fn();
   const on = vi.fn((event: string, cb: () => void) => {
@@ -40,7 +40,7 @@ vi.mock('maplibre-gl', () => ({
 
 vi.mock('maplibre-gl/dist/maplibre-gl.css', () => ({}));
 
-const samplePolygon: PermitContourGeometry = {
+const samplePolygon: MapGeometry = {
   type: 'Polygon',
   coordinates: [
     [

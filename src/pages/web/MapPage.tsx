@@ -16,8 +16,7 @@ type OpenDataLayer = components['schemas']['OpenDataLayerOut'];
 // Module scope, not inside the component body, so switching layers re-renders
 // the same lazy component instead of remounting it — and `maplibre-gl`
 // (sizeable) stays split into its own chunk rather than the shared bundle
-// every page pays for, the same trade-off `OpenDataPage` makes for
-// `LayerMapView`.
+// every page pays for. `/check`'s own map is lazy for the same reason.
 const LazyContourMap = React.lazy(() => import('../../components/map/ContourMap'));
 
 export interface MapPageProps {
