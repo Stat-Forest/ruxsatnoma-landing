@@ -137,10 +137,15 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                 {t('action.cabinet')}
               </Button>
             </div>
+            {/* The wizard, not `auth_login`: the button says «Ariza
+                topshirish», and `/login` sent a signed-in citizen to the
+                dashboard instead of the application (the front door itself
+                is the «Kabinet» button beside it). The adminka decides on
+                arrival whether a sign-in comes first — `src/lib/cabinet.ts`. */}
             <Button
               variant="success"
               size="sm"
-              onClick={() => onNavigate?.('auth_login')}
+              onClick={() => onNavigate?.('applicant_wizard')}
               className="!h-9 bg-[#2E7D4F] hover:bg-[#23653F] text-white shadow-md font-bold rounded-xl px-3 sm:px-4 text-xs shrink-0"
             >
               {t('action.submitApplication')}

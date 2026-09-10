@@ -92,6 +92,15 @@ it('sends the Kabinet button to the cabinet, not to a login form', async () => {
   }
 });
 
+it('sends the header\u2019s «Ariza topshirish» to the wizard, not to the login page', async () => {
+  // The last «Ariza topshirish» on the site that still opened `/login`: a
+  // signed-in citizen got the dashboard instead of the application.
+  const onNavigate = vi.fn();
+  renderLayout(onNavigate);
+  await userEvent.click(screen.getByRole('button', { name: /^Ariza topshirish$/i }));
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard');
+});
+
 it('draws footer contacts from the settings it is given', async () => {
   renderLayout(vi.fn(), { status: 'ready', data: settings });
   // Scoped to the footer landmark: the same phone number is also live in the
