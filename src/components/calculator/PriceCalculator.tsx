@@ -17,6 +17,10 @@ type EstimateResult = components['schemas']['PublicEstimateOut'];
 
 const GRAZING_CODE = 'grazing'; // `norms/calculator.py::GRAZING` — the one activity that prices per livestock head, not per declared quantity.
 const SCIENCE_CODE = 'science'; // `Imtiyozli, ariza asosida` — no quantity, no sum, no estimate call at all.
+/** Pre-selected activity. Grazing is first in the catalogue, but its tariff
+ *  waits on VMQ 689's annex 5, so opening on it greets every visitor with
+ *  "tariff not published"; haymaking shows a real figure. */
+const DEFAULT_ACTIVITY_CODE = 'haymaking';
 
 /** The error the backend's own `calculator.calculate` raises when a rule
  *  parameter it needs (a `coef_sb:*` row from VMQ 689 annex 5) has never
@@ -265,7 +269,10 @@ function CalculatorForm({
   const safeLivestock = Array.isArray(livestockTypes) ? livestockTypes : [];
   const t = useT();
   const { language } = useLanguage();
-  const [activityId, setActivityId] = useState(safeActivities[0]?.id ?? '');
+  const [activityId, setActivityId] = useState(
+    () =>
+      (safeActivities.find((a) => a.code === DEFAULT_ACTIVITY_CODE) ?? safeActivities[0])?.id ?? '',
+  );
   const [durationMonths, setDurationMonths] = useState(6);
   const [headCounts, setHeadCounts] = useState<Record<string, number | ''>>({});
   const [quantity, setQuantity] = useState<number | ''>(1);
