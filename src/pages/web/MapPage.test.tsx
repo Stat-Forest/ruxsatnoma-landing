@@ -117,6 +117,30 @@ function renderMap(onNavigate = vi.fn()) {
   return onNavigate;
 }
 
+/** The layer codes the page asked features for, in request order. */
+function requestedFeatureLayers(): string[] {
+  const calls = vi.mocked(api.GET).mock.calls as unknown as [string, { params: { path: { code: string } } }][];
+  return calls
+    .filter((call) => call[0] === '/api/v1/public/open-data/layers/{code}/features')
+    .map((call) => call[1].params.path.code);
+}
+
+it('opens on the forest-fund layer when it is published, not on the first by code', async () => {
+  const fireBans = { ...demoLayer, code: 'fire_bans', name: { uz_latn: 'Yongʻin taqiqlari' } };
+  const forestFund = { ...demoLayer, code: 'forest_fund', name: { uz_latn: 'Oʻrmon fondi' } };
+  mockApi([fireBans, forestFund]);
+  renderMap();
+  await screen.findAllByText('K-14');
+  expect(requestedFeatureLayers()).toEqual(['forest_fund']);
+});
+
+it('falls back to the first layer when the forest-fund layer is not published', async () => {
+  mockApi([{ ...demoLayer, code: 'fire_bans' }, { ...demoLayer, code: 'special_areas' }]);
+  renderMap();
+  await screen.findAllByText('K-14');
+  expect(requestedFeatureLayers()).toEqual(['fire_bans']);
+});
+
 it('lists contours and marks the selected one on the map', async () => {
   mockApi();
   renderMap();
