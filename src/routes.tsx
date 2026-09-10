@@ -9,8 +9,9 @@ import {
   NewsPage,
   NewsItemPage,
   DocumentsPage,
-  OpenDataPage,
-  FaqPage,
+  AboutPage,
+  ContactPage,
+  MapPage,
   VerifyPage,
   AppealCheckPage,
 } from './pages/web';
@@ -20,12 +21,22 @@ export type NavigateFn = (page: string, params?: Record<string, unknown>) => voi
 /** Legacy page-id -> real path. Every existing page still calls
  * `onNavigate?.('services')` the way it did under the old `useState` build
  * (decision: keep the markup exactly as it is) — this map is the only thing
- * that changed, so those calls now change the URL instead of a `useState`. */
+ * that changed, so those calls now change the URL instead of a `useState`.
+ *
+ * `opendata` and `faq` stay in this table even though neither has a header
+ * nav entry any more (stage 8): `opendata` is still how the home page's own
+ * open-data widget names its "view more" link, and `faq` is still how the
+ * footer names its FAQ link — both routes below just redirect on from there
+ * (`/opendata` -> `/`, `/faq` -> `/about`), same as `/tariffs` always has.
+ */
 const PAGE_TO_PATH: Record<string, string> = {
   home: '/',
   services: '/services',
   news: '/news',
   documents: '/documents',
+  about: '/about',
+  contact: '/contact',
+  map: '/map',
   opendata: '/opendata',
   faq: '/faq',
   verify: '/check',
@@ -35,7 +46,9 @@ const PAGE_TO_PATH: Record<string, string> = {
   // Old special-cases inlined here instead of in the handler below, so the
   // whole page-id -> path mapping lives in one table.
   activities: '/services',
-  feedback: '/faq',
+  // The home page's "contact us" button (`home.contact.button`) used to land
+  // on `/faq` for lack of anywhere better — `/contact` is now a real page.
+  feedback: '/contact',
 };
 
 /** The price calculator is a SECTION of the home page, not a page: it lost its
@@ -92,7 +105,7 @@ function Layout() {
       return;
     }
     const path = PAGE_TO_PATH[page];
-    if (!path) return; // out of `landing`'s nine screens (decision #60.4) — nothing to open
+    if (!path) return; // out of `landing`'s known screens — nothing to open
     navigate(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -132,10 +145,16 @@ export const routeConfig: RouteObject[] = [
       // its place in the header; the bookmarks that already exist keep working.
       { path: 'tariffs', element: <Navigate to={CALCULATOR_PATH} replace /> },
       { path: 'documents', element: <DocumentsPage /> },
-      { path: 'opendata', element: <OpenDataPage /> },
-      { path: 'faq', element: <FaqPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> },
+      { path: 'map', element: <MapPage /> },
       { path: 'check', element: <VerifyPage /> },
       { path: 'appeal-check', element: <AppealCheckPage /> },
+      // The standalone FAQ and open-data screens are retired (stage 8): their
+      // header-nav entries are gone, and each redirects on rather than 404s
+      // for anyone with the old URL bookmarked.
+      { path: 'faq', element: <Navigate to="/about" replace /> },
+      { path: 'opendata', element: <Navigate to="/" replace /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

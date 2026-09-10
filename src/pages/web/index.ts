@@ -7,3 +7,6 @@ export * from './OpenDataPage';
 export * from './FaqPage';
 export * from './VerifyPage';
 export * from './AppealCheckPage';
+export * from './MapPage';
+export * from './AboutPage';
+export * from './ContactPage';
