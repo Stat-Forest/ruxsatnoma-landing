@@ -83,7 +83,7 @@ const SECTION_TEXT: Record<
     statsTitle: 'Portal raqamlarda',
     statsIntro: 'Koʻrsatkichlar rasmiy ochiq maʼlumotlar xizmatidan real vaqtda olinadi.',
     quickCheckTitle: 'Ruxsatnomani tekshirish',
-    quickCheckSubtitle: 'Seriya va raqami boʻyicha',
+    quickCheckSubtitle: 'QR-kod yoki seriya va raqam boʻyicha',
     quickCheckSeriya: 'Seriya',
     quickCheckNumber: 'Raqam — masalan: 000123',
     quickCheckButton: 'Tekshirish',
@@ -99,7 +99,7 @@ const SECTION_TEXT: Record<
     statsTitle: 'Портал в цифрах',
     statsIntro: 'Показатели поступают из официального сервиса открытых данных в реальном времени.',
     quickCheckTitle: 'Проверка разрешения',
-    quickCheckSubtitle: 'По серии и номеру',
+    quickCheckSubtitle: 'По QR-коду или серии и номеру',
     quickCheckSeriya: 'Серия',
     quickCheckNumber: 'Номер — например: 000123',
     quickCheckButton: 'Проверить',
@@ -115,7 +115,7 @@ const SECTION_TEXT: Record<
     statsTitle: 'The portal in numbers',
     statsIntro: 'Figures are pulled from the official open-data service in real time.',
     quickCheckTitle: 'Verify a permit',
-    quickCheckSubtitle: 'By series and number',
+    quickCheckSubtitle: 'By QR code or series and number',
     quickCheckSeriya: 'Series',
     quickCheckNumber: 'Number — e.g. 000123',
     quickCheckButton: 'Verify',
@@ -131,7 +131,7 @@ const SECTION_TEXT: Record<
     statsTitle: 'Портал рақамларда',
     statsIntro: 'Кўрсаткичлар расмий очиқ маълумотлар хизматидан реал вақтда олинади.',
     quickCheckTitle: 'Рухсатномани текшириш',
-    quickCheckSubtitle: 'Серия ва рақами бўйича',
+    quickCheckSubtitle: 'QR-код ёки серия ва рақам бўйича',
     quickCheckSeriya: 'Серия',
     quickCheckNumber: 'Рақам — масалан: 000123',
     quickCheckButton: 'Текшириш',
@@ -147,7 +147,7 @@ const SECTION_TEXT: Record<
     statsTitle: 'Portal sanlarda',
     statsIntro: 'Kórsetkishler rásmiy ashıq maǵlıwmat xizmetinen real waqıtta alınadı.',
     quickCheckTitle: 'Ruxsatnamanı tekseriw',
-    quickCheckSubtitle: 'Seriya hám nomeri boyınsha',
+    quickCheckSubtitle: 'QR-kod yamasa seriya hám nomer boyınsha',
     quickCheckSeriya: 'Seriya',
     quickCheckNumber: 'Nomer — mısalı: 000123',
     quickCheckButton: 'Tekseriw',
@@ -404,16 +404,21 @@ export const HomePage: React.FC<HomePageProps> = ({
           under the header, matching the negative-margin overlap the
           quick-check strip below it needs too. `PublicLayout` renders no
           hero of its own — this is the only one on the page. */}
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen -mt-10">
-        <HeroSlider onNavigate={onNavigate} />
-      </div>
+      <div>
+        <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen -mt-10">
+          <HeroSlider onNavigate={onNavigate} />
+        </div>
 
-      {/* ── 1. QUICK CHECK STRIP ───────────────────────────────────────
-          Overlaps the hero's bottom edge, matching `Main.dc.html`'s own
-          `margin-top: -56px` treatment — this is why the hero above ends in
-          `-mt-10` rather than a plain top margin, so the two negative
-          margins compose instead of fighting. */}
-      <section className="relative z-10 -mt-14 sm:-mt-16">
+        {/* ── 1. QUICK CHECK STRIP ─────────────────────────────────────
+            Overlaps the hero's bottom edge, matching `Main.dc.html`'s own
+            `margin-top: -56px` treatment. The hero and the strip share ONE
+            wrapper on purpose: the page root is `space-y-16`, which under
+            Tailwind v4 puts `margin-bottom: 4rem` on every child but the
+            last — on the hero, that 64px pushed the strip clear of it and
+            the `-mt-14` overlap netted out to an 8px gap (Oybek's
+            screenshot, 2026-09-10). Inside a shared wrapper the gap lands
+            after the strip, where it belongs. */}
+        <section className="relative z-10 -mt-14 sm:-mt-16">
         <form
           onSubmit={handleQuickSearch}
           className="bg-white border border-[#E4E7EA] rounded-2xl shadow-xl px-6 py-6 sm:px-8 sm:py-7 flex flex-col lg:flex-row lg:items-center gap-5"
@@ -443,7 +448,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                 placeholder={sectionText.quickCheckNumber}
                 value={quickNumber}
                 onChange={(e) => setQuickNumber(e.target.value)}
-                leftIcon={<Search className="w-4 h-4" />}
                 touchSize
               />
             </div>
@@ -452,12 +456,14 @@ export const HomePage: React.FC<HomePageProps> = ({
               variant="success"
               size="lg"
               className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F] shrink-0"
+              leftIcon={<Search className="w-4 h-4" />}
             >
               {sectionText.quickCheckButton}
             </Button>
           </div>
         </form>
-      </section>
+        </section>
+      </div>
 
       {/* ── 2. STATISTICS + RATING ──────────────────────────────────── */}
       <section className="reveal">
