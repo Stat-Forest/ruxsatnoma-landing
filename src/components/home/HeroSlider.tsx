@@ -22,8 +22,14 @@ interface SlideCopy {
  *  that used to say the same thing; slides 1 and 2 are new copy this task
  *  needed and `src/i18n/*` is off-limits to this track (file-ownership
  *  boundary), so it lives here, translated into all five portal languages. */
+//
+// Slide 0's primary is the wizard, not `auth_login`: the button says
+// "Ariza topshirish", and `/login` showed a signed-in citizen a form they did
+// not need and then dropped them on the dashboard instead of the application.
+// The adminka's `RequireAuth` decides on arrival whether a sign-in comes first
+// and brings them back to the wizard afterwards (`src/lib/cabinet.ts`).
 const SLIDE_ACTIONS: { primary: string; secondary: string }[] = [
-  { primary: 'auth_login', secondary: 'calculator' },
+  { primary: 'applicant_wizard', secondary: 'calculator' },
   { primary: 'verify', secondary: 'about' },
   { primary: 'services', secondary: 'calculator' },
 ];
