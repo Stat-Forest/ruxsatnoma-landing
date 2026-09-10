@@ -29,6 +29,12 @@ on:
         # silent dead link — but a deploy must never ship with this empty.
         type: string
         default: ''
+      map-style-url:
+        # The basemap under both maps (`src/components/map/basemap.ts`), baked in at
+        # BUILD time like the two above. Empty keeps the plain ground — a PR build
+        # still draws contours; the deploy workflow passes the stand's provider.
+        type: string
+        default: ''
 
 jobs:
   check:
@@ -45,6 +51,7 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ inputs.api-base-url }}
           VITE_ADMIN_BASE_URL: ${{ inputs.admin-base-url }}
+          VITE_MAP_STYLE_URL: ${{ inputs.map-style-url }}
       - run: yarn run test
       - name: Upload the bundle
         if: ${{ inputs.upload-dist }}

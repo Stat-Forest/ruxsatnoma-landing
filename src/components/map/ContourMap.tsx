@@ -7,6 +7,7 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // Side effect: registers the bundled worker before any `Map` exists — see worker.ts.
 import './worker';
+import { attributionOption, mapStyle } from './basemap';
 import { extendBounds, firstCoordinate } from './geometry';
 import type { OpenDataFeatureCollection } from './types';
 
@@ -35,12 +36,8 @@ export default function ContourMap({ collection, selectedId }: ContourMapProps) 
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#EAF1EB' } }],
-      },
-      attributionControl: false,
+      style: mapStyle('#EAF1EB'),
+      attributionControl: attributionOption(),
       center: [69.2, 41.3],
       zoom: 8,
     });
