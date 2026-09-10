@@ -35,7 +35,6 @@ const settings: SiteSettings = {
     hours: { uz_latn: 'Dushanba – juma', ru: 'Пн – Пт' },
     social: { telegram: 'https://t.me/urmon', youtube: null },
   },
-  season_windows: { grazing: [9], haymaking: [6, 7, 8], apiary: [], recreation: [], deadwood: [], science: [] },
 };
 
 it('opens and closes mobile menu on hamburger button click', async () => {

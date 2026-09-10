@@ -212,7 +212,10 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
               // telling a citizen an activity is shut when the truth is that
               // nobody knows. An absent key and an empty array are different
               // answers, and only the second one means closed.
-              const openMonths = windows[code];
+              // `windows` itself is defended too: the day the backend moved
+              // the seasons to their own route, this read got `undefined`
+              // for the whole map and took the home page down with it.
+              const openMonths = windows?.[code];
               const known = Array.isArray(openMonths);
               const isOpenNow = known && openMonths.includes(currentMonth);
               return (
