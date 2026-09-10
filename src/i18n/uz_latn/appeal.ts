@@ -46,9 +46,6 @@ export const appeal = {
   'appeal.status.answered': 'Javob berildi',
   'appeal.status.closed': 'Yopilgan',
 
-  'appeal.error.rateLimited.before': 'Soʻrovlar soni chegarasiga yetildi. Iltimos,',
-  'appeal.error.rateLimited.after': 'soniyadan keyin qayta urinib koʻring.',
-
   'appeal.result.numberLabel': 'Murojaat raqami',
   'appeal.result.subjectLabel': 'Mavzu',
   'appeal.result.answerHeading': 'Javob',

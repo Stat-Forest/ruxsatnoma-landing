@@ -148,3 +148,33 @@ it('passes the real backend activity UUID when the apply button is clicked', asy
     activity: DEADWOOD.id,
   });
 });
+
+// Each of the six cards illustrates itself from `Scene` by the activity's own
+// `code` (task 11 brief: "they match the activity code the catalogue API
+// returns, so a card can pick its illustration straight from the code") —
+// never a shared fallback icon, and never a crash for a code `Scene` does not
+// (yet) know how to draw.
+it('illustrates each card with the Scene matching its own activity code', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([GRAZING, BEEKEEPING]) as never);
+  renderPage();
+
+  await screen.findByText(GRAZING.name.uz_latn);
+  // `Scene` renders `aria-hidden` decorative SVGs (its own docstring) — one
+  // per card that has a matching illustration.
+  expect(document.querySelectorAll('svg[aria-hidden="true"]').length).toBeGreaterThanOrEqual(2);
+});
+
+// The calculator is a section of the home page, not a second instance living
+// here (`routes.tsx`'s own `CALCULATOR_PATH` docstring) — this page reaches
+// it through the same `onNavigate('calculator')` contract the header CTA
+// already uses.
+it('sends the visitor to the home page calculator section, not a copy of it', async () => {
+  vi.mocked(api.GET).mockResolvedValue(answer([GRAZING]) as never);
+  const onNavigate = vi.fn();
+  renderPage(onNavigate);
+
+  const cta = await screen.findByText('Shu boʻyicha ariza topshirish');
+  await userEvent.click(cta);
+
+  expect(onNavigate).toHaveBeenCalledWith('calculator');
+});

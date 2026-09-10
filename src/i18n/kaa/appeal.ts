@@ -44,9 +44,6 @@ export const appeal = {
   'appeal.status.answered': 'Juwap berildi',
   'appeal.status.closed': 'Jabıldı',
 
-  'appeal.error.rateLimited.before': 'Sorawlar sanı shegarasına jettıńiz. Ótinish, ',
-  'appeal.error.rateLimited.after': 'sekunttan keyin qaytadan háreket etiń.',
-
   'appeal.result.numberLabel': 'Múrjat nomeri',
   'appeal.result.subjectLabel': 'Tema',
   'appeal.result.answerHeading': 'Juwap',

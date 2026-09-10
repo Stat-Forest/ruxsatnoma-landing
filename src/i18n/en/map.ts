@@ -1,0 +1,35 @@
+/** MapPage (`/map`) — the public GIS layer browser — English copy. */
+export const map = {
+  'map.header.badge': 'Interactive map',
+  'map.header.title': 'Find contours on the map',
+  'map.header.subtitle':
+    'Look at the area on the map before you apply. Occupancy is not shown here — the final answer comes from a forestry specialist when the application is reviewed.',
+  'map.layer.selectLabel': 'Choose a layer',
+  'map.layer.label': 'Layer:',
+  'map.layer.truncated': 'results were truncated; zoom in for a closer view.',
+  'map.filter.all': 'All',
+  'map.filter.free': 'Free only',
+  'map.filter.taken': 'Taken',
+  'map.filter.disabledHint': 'Occupancy is not available yet',
+  'map.error.loadTitle': 'Could not load the data',
+  'map.error.mapTitle': 'Could not load the map',
+  'map.error.layerUnreadable': 'Could not read the layer data.',
+  'map.error.network': 'Could not reach the server. Check your connection and try again.',
+  'map.empty.title': 'No public layers',
+  'map.empty.body': 'There is no public GIS layer to show on the map yet.',
+  'map.list.title': 'Contour list',
+  'map.list.hint': 'Pick one from the list — it is marked on the map',
+  'map.list.empty': 'No features found in this layer.',
+  'map.contour.fallbackName': 'Contour',
+  'map.contour.occupancyUnknown': 'Occupancy: unknown',
+  'map.contour.areaLabel': 'Area:',
+  'map.contour.capacityLabel': 'Capacity:',
+  'map.selected.title': 'Selected contour',
+  'map.selected.note':
+    'This page does not show whether this contour is taken. Once an application is filed, a forestry specialist reviews the area and gives the final answer.',
+  'map.selected.apply': 'Apply for this contour',
+  'map.selected.empty': 'Pick a contour from the list.',
+  'map.warning.bold': 'Occupancy information is not available on this page.',
+  'map.warning.rest':
+    'The final decision is made by a forestry specialist when the application is reviewed — the contour may already be taken by another application.',
+} as const;

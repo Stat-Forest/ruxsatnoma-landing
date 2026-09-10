@@ -24,4 +24,10 @@ export const ui = {
   'ui.statusBadge.rejected': 'Biykar etildi',
   'ui.statusBadge.warning': 'Múddeti pitpekte',
   'ui.statusBadge.info': 'Maǵlıwmat',
+
+  /* `ERR-SYS-006`. Shared by every `/public/*` page through
+     `formatApiError` (`src/api/errors.ts`) — each page used to carry its
+     own copy of that helper, and they had already drifted apart. */
+  'ui.error.rateLimited.before': 'Sorawlar sanı shegarasına jetildi. Iltimas,',
+  'ui.error.rateLimited.after': 'sekundtan keyin qayta urınıp kóriń.',
 } as const;

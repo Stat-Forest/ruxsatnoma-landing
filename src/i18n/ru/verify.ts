@@ -35,4 +35,32 @@ export const verify = {
   'verify.result.validityLabel': 'Срок действия',
   'verify.result.signaturesValid': 'Электронные подписи действительны (E-IMZO)',
   'verify.result.signaturesPending': 'Электронные подписи ещё не полностью подтверждены',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Карта контура',
+  'verify.map.heading': 'На карте',
+  'verify.map.legend': 'Разрешённый контур',
+
+  /* The two-tab switcher and the whole "application status" arm — added
+     as `LOCAL_COPY` in Uzbek Latin only, so a Russian reader met an
+     entirely Uzbek tab. */
+  'verify.tabs.label': 'Тип проверки',
+  'verify.tabs.permit': 'Разрешение',
+  'verify.tabs.application': 'Статус заявки',
+  'verify.application.numberLabel': 'Номер заявки',
+  'verify.application.numberPlaceholder': 'Например: AR-2026-004518',
+  'verify.application.phoneLabel': 'Телефон',
+  'verify.application.phonePlaceholder': '+998 90 123 45 67',
+  'verify.application.validation': 'Введите номер заявки и номер телефона',
+  'verify.application.missTitle': 'Заявка не найдена',
+  'verify.application.missMessage':
+    'По указанному номеру заявки и номеру телефона ничего не найдено. Проверьте данные и попробуйте снова.',
+  'verify.application.privacyBold': 'Конфиденциальность:',
+  'verify.application.privacyAfter':
+    'номер телефона используется только для подтверждения того, что заявка принадлежит вам.',
+  'verify.application.activityLabel': 'Вид деятельности',
+  'verify.application.organizationLabel': 'Лесхоз',
+  'verify.application.submittedLabel': 'Дата подачи',
+  'verify.application.nextStepLabel': 'Следующий шаг',
 } as const;

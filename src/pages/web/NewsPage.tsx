@@ -49,11 +49,21 @@ export const NewsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
       <div className="text-center space-y-3">
-        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+        <span className="reveal inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('news.badge')}
         </span>
-        <h1 className="text-2xl sm:text-4xl font-bold text-[#1A1F24]">{t('news.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">{t('news.subtitle')}</p>
+        <h1
+          className="reveal text-2xl sm:text-4xl font-bold text-[#1A1F24]"
+          style={{ animationDelay: '0.06s' }}
+        >
+          {t('news.title')}
+        </h1>
+        <p
+          className="reveal text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed"
+          style={{ animationDelay: '0.12s' }}
+        >
+          {t('news.subtitle')}
+        </p>
       </div>
 
       {state.status === 'loading' && (
@@ -73,7 +83,7 @@ export const NewsPage: React.FC = () => {
       {state.status === 'ready' && state.items.length === 0 && (
         <div
           data-testid="news-empty"
-          className="bg-white border border-[#E4E7EA] rounded-2xl p-10 text-center space-y-2"
+          className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-10 text-center space-y-2"
         >
           <Newspaper className="w-8 h-8 mx-auto text-[#9AA3AB]" />
           <p className="text-sm text-[#5A646D]">{t('news.empty')}</p>
@@ -81,9 +91,15 @@ export const NewsPage: React.FC = () => {
       )}
 
       {state.status === 'ready' && state.items.length > 0 && (
-        <div className="bg-white border border-[#E4E7EA] rounded-2xl divide-y divide-[#E4E7EA] shadow-xs">
-          {state.items.map((item) => (
-            <NewsRow key={item.id} item={item} language={language} attachmentsLabel={t('news.attachments')} />
+        <div className="space-y-4">
+          {state.items.map((item, idx) => (
+            <NewsRow
+              key={item.id}
+              item={item}
+              language={language}
+              attachmentsLabel={t('news.attachments')}
+              delaySeconds={idx * 0.09}
+            />
           ))}
         </div>
       )}
@@ -110,14 +126,23 @@ export const NewsPage: React.FC = () => {
   );
 };
 
+/**
+ * One row of the register — its own card, not a divider-separated line: the
+ * foundation's card system (`reveal` + `card-lift` + a `thumb-zoom` accent)
+ * stays the same shape whether there is one announcement or fifty, and each
+ * row fades in staggered by its position in the current page rather than all
+ * at once.
+ */
 function NewsRow({
   item,
   language,
   attachmentsLabel,
+  delaySeconds,
 }: {
   item: NewsItem;
   language: string;
   attachmentsLabel: string;
+  delaySeconds: number;
 }) {
   const title = pickLocalized(item.title, language);
   const body = pickLocalized(item.body, language);
@@ -125,24 +150,30 @@ function NewsRow({
     <Link
       to={`/news/${item.id}`}
       data-testid={`news-item-${item.id}`}
-      className="block p-5 space-y-1 hover:bg-[#F8F9FA] transition-colors"
+      className="reveal card-lift group flex items-start gap-4 bg-white border border-[#E4E7EA] rounded-2xl p-5 shadow-xs"
+      style={{ animationDelay: `${delaySeconds}s` }}
     >
-      <span className="text-[11px] font-mono text-[#767F87]">
-        {formatNewsDate(item.publish_from)}
-      </span>
-      <h2 className="text-base font-bold text-[#1A1F24] flex items-start gap-2">
-        <span className="flex-1">{title}</span>
-        <ChevronRight className="w-4 h-4 mt-1 shrink-0 text-[#2E7D4F]" />
-      </h2>
-      {/* Two lines of the announcement itself, not a separately edited teaser:
-          the backend has one text, and a summary this page invented would be a
-          second one nobody wrote. */}
-      <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">{body}</p>
-      {item.files.length > 0 && (
-        <span className="inline-flex items-center gap-1 text-[11px] text-[#2E7D4F] font-semibold">
-          <Paperclip className="w-3 h-3" /> {attachmentsLabel}: {item.files.length}
+      <div className="thumb-zoom shrink-0 w-11 h-11 rounded-xl bg-[#F0F7F1] text-[#2E7D4F] flex items-center justify-center">
+        <Newspaper className="w-5 h-5" />
+      </div>
+      <div className="flex-1 min-w-0 space-y-1">
+        <span className="text-[11px] font-mono text-[#767F87]">
+          {formatNewsDate(item.publish_from)}
         </span>
-      )}
+        <h2 className="text-base font-bold text-[#1A1F24] flex items-start gap-2">
+          <span className="flex-1">{title}</span>
+          <ChevronRight className="w-4 h-4 mt-1 shrink-0 text-[#2E7D4F] transition-transform group-hover:translate-x-1" />
+        </h2>
+        {/* Two lines of the announcement itself, not a separately edited teaser:
+            the backend has one text, and a summary this page invented would be a
+            second one nobody wrote. */}
+        <p className="text-xs text-[#5A646D] leading-relaxed line-clamp-2">{body}</p>
+        {item.files.length > 0 && (
+          <span className="inline-flex items-center gap-1 text-[11px] text-[#2E7D4F] font-semibold">
+            <Paperclip className="w-3 h-3" /> {attachmentsLabel}: {item.files.length}
+          </span>
+        )}
+      </div>
     </Link>
   );
 }

@@ -1,8 +1,10 @@
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '../../i18n';
+import type { SiteSettings, SiteSettingsState } from '../../api/site';
 
 vi.mock('../../api/client', () => ({
   api: { GET: vi.fn() },
@@ -10,6 +12,68 @@ vi.mock('../../api/client', () => ({
 }));
 
 import { api } from '../../api/client';
+
+/**
+ * `GET /public/ratings/summary` reaches the page through the bare `fetch`
+ * global rather than the typed `api.GET` client, because it is not in
+ * `schema.d.ts` yet (`RatingBand.tsx`'s own docstring explains why). This
+ * project has no `msw` dependency (see the foundation track's report), so a
+ * bare-fetch endpoint is stubbed with `vi.stubGlobal('fetch', ...)` rather
+ * than `server.use(http.get(...))`. Defaults to a published: false summary,
+ * so a test that doesn't care sees the honest "not enough ratings" shape.
+ *
+ * `/public/site-settings` is NOT here any more: `routes.tsx`'s `Layout`
+ * fetches it once per page view and hands the answer down as a prop, where
+ * this page and `PublicLayout` above it each used to fetch it separately.
+ * The tests that care pass `siteSettings` to `renderHome` instead.
+ */
+type FetchAnswers = {
+  ratings?: unknown;
+  ratingsFails?: boolean;
+};
+
+function mockFetch({ ratings, ratingsFails }: FetchAnswers = {}) {
+  const fetchMock = vi.fn((url: string) => {
+    if (url.includes('/ratings/summary')) {
+      if (ratingsFails) return Promise.reject(new Error('network error'));
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            ratings ?? { published: false, average: null, count: 0, histogram: null, threshold: 5 },
+          ),
+      });
+    }
+    return Promise.reject(new Error(`unexpected fetch: ${url}`));
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+/** As `routes.tsx`'s `Layout` hands them down. */
+function readySettings(overrides: Partial<SiteSettings> = {}): SiteSettingsState {
+  return {
+    status: 'ready',
+    data: {
+      contacts: {
+        phone: '',
+        email: '',
+        address: { uz_latn: '', ru: '' },
+        hours: { uz_latn: '', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: {
+        grazing: [],
+        haymaking: [],
+        apiary: [],
+        recreation: [],
+        deadwood: [],
+        science: [],
+      },
+      ...overrides,
+    },
+  };
+}
 
 /**
  * The defect these pin (stage 7.3 walkthrough, finding F7): this page
@@ -100,19 +164,62 @@ function mockBackend({
 beforeEach(() => {
   window.localStorage.clear();
   vi.mocked(api.GET).mockReset();
+  mockFetch();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 /** The page links to `/news/:id` and reads `#calculator` off the location, so
  *  it only renders inside a router — as it does in the app. */
-function renderHome() {
+function renderHome(siteSettings: SiteSettingsState = readySettings()) {
   return render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage />
+        <HomePage siteSettings={siteSettings} />
       </I18nProvider>
     </MemoryRouter>,
   );
 }
+
+it('opens with the hero slider', () => {
+  mockBackend();
+  renderHome();
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
+});
+
+it('sends the quick-check strip to the verify page with what was typed', async () => {
+  mockBackend();
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+
+  await userEvent.type(screen.getByPlaceholderText('Seriya'), 'AB');
+  await userEvent.type(screen.getByPlaceholderText(/Raqam/i), '000123');
+  await userEvent.click(screen.getByRole('button', { name: /^Tekshirish$/i }));
+
+  expect(onNavigate).toHaveBeenCalledWith('verify', { query: 'AB 000123' });
+});
+
+/**
+ * The two tiles this pins ALWAYS show a dash — `by_organization`/`by_region`
+ * are k-anonymity-suppressed per-cut breakdowns (#109), not a total count.
+ * Reading the array's length used to turn a suppressed cut into a false
+ * zero; this test would have caught that regression.
+ */
+it('never turns a suppressed cut into a false zero for organizations or regions', async () => {
+  mockBackend();
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.getByTestId('home-stat-organizations')).toHaveTextContent('—');
+  expect(screen.getByTestId('home-stat-regions')).toHaveTextContent('—');
+});
 
 it('shows the figures the aggregates endpoint returns, not constants', async () => {
   mockBackend();
@@ -182,6 +289,144 @@ it('shows the services the catalog returns, not the six that used to be constant
   expect(within(section).getByText('Chorva mollarini boqish')).toBeInTheDocument();
 });
 
+/**
+ * The rating band's own three states (#174) — pinned here too, at the page
+ * level, in addition to `RatingBand.test.tsx`'s unit coverage: this is what
+ * actually reaches a visitor, wired to the real `fetch` call.
+ */
+it('says there are not enough ratings yet rather than printing an average', async () => {
+  mockBackend();
+  mockFetch({ ratings: { published: false, average: null, count: 2, histogram: null, threshold: 5 } });
+  renderHome();
+  expect(await screen.findByTestId('home-rating')).toHaveTextContent(/yetarli baho/i);
+  expect(screen.queryByText(/4[,.]\d/)).not.toBeInTheDocument();
+});
+
+it('draws the average and histogram once the rating summary is published', async () => {
+  mockBackend();
+  mockFetch({
+    ratings: {
+      published: true,
+      average: '4.2',
+      count: 128,
+      histogram: { 1: 1, 2: 2, 3: 5, 4: 20, 5: 100 },
+      threshold: 5,
+    },
+  });
+  renderHome();
+  expect(await screen.findByText('4,2')).toBeInTheDocument();
+  expect(screen.getByText(/128/)).toBeInTheDocument();
+});
+
+it('says the ratings are unavailable rather than blank when the summary fails to load', async () => {
+  mockBackend();
+  mockFetch({ ratingsFails: true });
+  renderHome();
+  expect(await screen.findByTestId('home-rating')).toHaveTextContent(/vaqtincha mavjud emas/i);
+});
+
+/**
+ * Ruling R3: the season strip may only ever show months the settings
+ * endpoint actually returned — never a fallback set invented locally.
+ */
+it('draws the season strip from the site-settings response', async () => {
+  mockBackend();
+  renderHome(
+    readySettings({
+      season_windows: {
+        grazing: [9], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [],
+      },
+    }),
+  );
+  expect(await screen.findByTestId('season-row-grazing')).toBeInTheDocument();
+  expect(screen.getByRole('note')).toHaveTextContent(/Agentlik tomonidan tasdiqlanadi/i);
+});
+
+it('renders no season strip at all when the settings fetch fails', async () => {
+  mockBackend();
+  renderHome({ status: 'error' });
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
+  expect(screen.queryByRole('note')).not.toBeInTheDocument();
+});
+
+it('sends the map band to the map page', async () => {
+  mockBackend();
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: /Xaritani ochish/i }));
+  expect(onNavigate).toHaveBeenCalledWith('map');
+});
+
+it('shows the live phone in the support CTA once site-settings answers', async () => {
+  mockBackend();
+  renderHome(
+    readySettings({
+      contacts: {
+        phone: '+998 71 000 00 00', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: 'Dushanba – juma', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+    }),
+  );
+  expect(await screen.findByText('+998 71 000 00 00')).toBeInTheDocument();
+});
+
+it('hides the CTA phone row rather than inventing one when contacts are unavailable', async () => {
+  mockBackend();
+  renderHome({ status: 'error' });
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByText(/^\+998/)).not.toBeInTheDocument();
+});
+
+/** As `GET /public/refs/activity-types` might one day answer with the full
+ *  catalogue — one row per `Scene` kind, in that component's own order. */
+const sixActivities = [
+  { id: 'a1', code: 'grazing', name: { uz_latn: 'Chorva mollarini boqish' }, description: null, processing_days: 15 },
+  { id: 'a2', code: 'haymaking', name: { uz_latn: 'Pichan tayyorlash' }, description: null, processing_days: 15 },
+  { id: 'a3', code: 'apiary', name: { uz_latn: 'Asalarichilik' }, description: null, processing_days: 15 },
+  { id: 'a4', code: 'recreation', name: { uz_latn: 'Dam olish va turizm' }, description: null, processing_days: 15 },
+  { id: 'a5', code: 'deadwood', name: { uz_latn: 'Quruq shox-shabba yigʻish' }, description: null, processing_days: 15 },
+  { id: 'a6', code: 'science', name: { uz_latn: 'Ilmiy tadqiqot' }, description: null, processing_days: 15 },
+];
+
+it('renders six direction cards, each with its own illustration', async () => {
+  mockBackend({ services: sixActivities });
+  renderHome();
+
+  const cards = await screen.findAllByTestId('direction-card');
+  expect(cards).toHaveLength(6);
+  const svgIds = cards.map((c) => c.querySelector('linearGradient')?.id);
+  expect(new Set(svgIds).size).toBe(6);
+});
+
+/**
+ * The defect this pins: an unknown activity code fell back to `grazing`'s
+ * illustration, so a seventh service the art set does not cover would have
+ * been drawn with cattle — a statement about the service, not a neutral
+ * placeholder. `ServicesPage` draws nothing for the same case, and now so
+ * does this.
+ */
+it('draws no illustration at all for an activity code the art set does not cover', async () => {
+  mockBackend({
+    services: [
+      { id: 'a9', code: 'felling', name: { uz_latn: 'Kesish' }, description: null, processing_days: 15 },
+    ],
+  });
+  renderHome();
+
+  const cards = await screen.findAllByTestId('direction-card');
+  expect(cards).toHaveLength(1);
+  // `linearGradient` is what every `<Scene>` opens with — the test above
+  // counts them to prove the six cards get six different illustrations.
+  expect(cards[0].querySelector('linearGradient')).toBeNull();
+});
+
 const sampleActivities = [
   {
     id: '0198f100-0001-7000-8000-000000000001',
@@ -223,6 +468,10 @@ it('fetches and renders every activity type the public API returns', async () =>
 // needs to identify the activity type (`PriceCalculator` submits the same
 // catalog's `id` as `activity_type_id`). A login started from this link
 // must receive the real id, not a string the API never promised as a key.
+//
+// The page id is `applicant_wizard`, the same one `ServicesPage`'s own card
+// sends. This one used to send `auth_login`, which lands a visitor on the
+// cabinet's front door instead of the form they pressed a button to reach.
 it('passes the real backend activity UUID when apply link is clicked', async () => {
   mockBackend({ services: sampleActivities });
 
@@ -230,7 +479,7 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
   render(
     <MemoryRouter>
       <I18nProvider>
-        <HomePage onNavigate={onNavigate} />
+        <HomePage onNavigate={onNavigate} siteSettings={readySettings()} />
       </I18nProvider>
     </MemoryRouter>,
   );
@@ -241,7 +490,7 @@ it('passes the real backend activity UUID when apply link is clicked', async () 
   expect(applyButtons.length).toBe(3);
   applyButtons[1].click();
 
-  expect(onNavigate).toHaveBeenCalledWith('auth_login', {
+  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard', {
     activity: '0198f100-0001-7000-8000-000000000005',
   });
 });

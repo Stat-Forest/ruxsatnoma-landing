@@ -35,4 +35,32 @@ export const verify = {
   'verify.result.validityLabel': 'Ámel Qılıw Múddeti',
   'verify.result.signaturesValid': 'Sanlı qol tańbalar haqıyqıy (E-IMZO)',
   'verify.result.signaturesPending': 'Sanlı qol tańbalar ele tolıq tastıyıqlanbaǵan',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Kontur kartası',
+  'verify.map.heading': 'Kartada',
+  'verify.map.legend': 'Ruxsat etilgen kontur',
+
+  /* The two-tab switcher and the whole "application status" arm — added
+     as `LOCAL_COPY` in Uzbek Latin only, so a Russian reader met an
+     entirely Uzbek tab. */
+  'verify.tabs.label': 'Tekseriw túri',
+  'verify.tabs.permit': 'Ruxsatnama',
+  'verify.tabs.application': 'Arza jaǵdayı',
+  'verify.application.numberLabel': 'Arza nomeri',
+  'verify.application.numberPlaceholder': 'Mısalı: AR-2026-004518',
+  'verify.application.phoneLabel': 'Telefon',
+  'verify.application.phonePlaceholder': '+998 90 123 45 67',
+  'verify.application.validation': 'Arza nomerin hám telefon nomerin kiritiń',
+  'verify.application.missTitle': 'Arza tabılmadı',
+  'verify.application.missMessage':
+    'Kiritilgen arza nomeri hám telefon nomeri boyınsha maǵlıwmat tabılmadı. Maǵlıwmatlardı qaytadan tekseriń.',
+  'verify.application.privacyBold': 'Maxfiylik:',
+  'verify.application.privacyAfter':
+    'telefon nomeri tek arzanıń sizge tiyisli ekenin tastıyıqlaw ushın paydalanıladı.',
+  'verify.application.activityLabel': 'Xızmet túri',
+  'verify.application.organizationLabel': 'Orman xojalıǵı',
+  'verify.application.submittedLabel': 'Tapsırılǵan sáne',
+  'verify.application.nextStepLabel': 'Keyingi qádem',
 } as const;

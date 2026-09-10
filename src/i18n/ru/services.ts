@@ -6,7 +6,6 @@ export const services = {
   'services.title': 'Услуги по пользованию землями лесного фонда',
   'services.subtitle': 'На едином интерактивном портале вы можете подать заявку на разрешение любого вида.',
 
-  'services.card.termLabel': 'Срок рассмотрения:',
   'services.card.daysUnit': 'дней',
   'services.card.apply': 'Подать заявку',
 

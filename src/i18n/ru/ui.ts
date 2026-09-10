@@ -25,4 +25,10 @@ export const ui = {
   'ui.statusBadge.rejected': 'Отклонено',
   'ui.statusBadge.warning': 'Срок истекает',
   'ui.statusBadge.info': 'Информация',
+
+  /* `ERR-SYS-006`. Shared by every `/public/*` page through
+     `formatApiError` (`src/api/errors.ts`) — each page used to carry its
+     own copy of that helper, and they had already drifted apart. */
+  'ui.error.rateLimited.before': 'Достигнут предел числа запросов. Пожалуйста, повторите через',
+  'ui.error.rateLimited.after': 'секунд.',
 } as const;

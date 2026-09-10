@@ -6,13 +6,11 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import type { StatusType } from '../../components/ui/StatusBadge';
 import { Alert } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
-import { apiError } from '../../api/errors';
-import type { ApiError } from '../../api/errors';
+import { apiError, formatApiError } from '../../api/errors';
 import type { components } from '../../api/schema';
 import { useT } from '../../i18n/useT';
 
 type AppealStatusOut = components['schemas']['AppealStatusOut'];
-type TFunction = ReturnType<typeof useT>;
 
 type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
 
@@ -32,20 +30,6 @@ const STATUS_LABEL_KEY: Record<string, string> = {
   answered: 'appeal.status.answered',
   closed: 'appeal.status.closed',
 };
-
-/** Same rate-limit (`ERR-SYS-006`) special-case as `OpenDataPage`'s own local
- * helper — written again here rather than shared, per the plan's own call:
- * two lines is not worth a cross-file dependency for. */
-function formatCheckError(t: TFunction, err: ApiError): string {
-  if (err.code === 'ERR-SYS-006') {
-    const details = err.details as { retry_after_seconds?: unknown } | undefined;
-    const seconds = typeof details?.retry_after_seconds === 'number' ? details.retry_after_seconds : null;
-    if (seconds !== null) {
-      return `${t('appeal.error.rateLimited.before')} ${seconds} ${t('appeal.error.rateLimited.after')}`;
-    }
-  }
-  return `${err.message} (${err.code})`;
-}
 
 type FileState = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -109,7 +93,7 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
         });
         if (apiErr || !data) {
           setState('error');
-          setError(formatCheckError(t, apiError(apiErr ?? {})));
+          setError(formatApiError(t, apiError(apiErr ?? {})));
           return;
         }
         setAssignedNumber(data.number);
@@ -123,7 +107,7 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
   };
 
   return (
-    <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
       <div>
         <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.file.title')}</h2>
         <p className="text-xs text-[#5A646D]">{t('appeal.file.subtitle')}</p>
@@ -255,7 +239,7 @@ export const AppealCheckPage: React.FC = () => {
         });
         if (error) {
           setStatus('error');
-          setErrorMessage(formatCheckError(t, apiError(error)));
+          setErrorMessage(formatApiError(t, apiError(error)));
           return;
         }
         const body = data as AppealStatusOut;
@@ -277,11 +261,21 @@ export const AppealCheckPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
       <div className="text-center space-y-3">
-        <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
+        <span className="reveal inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
           {t('appeal.header.badge')}
         </span>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F24]">{t('appeal.header.title')}</h1>
-        <p className="text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed">{t('appeal.header.subtitle')}</p>
+        <h1
+          className="reveal text-2xl sm:text-3xl font-bold text-[#1A1F24]"
+          style={{ animationDelay: '0.06s' }}
+        >
+          {t('appeal.header.title')}
+        </h1>
+        <p
+          className="reveal text-sm text-[#5A646D] max-w-xl mx-auto pt-1 leading-relaxed"
+          style={{ animationDelay: '0.12s' }}
+        >
+          {t('appeal.header.subtitle')}
+        </p>
       </div>
 
       <AppealForm
@@ -292,7 +286,10 @@ export const AppealCheckPage: React.FC = () => {
         }}
       />
 
-      <div className="bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+      <div
+        className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6"
+        style={{ animationDelay: '0.06s' }}
+      >
         <div>
           <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.check.title')}</h2>
           <p className="text-xs text-[#5A646D]">{t('appeal.check.subtitle')}</p>
@@ -349,7 +346,7 @@ export const AppealCheckPage: React.FC = () => {
       )}
 
       {status === 'found' && result && (
-        <div className="bg-white border border-[#E4E7EA] rounded-2xl shadow-md p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+        <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl shadow-md p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs text-[#5A646D] uppercase font-semibold block">

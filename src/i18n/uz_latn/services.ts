@@ -6,7 +6,6 @@ export const services = {
   'services.title': 'Oʻrmon Fondidan Foydalanish Xizmatlari',
   'services.subtitle': 'Yagona interaktiv portal orqali barcha turdagi ruxsatnomalarga ariza topshirishingiz mumkin.',
 
-  'services.card.termLabel': 'Koʻrib chiqish muddati:',
   'services.card.daysUnit': 'kun',
   'services.card.apply': 'Ariza berish',
 

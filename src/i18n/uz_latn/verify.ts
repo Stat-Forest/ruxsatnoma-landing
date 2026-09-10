@@ -35,4 +35,32 @@ export const verify = {
   'verify.result.validityLabel': 'Amal Qilish Muddati',
   'verify.result.signaturesValid': 'Raqamli imzolar haqiqiy (E-IMZO)',
   'verify.result.signaturesPending': 'Raqamli imzolar hali toʻliq tasdiqlanmagan',
+
+  /* The map panel is mounted ONLY when `GET /public/permits/check` actually
+     sent a `contour` — a legend may only name what is drawn. */
+  'verify.map.title': 'Kontur xaritasi',
+  'verify.map.heading': 'Xaritada',
+  'verify.map.legend': 'Ruxsat etilgan kontur',
+
+  /* The two-tab switcher and the whole "application status" arm — added
+     as `LOCAL_COPY` in Uzbek Latin only, so a Russian reader met an
+     entirely Uzbek tab. */
+  'verify.tabs.label': 'Tekshirish turi',
+  'verify.tabs.permit': 'Ruxsatnoma',
+  'verify.tabs.application': 'Ariza holati',
+  'verify.application.numberLabel': 'Ariza raqami',
+  'verify.application.numberPlaceholder': 'Masalan: AR-2026-004518',
+  'verify.application.phoneLabel': 'Telefon',
+  'verify.application.phonePlaceholder': '+998 90 123 45 67',
+  'verify.application.validation': 'Ariza raqami va telefon raqamini kiriting',
+  'verify.application.missTitle': 'Ariza topilmadi',
+  'verify.application.missMessage':
+    'Kiritilgan ariza raqami va telefon raqami boʻyicha maʼlumot topilmadi. Maʼlumotlarni qaytadan tekshiring.',
+  'verify.application.privacyBold': 'Maxfiylik:',
+  'verify.application.privacyAfter':
+    'telefon raqami faqat arizaning sizga tegishli ekanini tasdiqlash uchun ishlatiladi.',
+  'verify.application.activityLabel': 'Faoliyat turi',
+  'verify.application.organizationLabel': 'Oʻrmon xoʻjaligi',
+  'verify.application.submittedLabel': 'Topshirilgan sana',
+  'verify.application.nextStepLabel': 'Keyingi qadam',
 } as const;

@@ -1,31 +1,52 @@
+import React from 'react';
 import type { RouteObject } from 'react-router';
 import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
 import { CALCULATOR_ANCHOR } from './components/calculator/PriceCalculator';
+import { fetchSiteSettings } from './api/site';
+import type { SiteSettingsState } from './api/site';
 import {
   HomePage,
   ServicesPage,
   NewsPage,
   NewsItemPage,
   DocumentsPage,
-  OpenDataPage,
-  FaqPage,
+  AboutPage,
+  ContactPage,
+  MapPage,
   VerifyPage,
   AppealCheckPage,
 } from './pages/web';
 
 export type NavigateFn = (page: string, params?: Record<string, unknown>) => void;
 
+/** What `<Outlet context={…}>` carries, and therefore what a route wrapper
+ *  below can hand a page. */
+export interface LandingOutletContext {
+  onNavigate: NavigateFn;
+  siteSettings: SiteSettingsState;
+}
+
 /** Legacy page-id -> real path. Every existing page still calls
  * `onNavigate?.('services')` the way it did under the old `useState` build
  * (decision: keep the markup exactly as it is) — this map is the only thing
- * that changed, so those calls now change the URL instead of a `useState`. */
+ * that changed, so those calls now change the URL instead of a `useState`.
+ *
+ * `opendata` and `faq` stay in this table even though neither has a header
+ * nav entry any more (stage 8): `opendata` is still how the home page's own
+ * open-data widget names its "view more" link, and `faq` is still how the
+ * footer names its FAQ link — both routes below just redirect on from there
+ * (`/opendata` -> `/`, `/faq` -> `/about`), same as `/tariffs` always has.
+ */
 const PAGE_TO_PATH: Record<string, string> = {
   home: '/',
   services: '/services',
   news: '/news',
   documents: '/documents',
+  about: '/about',
+  contact: '/contact',
+  map: '/map',
   opendata: '/opendata',
   faq: '/faq',
   verify: '/check',
@@ -35,7 +56,9 @@ const PAGE_TO_PATH: Record<string, string> = {
   // Old special-cases inlined here instead of in the handler below, so the
   // whole page-id -> path mapping lives in one table.
   activities: '/services',
-  feedback: '/faq',
+  // The home page's "contact us" button (`home.contact.button`) used to land
+  // on `/faq` for lack of anywhere better — `/contact` is now a real page.
+  feedback: '/contact',
 };
 
 /** The price calculator is a SECTION of the home page, not a page: it lost its
@@ -70,6 +93,24 @@ function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ONE fetch per page view. `PublicLayout`, `HomePage` and `ContactPage`
+  // each called `fetchSiteSettings()` for themselves, with no shared state,
+  // so a visit to `/` made the same request twice and a visit to `/contact`
+  // twice again. It is fetched here, where both the chrome and the page can
+  // be handed the same answer.
+  const [siteSettings, setSiteSettings] = React.useState<SiteSettingsState>({ status: 'loading' });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    void fetchSiteSettings().then((data) => {
+      if (cancelled) return;
+      setSiteSettings(data ? { status: 'ready', data } : { status: 'error' });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const onNavigate: NavigateFn = (page, params) => {
     const cabinetPath = CABINET_ENTRIES[page];
     if (cabinetPath) {
@@ -92,7 +133,7 @@ function Layout() {
       return;
     }
     const path = PAGE_TO_PATH[page];
-    if (!path) return; // out of `landing`'s nine screens (decision #60.4) — nothing to open
+    if (!path) return; // out of `landing`'s known screens — nothing to open
     navigate(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -102,22 +143,48 @@ function Layout() {
     : (PATH_TO_PAGE[location.pathname] ?? 'home');
 
   return (
-    <PublicLayout onNavigate={onNavigate} activeNav={activeNav}>
-      <Outlet context={{ onNavigate } satisfies { onNavigate: NavigateFn }} />
+    <PublicLayout onNavigate={onNavigate} activeNav={activeNav} siteSettings={siteSettings}>
+      <Outlet context={{ onNavigate, siteSettings } satisfies LandingOutletContext} />
     </PublicLayout>
   );
 }
 
-function useLandingNavigate(): NavigateFn {
-  return useOutletContext<{ onNavigate: NavigateFn }>().onNavigate;
+function useLandingContext(): LandingOutletContext {
+  return useOutletContext<LandingOutletContext>();
 }
 
+function useLandingNavigate(): NavigateFn {
+  return useLandingContext().onNavigate;
+}
+
+/**
+ * EVERY page that calls `onNavigate?.(...)` needs a wrapper here. The call is
+ * optional-chained, so a page rendered as a bare `<AboutPage/>` compiles,
+ * renders and silently does nothing when its primary button is pressed —
+ * which is how six buttons across `/about`, `/contact` and `/map` shipped
+ * dead. Their own tests now render them with the prop, so a wrapper dropped
+ * from this list fails a test instead of a click.
+ */
 function HomeRoute() {
-  return <HomePage onNavigate={useLandingNavigate()} />;
+  const { onNavigate, siteSettings } = useLandingContext();
+  return <HomePage onNavigate={onNavigate} siteSettings={siteSettings} />;
 }
 
 function ServicesRoute() {
   return <ServicesPage onNavigate={useLandingNavigate()} />;
+}
+
+function AboutRoute() {
+  return <AboutPage onNavigate={useLandingNavigate()} />;
+}
+
+function ContactRoute() {
+  const { onNavigate, siteSettings } = useLandingContext();
+  return <ContactPage onNavigate={onNavigate} siteSettings={siteSettings} />;
+}
+
+function MapRoute() {
+  return <MapPage onNavigate={useLandingNavigate()} />;
 }
 
 export const routeConfig: RouteObject[] = [
@@ -132,10 +199,16 @@ export const routeConfig: RouteObject[] = [
       // its place in the header; the bookmarks that already exist keep working.
       { path: 'tariffs', element: <Navigate to={CALCULATOR_PATH} replace /> },
       { path: 'documents', element: <DocumentsPage /> },
-      { path: 'opendata', element: <OpenDataPage /> },
-      { path: 'faq', element: <FaqPage /> },
+      { path: 'about', element: <AboutRoute /> },
+      { path: 'contact', element: <ContactRoute /> },
+      { path: 'map', element: <MapRoute /> },
       { path: 'check', element: <VerifyPage /> },
       { path: 'appeal-check', element: <AppealCheckPage /> },
+      // The standalone FAQ and open-data screens are retired (stage 8): their
+      // header-nav entries are gone, and each redirects on rather than 404s
+      // for anyone with the old URL bookmarked.
+      { path: 'faq', element: <Navigate to="/about" replace /> },
+      { path: 'opendata', element: <Navigate to="/" replace /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
