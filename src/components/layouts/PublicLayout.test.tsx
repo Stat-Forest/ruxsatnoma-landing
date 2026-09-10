@@ -80,10 +80,17 @@ it('offers six nav items and no open-data entry', () => {
 });
 
 it('sends the Kabinet button to the cabinet, not to a login form', async () => {
+  // `goToCabinet` throws without this — CI has no `.env`, and the test must
+  // not depend on the developer's machine having one.
+  vi.stubEnv('VITE_ADMIN_BASE_URL', 'https://admin.example.uz');
   const assign = vi.spyOn(navigation, 'assign').mockImplementation(() => {});
-  renderLayout();
-  await userEvent.click(screen.getByRole('button', { name: /kabinet/i }));
-  expect(assign).toHaveBeenCalledWith(expect.stringContaining('/login'));
+  try {
+    renderLayout();
+    await userEvent.click(screen.getByRole('button', { name: /kabinet/i }));
+    expect(assign).toHaveBeenCalledWith(expect.stringContaining('/login'));
+  } finally {
+    vi.unstubAllEnvs();
+  }
 });
 
 it('draws footer contacts from the settings it is given', async () => {

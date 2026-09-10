@@ -17,10 +17,14 @@ vi.mock('../../api/client', () => ({
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('no network in tests')));
+  // `goToCabinet` throws without this — CI has no `.env`, and a test that
+  // presses the apply button must not depend on the developer's machine.
+  vi.stubEnv('VITE_ADMIN_BASE_URL', 'https://admin.example.uz');
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   window.localStorage.clear();
 });
 
