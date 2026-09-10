@@ -27,6 +27,7 @@ const READY: SiteSettingsState = { status: 'ready', data: fullSettings };
 
 beforeEach(() => {
   vi.mocked(api.POST).mockReset();
+  window.localStorage.clear();
 });
 
 /**
@@ -97,4 +98,18 @@ it('renders without contact details when the site-settings fetch failed', () => 
   expect(screen.queryByText('Ishonch telefoni')).not.toBeInTheDocument();
   // The filing form itself never depends on site settings being loaded.
   expect(screen.getByRole('button', { name: /^yuborish$/i })).toBeInTheDocument();
+});
+
+/**
+ * These three screens (and `/check`'s application tab, and the price
+ * calculator) had their copy as local constants in Uzbek Latin, so switching
+ * to Russian changed only the header and the footer. The switcher stores the
+ * pick in `localStorage`, which is what this sets.
+ */
+it('follows the language switcher', async () => {
+  window.localStorage.setItem('lang', 'ru');
+  renderContact();
+
+  expect(await screen.findByRole('heading', { name: /Связаться с нами/i })).toBeInTheDocument();
+  expect(screen.getByText('Телефон доверия')).toBeInTheDocument();
 });

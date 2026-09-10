@@ -34,41 +34,24 @@ interface DisplayFaq {
   a: string;
 }
 
-const PRINCIPLE_ICONS = [ShieldCheck, Timer, Layers, FileText] as const;
-
-/** Non-numeric, non-editorial claims about how the system behaves — each one
- *  traceable to a real rule (E-IMZO signing, per-activity `processing_days`
- *  on `/public/refs/activity-types`, one active permit per contour, the
- *  k-anonymity threshold `OpenDataPage` already renders) rather than a
- *  invented figure. Kept as local constants, not `t()` keys: `about.*` does
- *  not exist in `src/i18n/*` yet and this track does not own that directory
- *  (see the track report for the keys a later pass should add). */
-const PRINCIPLES: { titleKey: string; body: string }[] = [
-  {
-    titleKey: 'Huquqiy kuch',
-    body: 'Har bir ruxsatnoma E-IMZO raqamli imzolari bilan tasdiqlanadi va qogʻoz hujjat bilan bir xil yuridik kuchga ega.',
-  },
-  {
-    titleKey: 'Belgilangan muddat',
-    body: 'Ariza koʻrib chiqish muddati har bir faoliyat turi uchun oldindan koʻrsatilgan va tizim tomonidan nazorat qilinadi.',
-  },
-  {
-    titleKey: 'GIS asosida',
-    body: 'Maydon va kontur xaritadan tanlanadi — bir konturga bir vaqtning oʻzida ikkita amaldagi ruxsatnoma berilishi tizim darajasida bloklanadi.',
-  },
-  {
-    titleKey: 'Ochiq hisobot',
-    body: 'Umumiy koʻrsatkichlar ochiq eʼlon qilinadi; shaxsni aniqlash mumkin boʻlgan kichik kesimlar maxfiylik uchun yashiriladi.',
-  },
-];
+/**
+ * Non-numeric, non-editorial claims about how the system behaves — each one
+ * traceable to a real rule (E-IMZO signing, per-activity `processing_days`
+ * on `/public/refs/activity-types`, one active permit per contour, the
+ * k-anonymity threshold the open-data endpoint already publishes) rather
+ * than an invented figure. The copy itself is `about.principle.*` in all
+ * five languages; only the icon and the key stem live here.
+ */
+const PRINCIPLES = [
+  { key: 'legal', Icon: ShieldCheck },
+  { key: 'term', Icon: Timer },
+  { key: 'gis', Icon: Layers },
+  { key: 'openData', Icon: FileText },
+] as const;
 
 /** Real legal instruments already named in the project's own decisions and
  *  status notes — informational citations, not invented figures. */
-const LEGAL_BASIS = [
-  { title: 'Oʻzbekiston Respublikasi Oʻrmon kodeksi', note: 'Oʻrmon fondi yerlaridan foydalanish tartibi' },
-  { title: 'VMQ № 689', note: 'Foydalanish uchun toʻlov normalari' },
-  { title: 'VMQ № 278', note: 'Imtiyozli toifalar roʻyxati' },
-];
+const LEGAL_BASIS = ['code', 'vmq689', 'vmq278'] as const;
 
 /** Same rate-limit-aware fallback text every `/public/*` page writes locally.
  *  The FAQ section below only needs the fallback branch (a fetch failure
@@ -200,10 +183,8 @@ function FaqAccordion() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-5 rounded-2xl border border-[#D9EBDC] bg-[#F0F7F1]">
-        <p className="text-sm text-[#1A1F24]">
-          Javob topilmadimi? Ishonch telefoniga qoʻngʻiroq qiling yoki rasmiy murojaat yuboring.
-        </p>
-        <span className="text-sm font-bold text-[#2E7D4F]">Aloqa boʻlimi</span>
+        <p className="text-sm text-[#1A1F24]">{t('about.faq.help')}</p>
+        <span className="text-sm font-bold text-[#2E7D4F]">{t('about.faq.contactSection')}</span>
       </div>
     </section>
   );
@@ -216,6 +197,7 @@ function FaqAccordion() {
  * same live `/api/v1/help/faq` read with the same four-question fallback.
  */
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
+  const t = useT();
   const [serviceCount, setServiceCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -237,101 +219,84 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       <section className="reveal -mx-4 sm:-mx-6 lg:mx-0 rounded-none lg:rounded-[24px] bg-[#0F2C18] px-6 sm:px-12 py-16 sm:py-20 text-white">
         <div className="max-w-3xl mx-auto lg:mx-0 space-y-5">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9CE3AE] bg-white/10 border border-white/20 px-3 py-1.5 rounded-full">
-            Portal haqida
+            {t('about.hero.badge')}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black leading-tight">
-            Oʻrmon fondi yerlaridan foydalanish — qogʻozsiz, oydin va tekshiriladigan tartibda
-          </h1>
-          <p className="text-base text-[#C4D8C9] leading-relaxed max-w-2xl">
-            Ruxsatnoma portali fuqaro va tadbirkorga oʻrmon fondi yerlaridan foydalanish uchun
-            ruxsatnomani onlayn olish imkonini beradi: ariza berishdan tortib E-IMZO bilan
-            imzolangan rasmiy hujjatni yuklab olishgacha.
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-black leading-tight">{t('about.hero.title')}</h1>
+          <p className="text-base text-[#C4D8C9] leading-relaxed max-w-2xl">{t('about.hero.body')}</p>
         </div>
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
         <div className="space-y-4">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#23653F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-            Tizim nima uchun kerak
+            {t('about.why.badge')}
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#123522] leading-tight">
-            Bitta ariza, bitta reyestr, bitta hujjat
+            {t('about.why.title')}
           </h2>
         </div>
         <div className="space-y-4 text-sm sm:text-base text-[#3F4A52] leading-relaxed">
-          <p>
-            Ilgari ruxsatnoma olish uchun fuqaro oʻrmon xoʻjaligiga borishi, hujjatlarni qoʻlda
-            toʻldirishi va javobni kutishi kerak edi. Har bir xoʻjalik oʻz daftarini yuritardi —
-            maydonlar, muddatlar va toʻlovlar bir joyda jamlanmagan edi.
-          </p>
-          <p>
-            Portal shu jarayonni yagona davlat tizimiga koʻchiradi. Ariza onlayn topshiriladi,
-            kontur GIS xaritada tanlanadi, toʻlov normalar boʻyicha avtomatik hisoblanadi, hujjat
-            esa E-IMZO bilan imzolanadi va QR-kod orqali istalgan vaqtda tekshiriladi.
-          </p>
+          <p>{t('about.why.before')}</p>
+          <p>{t('about.why.now')}</p>
         </div>
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {PRINCIPLES.map((principle, idx) => {
-          const Icon = PRINCIPLE_ICONS[idx];
-          return (
-            <div key={principle.titleKey} className="card-lift border border-[#E4E7EA] rounded-2xl p-6">
-              <div className="w-11 h-11 rounded-xl bg-[#F0F7F1] flex items-center justify-center">
-                <Icon className="w-5 h-5 text-[#2E7D4F]" />
-              </div>
-              <h3 className="mt-4 text-base font-bold text-[#123522]">{principle.titleKey}</h3>
-              <p className="mt-2 text-sm text-[#5A646D] leading-relaxed">{principle.body}</p>
+        {PRINCIPLES.map(({ key, Icon }) => (
+          <div key={key} className="card-lift border border-[#E4E7EA] rounded-2xl p-6">
+            <div className="w-11 h-11 rounded-xl bg-[#F0F7F1] flex items-center justify-center">
+              <Icon className="w-5 h-5 text-[#2E7D4F]" />
             </div>
-          );
-        })}
+            <h3 className="mt-4 text-base font-bold text-[#123522]">
+              {t(`about.principle.${key}.title`)}
+            </h3>
+            <p className="mt-2 text-sm text-[#5A646D] leading-relaxed">
+              {t(`about.principle.${key}.body`)}
+            </p>
+          </div>
+        ))}
       </section>
 
       <section className="rounded-[20px] border border-[#E4E7EA] overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         <div className="p-8 sm:p-12 bg-[#F8F9FA] space-y-4">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#23653F] bg-white px-3 py-1 rounded-full border border-[#D9EBDC]">
-            Buyurtmachi
+            {t('about.customer.badge')}
           </span>
           <h2 className="text-xl sm:text-2xl font-bold text-[#123522] leading-snug">
-            Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi
+            {t('about.customer.title')}
           </h2>
-          <p className="text-sm text-[#5A646D] leading-relaxed">
-            Portal Agentlik topshirigʻi asosida yaratilgan. Ruxsatnomalarni berish, ularni nazorat
-            qilish va hisobotlarni shakllantirish Agentlik hamda hududiy oʻrmon xoʻjaliklari
-            zimmasida.
-          </p>
+          <p className="text-sm text-[#5A646D] leading-relaxed">{t('about.customer.body')}</p>
           <div className="flex flex-wrap gap-8 pt-2">
             {serviceCount !== null && (
               <div>
                 <div className="text-3xl font-black text-[#123522]">{serviceCount}</div>
                 <div className="mt-1 text-xs text-[#5A646D] flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5" /> foydalanish yoʻnalishi
+                  <Layers className="w-3.5 h-3.5" /> {t('about.customer.servicesUnit')}
                 </div>
               </div>
             )}
             <div>
               <div className="text-3xl font-black text-[#123522]">{LANGUAGES.length}</div>
               <div className="mt-1 text-xs text-[#5A646D] flex items-center gap-1.5">
-                <Globe2 className="w-3.5 h-3.5" /> interfeys tili
+                <Globe2 className="w-3.5 h-3.5" /> {t('about.customer.languagesUnit')}
               </div>
             </div>
           </div>
         </div>
         <div className="p-8 sm:p-12 bg-[#123522] text-white space-y-5">
           <div className="text-xs font-extrabold uppercase tracking-wider text-[#7FB98A] flex items-center gap-2">
-            <Landmark className="w-4 h-4" /> Huquqiy asos
+            <Landmark className="w-4 h-4" /> {t('about.legal.heading')}
           </div>
           <div className="space-y-4">
             {LEGAL_BASIS.map((doc, idx) => (
               <div
-                key={doc.title}
+                key={doc}
                 className={`flex gap-3 ${idx < LEGAL_BASIS.length - 1 ? 'pb-4 border-b border-white/10' : ''}`}
               >
                 <FileText className="w-4 h-4 text-[#9CE3AE] shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-sm font-bold">{doc.title}</div>
-                  <div className="mt-1 text-xs text-[#A9C2AE]">{doc.note}</div>
+                  <div className="text-sm font-bold">{t(`about.legal.${doc}.title`)}</div>
+                  <div className="mt-1 text-xs text-[#A9C2AE]">{t(`about.legal.${doc}.note`)}</div>
                 </div>
               </div>
             ))}
@@ -341,7 +306,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             onClick={() => onNavigate?.('documents')}
             className="flex items-center gap-2 text-sm font-bold text-[#9CE3AE] hover:text-white transition-colors"
           >
-            Barcha hujjatlar boʻlimi <ArrowRight className="w-4 h-4" />
+            {t('about.legal.allDocuments')} <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>
@@ -351,17 +316,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       <section className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-[#17331B] to-[#235C39] px-6 sm:px-12 py-10 sm:py-12">
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="max-w-xl space-y-2">
-            <h2 className="text-xl sm:text-2xl font-black text-white">
-              Ruxsatnoma olishni hoziroq boshlang
-            </h2>
-            <p className="text-sm text-[#C4D8C9] leading-relaxed">
-              OneID orqali kiring, faoliyat turini tanlang va konturni xaritada belgilang —
-              qolganini tizim bajaradi.
-            </p>
+            <h2 className="text-xl sm:text-2xl font-black text-white">{t('about.cta.title')}</h2>
+            <p className="text-sm text-[#C4D8C9] leading-relaxed">{t('about.cta.body')}</p>
           </div>
           <div className="flex gap-3">
             <Button variant="primary" size="lg" onClick={() => onNavigate?.('applicant_wizard')}>
-              Ariza topshirish <ArrowRight className="w-4 h-4" />
+              {t('action.submitApplication')} <ArrowRight className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
@@ -369,7 +329,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               className="!border-white/40 !text-white hover:!bg-white/10"
               onClick={() => onNavigate?.('services')}
             >
-              Xizmatlar
+              {t('nav.services')}
             </Button>
           </div>
         </div>

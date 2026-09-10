@@ -9,9 +9,7 @@ export const common = {
   'nav.documents': 'Hújjetler',
   'nav.about': 'Portal haqqında',
   'nav.contact': 'Baylanıs',
-  'nav.faq': 'Sorawlar',
 
-  'action.login': 'Kiriw (OneID)',
   'action.cabinet': 'Kabinet',
   'action.submitApplication': 'Arza tapsırıw',
   'action.language': 'Til',
@@ -34,7 +32,6 @@ export const common = {
   'footer.about':
     'Ózbekstan Respublikası Orman xojalıǵı mámleketlik komitetiniń rásmiy ruxsatnamalar málimleme sisteması.',
   'footer.services': 'Xızmetler',
-  'footer.documents': 'Hújjetler',
   'footer.portal': 'Portal',
   'footer.contacts': 'Baylanıs',
   'footer.link.howToApply': 'Arza beriw tártibi',
@@ -43,12 +40,8 @@ export const common = {
   'footer.link.map': 'Bos konturlar kartası',
   'footer.link.news': 'Jańalıqlar hám daǵazalar',
   'footer.link.appealStatus': 'Múrjat jiberiw hám tekseriw',
-  'footer.link.gis': 'Orman zonaları GIS kartası',
   'footer.link.documents': 'Hújjetler hám normalar',
   'footer.link.faq': 'Kóp beriletuǵın sorawlar',
-  'footer.link.norms': 'Geobotanikalıq normalar hám qádeler',
-  'footer.link.prosecutor': 'Sanlı Qadaǵalaw (Prokuratura Portali)',
-  'footer.address': 'Orman hám jasıl aymaqlardı kóbeytiw, shólistanıwǵa qarsı gúresiw agentligi',
   'footer.copyright': '© 2026 Orman xojalıǵı mámleketlik komiteti. Barlıq huqıqlar qorǵalǵan.',
   'footer.wcag': 'WCAG 2.2 AA Saykes dizayn-sisteması',
 } as const;

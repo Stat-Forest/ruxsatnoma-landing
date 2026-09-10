@@ -24,6 +24,7 @@ import { apiError } from '../../api/errors';
 import type { components } from '../../api/schema';
 import { useT, useLanguage } from '../../i18n/useT';
 import { pickLocalized } from '../../lib/localized';
+import { DASH } from '../../lib/format';
 import type { MapGeometry } from '../../components/map/types';
 import { checkApplication } from '../../api/applications';
 import type { ApplicationCheckResult } from '../../api/applications';
@@ -80,33 +81,6 @@ function applicationStatusVariant(status: string | null): StatusType {
   return 'info';
 }
 
-/** Copy this task needs that has no `i18n` key yet — the tab switcher and
- *  the whole "Ariza holati" arm are new. Flagged in the track report; add
- *  `verify.tabs.*` / `verify.application.*` keys to `src/i18n/*` (all five
- *  languages, `parity.test.ts` enforces that) and replace these with
- *  `t(...)` once they exist. Uzbek only, per the task's own UI-copy rule. */
-const LOCAL_COPY = {
-  tabPermit: 'Ruxsatnoma',
-  tabApplication: 'Ariza holati',
-  tabListLabel: 'Tekshirish turi',
-  appNumberLabel: 'Ariza raqami',
-  appNumberPlaceholder: 'Masalan: AR-2026-004518',
-  appPhoneLabel: 'Telefon',
-  appPhonePlaceholder: '+998 90 123 45 67',
-  appValidation: 'Ariza raqami va telefon raqamini kiriting',
-  appMissTitle: 'Ariza topilmadi',
-  appMissMessage:
-    'Kiritilgan ariza raqami va telefon raqami boʻyicha maʼlumot topilmadi. Maʼlumotlarni qaytadan tekshiring.',
-  appPrivacyBold: 'Maxfiylik:',
-  appPrivacyAfter:
-    'telefon raqami faqat arizaning sizga tegishli ekanini tasdiqlash uchun ishlatiladi.',
-  appNumberResultLabel: 'Ariza raqami',
-  appActivityLabel: 'Faoliyat turi',
-  appOrganizationLabel: 'Oʻrmon xoʻjaligi',
-  appSubmittedLabel: 'Topshirilgan sana',
-  appNextStepLabel: 'Keyingi qadam',
-} as const;
-
 /** Splits a loose permit-number string (the home page's single quick-search
  * box, e.g. "А № 000123" or "A-123") into `series`+`number` — the two halves
  * `GET /public/permits/check` actually takes (`permits/service.py`'s
@@ -142,13 +116,32 @@ function queryFromParams(params: URLSearchParams): Query | null {
 }
 
 type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
-type Arm = 'permit' | 'application';
+
+const ARMS = ['permit', 'application'] as const;
+type Arm = (typeof ARMS)[number];
+
+/** One panel, whose `aria-labelledby` follows the selected tab — the two
+ *  arms share a single region of the page, so a second `tabpanel` would be
+ *  a lie about the structure. */
+const PANEL_ID = 'verify-panel';
+
+function tabId(arm: Arm): string {
+  return `verify-tab-${arm}`;
+}
 
 export const VerifyPage: React.FC = () => {
   const t = useT();
   const { uiLanguage } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [arm, setArm] = useState<Arm>('permit');
+
+  const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    event.preventDefault();
+    const next = ARMS[(ARMS.indexOf(arm) + 1) % ARMS.length];
+    setArm(next);
+    document.getElementById(tabId(next))?.focus();
+  };
 
   // ── Permit arm (existing) ────────────────────────────────────────────────
   const [seriesInput, setSeriesInput] = useState(searchParams.get('series') ?? '');
@@ -235,7 +228,7 @@ export const VerifyPage: React.FC = () => {
     const trimmedNumber = appNumberInput.trim();
     const trimmedPhone = appPhoneInput.trim();
     if (!trimmedNumber || !trimmedPhone) {
-      setAppValidationError(LOCAL_COPY.appValidation);
+      setAppValidationError(t('verify.application.validation'));
       return;
     }
     setAppValidationError(null);
@@ -289,36 +282,44 @@ export const VerifyPage: React.FC = () => {
         </p>
 
         {/* Two-tab switcher: which of the two anonymous lookups this page
-            runs. Not itself part of `verify.header.*` — see `LOCAL_COPY`. */}
+            runs. It carried `role="tablist"` and `role="tab"` with no
+            `tabpanel` anywhere and no `aria-controls` — a screen reader was
+            told a tab widget existed and then given nothing it controlled.
+            Arrow keys move between the tabs, which is what the roving
+            `tabIndex` below requires: without them the inactive tab would
+            be unreachable from the keyboard entirely. */}
         <div
           role="tablist"
-          aria-label={LOCAL_COPY.tabListLabel}
+          aria-label={t('verify.tabs.label')}
           className="inline-flex gap-1 rounded-xl border border-[#D9EBDC] bg-[#F0F7F1] p-1"
         >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={arm === 'permit'}
-            onClick={() => setArm('permit')}
-            className={`rounded-lg px-5 py-2.5 text-sm font-bold transition-colors ${
-              arm === 'permit' ? 'bg-[#123522] text-white' : 'text-[#23653F]'
-            }`}
-          >
-            {LOCAL_COPY.tabPermit}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={arm === 'application'}
-            onClick={() => setArm('application')}
-            className={`rounded-lg px-5 py-2.5 text-sm font-bold transition-colors ${
-              arm === 'application' ? 'bg-[#123522] text-white' : 'text-[#23653F]'
-            }`}
-          >
-            {LOCAL_COPY.tabApplication}
-          </button>
+          {ARMS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              id={tabId(value)}
+              role="tab"
+              aria-selected={arm === value}
+              aria-controls={PANEL_ID}
+              tabIndex={arm === value ? 0 : -1}
+              onClick={() => setArm(value)}
+              onKeyDown={onTabKeyDown}
+              className={`rounded-lg px-5 py-2.5 text-sm font-bold transition-colors ${
+                arm === value ? 'bg-[#123522] text-white' : 'text-[#23653F]'
+              }`}
+            >
+              {t(`verify.tabs.${value}`)}
+            </button>
+          ))}
         </div>
       </div>
+
+      <div
+        id={PANEL_ID}
+        role="tabpanel"
+        aria-labelledby={tabId(arm)}
+        className="space-y-8"
+      >
 
       {/* Search Input Card */}
       <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
@@ -376,13 +377,13 @@ export const VerifyPage: React.FC = () => {
             >
               <div className="w-full sm:w-2/5">
                 <FormField
-                  label={LOCAL_COPY.appNumberLabel}
+                  label={t('verify.application.numberLabel')}
                   htmlFor="application-number"
                   error={appValidationError ?? undefined}
                 >
                   <Input
                     id="application-number"
-                    placeholder={LOCAL_COPY.appNumberPlaceholder}
+                    placeholder={t('verify.application.numberPlaceholder')}
                     value={appNumberInput}
                     onChange={(e) => setAppNumberInput(e.target.value)}
                     leftIcon={<Hash className="w-4 h-4" />}
@@ -391,10 +392,10 @@ export const VerifyPage: React.FC = () => {
                 </FormField>
               </div>
               <div className="w-full sm:w-2/5">
-                <FormField label={LOCAL_COPY.appPhoneLabel} htmlFor="application-phone">
+                <FormField label={t('verify.application.phoneLabel')} htmlFor="application-phone">
                   <Input
                     id="application-phone"
-                    placeholder={LOCAL_COPY.appPhonePlaceholder}
+                    placeholder={t('verify.application.phonePlaceholder')}
                     value={appPhoneInput}
                     onChange={(e) => setAppPhoneInput(e.target.value)}
                     leftIcon={<Phone className="w-4 h-4" />}
@@ -410,7 +411,7 @@ export const VerifyPage: React.FC = () => {
             <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">
               <Lock className="w-4 h-4 text-[#2E7D4F] shrink-0" />
               <span>
-                <b>{LOCAL_COPY.appPrivacyBold}</b> {LOCAL_COPY.appPrivacyAfter}
+                <b>{t('verify.application.privacyBold')}</b> {t('verify.application.privacyAfter')}
               </span>
             </div>
           </>
@@ -550,8 +551,8 @@ export const VerifyPage: React.FC = () => {
       )}
 
       {arm === 'application' && appStatus === 'miss' && (
-        <Alert variant="danger" title={LOCAL_COPY.appMissTitle}>
-          {LOCAL_COPY.appMissMessage}
+        <Alert variant="danger" title={t('verify.application.missTitle')}>
+          {t('verify.application.missMessage')}
         </Alert>
       )}
 
@@ -561,10 +562,10 @@ export const VerifyPage: React.FC = () => {
             <div className="p-6 border-b border-[#D9EBDC] bg-[#F0F7F1] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-xs text-[#767F87] uppercase font-semibold block">
-                  {LOCAL_COPY.appNumberResultLabel}
+                  {t('verify.application.numberLabel')}
                 </span>
                 <span className="mt-1 block text-xl font-bold font-mono text-[#123522]">
-                  {appResult.number ?? '—'}
+                  {appResult.number ?? DASH}
                 </span>
               </div>
               {appStatusLabel && (
@@ -578,28 +579,28 @@ export const VerifyPage: React.FC = () => {
                   <Building className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
                     <span className="text-xs text-[#5A646D] uppercase font-semibold block">
-                      {LOCAL_COPY.appActivityLabel}
+                      {t('verify.application.activityLabel')}
                     </span>
-                    <span className="font-bold text-[#1A1F24]">{appResult.activity_type ?? '—'}</span>
+                    <span className="font-bold text-[#1A1F24]">{appResult.activity_type ?? DASH}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <MapPin className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
                     <span className="text-xs text-[#5A646D] uppercase font-semibold block">
-                      {LOCAL_COPY.appOrganizationLabel}
+                      {t('verify.application.organizationLabel')}
                     </span>
-                    <span className="font-bold text-[#1A1F24]">{appResult.organization ?? '—'}</span>
+                    <span className="font-bold text-[#1A1F24]">{appResult.organization ?? DASH}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-[#F8F9FA] border border-[#E4E7EA]">
                   <Calendar className="w-5 h-5 text-[#2E7D4F] shrink-0 mt-0.5" />
                   <div>
                     <span className="text-xs text-[#5A646D] uppercase font-semibold block">
-                      {LOCAL_COPY.appSubmittedLabel}
+                      {t('verify.application.submittedLabel')}
                     </span>
                     <span className="font-bold text-[#1A1F24] font-mono">
-                      {appResult.submitted_at ? appResult.submitted_at.slice(0, 10) : '—'}
+                      {appResult.submitted_at ? appResult.submitted_at.slice(0, 10) : DASH}
                     </span>
                   </div>
                 </div>
@@ -609,7 +610,7 @@ export const VerifyPage: React.FC = () => {
                   it is a whole callout, not a label:value pair. */}
               {appResult.next_step && (
                 <div className="p-4 bg-[#F8F9FA] border-l-4 border-[#B45309] rounded-xl">
-                  <div className="text-sm font-bold text-[#123522]">{LOCAL_COPY.appNextStepLabel}</div>
+                  <div className="text-sm font-bold text-[#123522]">{t('verify.application.nextStepLabel')}</div>
                   <p className="mt-2 text-sm leading-relaxed text-[#3F4A52]">{appResult.next_step}</p>
                 </div>
               )}
@@ -617,6 +618,7 @@ export const VerifyPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

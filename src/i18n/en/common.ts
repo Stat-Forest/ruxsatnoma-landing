@@ -9,9 +9,7 @@ export const common = {
   'nav.documents': 'Documents',
   'nav.about': 'About',
   'nav.contact': 'Contact',
-  'nav.faq': 'FAQ',
 
-  'action.login': 'Log In (OneID)',
   'action.cabinet': 'Cabinet',
   'action.submitApplication': 'Submit Application',
   'action.language': 'Language',
@@ -34,7 +32,6 @@ export const common = {
   'footer.about':
     'Official permit information system of the State Forestry Committee of the Republic of Uzbekistan.',
   'footer.services': 'Services',
-  'footer.documents': 'Documents',
   'footer.portal': 'Portal',
   'footer.contacts': 'Contacts',
   'footer.link.howToApply': 'Application Procedure',
@@ -43,12 +40,8 @@ export const common = {
   'footer.link.map': 'Map of Available Contours',
   'footer.link.news': 'News & Announcements',
   'footer.link.appealStatus': 'Submit & Track Appeals',
-  'footer.link.gis': 'Forest Zones GIS Map',
   'footer.link.documents': 'Documents & Regulations',
   'footer.link.faq': 'Frequently Asked Questions',
-  'footer.link.norms': 'Geobotanical Norms & Rules',
-  'footer.link.prosecutor': 'Digital Oversight (Prosecutor Portal)',
-  'footer.address': 'Agency for Forestry and Greenery Development, Combating Desertification',
   'footer.copyright': '© 2026 State Forestry Committee. All rights reserved.',
   'footer.wcag': 'WCAG 2.2 AA Compliant Design System',
 } as const;

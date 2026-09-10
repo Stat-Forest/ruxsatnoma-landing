@@ -21,6 +21,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  window.localStorage.clear();
 });
 
 function renderAt(path: string) {
@@ -97,4 +98,20 @@ it('never invents the review-deadline or legal-basis figures the design mock har
   // track could verify, so neither may appear on the shipped page.
   expect(screen.queryByText(/15/)).not.toBeInTheDocument();
   expect(screen.queryByText(/3\+1/)).not.toBeInTheDocument();
+});
+
+/**
+ * These three screens (and `/check`'s application tab, and the price
+ * calculator) had their copy as local constants in Uzbek Latin, so switching
+ * to Russian changed only the header and the footer. The switcher stores the
+ * pick in `localStorage`, which is what this sets.
+ */
+it('follows the language switcher', async () => {
+  window.localStorage.setItem('lang', 'ru');
+  renderAt('/about');
+
+  expect(
+    await screen.findByRole('heading', { name: /Пользование землями лесного фонда/i }),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Правовая основа')).toBeInTheDocument();
 });

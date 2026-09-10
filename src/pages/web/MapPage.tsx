@@ -5,10 +5,10 @@ import { Button } from '../../components/ui/button';
 import { Select } from '../../components/ui/FormControls';
 import type { OpenDataFeature, OpenDataFeatureCollection } from '../../components/map/types';
 import { api } from '../../api/client';
-import { apiError } from '../../api/errors';
-import type { ApiError } from '../../api/errors';
+import { apiError, formatApiError } from '../../api/errors';
 import { pickName } from '../../lib/localized';
-import { useLanguage } from '../../i18n/useT';
+import { DASH } from '../../lib/format';
+import { useLanguage, useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
 
 type OpenDataLayer = components['schemas']['OpenDataLayerOut'];
@@ -29,29 +29,18 @@ function isFeatureCollection(data: unknown): data is OpenDataFeatureCollection {
   return candidate.type === 'FeatureCollection' && Array.isArray(candidate.features);
 }
 
-/** Same rate-limit (`ERR-SYS-006`) special-case every other page under
- * `/public/*` writes locally rather than sharing — `OpenDataPage` and
- * `AppealCheckPage` both make the same call, per the plan's own note that
- * two lines is not worth a cross-file dependency for. */
-function formatApiError(err: ApiError): string {
-  if (err.code === 'ERR-SYS-006') {
-    const details = err.details as { retry_after_seconds?: unknown } | undefined;
-    const seconds = typeof details?.retry_after_seconds === 'number' ? details.retry_after_seconds : null;
-    if (seconds !== null) {
-      return `Serverga soʻrovlar chegarasiga yetildi. ${seconds} soniyadan keyin qayta urinib koʻring.`;
-    }
-  }
-  return `${err.message} (${err.code})`;
-}
-
 /** The public layer/feature contract (`gis/repo.py::features_geojson`)
  * carries no occupancy attribute today — `name`, a free-form `props` bag and
  * a validity window, nothing else. A parallel, unmerged backend track is
  * building real occupancy (a contour is capacity; an unset capacity reads as
  * exclusive; a taken one reports a free-from date) — until that lands and
  * this screen has an endpoint to call, occupancy is always unknown here.
- * Never render "boʻsh" (free) or "band" (taken) — only this. */
-const OCCUPANCY_UNKNOWN_LABEL = 'Bandligi: nomaʼlum';
+ * Never render "boʻsh" (free) or "band" (taken) — only
+ * `map.contour.occupancyUnknown`.
+ *
+ * Note that this is the ONE place on the page that says "unknown" in words
+ * rather than with `DASH`: it is a state, not a missing value (see
+ * `src/lib/format.ts`). */
 
 function areaLabel(feature: OpenDataFeature): string | null {
   const value = feature.properties.props?.area_ha;
@@ -69,9 +58,21 @@ function capacityLabel(feature: OpenDataFeature): string | null {
   return null;
 }
 
-function featureLabel(feature: OpenDataFeature, language: string, index: number): string {
+function featureLabel(
+  feature: OpenDataFeature,
+  language: string,
+  index: number,
+  fallback: string,
+): string {
   const name = feature.properties.name ? pickName(feature.properties.name, language) : '';
-  return name || `Kontur ${index + 1}`;
+  return name || `${fallback} ${index + 1}`;
+}
+
+
+/** `aria-activedescendant` needs a DOM id per option, and a raw feature id
+ *  is not guaranteed to be a valid one on its own. */
+function optionId(featureId: string): string {
+  return `contour-option-${featureId}`;
 }
 
 type LayersState =
@@ -100,6 +101,7 @@ type FeaturesState =
  * is the one real choice this data supports.
  */
 export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
+  const t = useT();
   const { language } = useLanguage();
   const [layersState, setLayersState] = useState<LayersState>({ status: 'loading' });
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
@@ -113,7 +115,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         const { data, error } = await api.GET('/api/v1/public/open-data/layers');
         if (cancelled) return;
         if (error) {
-          setLayersState({ status: 'error', message: formatApiError(apiError(error)) });
+          setLayersState({ status: 'error', message: formatApiError(t, apiError(error)) });
           return;
         }
         const layers = data ?? [];
@@ -123,7 +125,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         if (!cancelled) {
           setLayersState({
             status: 'error',
-            message: 'Serverga ulanib boʻlmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
+            message: t('map.error.network'),
           });
         }
       }
@@ -131,6 +133,9 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     return () => {
       cancelled = true;
     };
+    // `t` is stable for a given language, and refetching the layer list on a
+    // language switch would buy nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,11 +150,11 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         });
         if (cancelled) return;
         if (error) {
-          setFeaturesState({ status: 'error', message: formatApiError(apiError(error)) });
+          setFeaturesState({ status: 'error', message: formatApiError(t, apiError(error)) });
           return;
         }
         if (!isFeatureCollection(data)) {
-          setFeaturesState({ status: 'error', message: 'Qatlam maʼlumotini oʻqib boʻlmadi.' });
+          setFeaturesState({ status: 'error', message: t('map.error.layerUnreadable') });
           return;
         }
         setFeaturesState({ status: 'ready', collection: data });
@@ -158,7 +163,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         if (!cancelled) {
           setFeaturesState({
             status: 'error',
-            message: 'Serverga ulanib boʻlmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
+            message: t('map.error.network'),
           });
         }
       }
@@ -166,6 +171,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCode]);
 
   const selectedLayer = useMemo(() => {
@@ -180,18 +186,31 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     ? collection.features.findIndex((feature) => feature.id === selectedFeatureId)
     : -1;
 
+  /** Arrow / Home / End move the selection inside the single tab stop, which
+   *  is what makes `role="listbox"` a listbox rather than a list of buttons
+   *  wearing one. */
+  const onListKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const features = collection?.features ?? [];
+    if (features.length === 0) return;
+    const current = selectedIndex >= 0 ? selectedIndex : 0;
+    let next: number | null = null;
+    if (event.key === 'ArrowDown') next = Math.min(current + 1, features.length - 1);
+    else if (event.key === 'ArrowUp') next = Math.max(current - 1, 0);
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = features.length - 1;
+    if (next === null) return;
+    event.preventDefault();
+    setSelectedFeatureId(features[next].id);
+  };
+
   return (
     <div data-testid="map-page" className="space-y-6 font-sans">
       <div className="reveal text-center space-y-3 max-w-3xl mx-auto">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#23653F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Interaktiv xarita
+          {t('map.header.badge')}
         </span>
-        <h1 className="text-3xl font-bold text-[#123522]">Konturlarni xaritadan toping</h1>
-        <p className="text-sm text-[#5A646D] leading-relaxed">
-          Ariza topshirishdan oldin hududni xaritadan koʻring. Bandlik holati bu yerda
-          koʻrsatilmaydi — yakuniy javobni ariza koʻrib chiqilganda oʻrmon xoʻjaligi mutaxassisi
-          beradi.
-        </p>
+        <h1 className="text-3xl font-bold text-[#123522]">{t('map.header.title')}</h1>
+        <p className="text-sm text-[#5A646D] leading-relaxed">{t('map.header.subtitle')}</p>
       </div>
 
       {layersState.status === 'loading' && (
@@ -203,7 +222,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
       {layersState.status === 'error' && (
         <div className="max-w-3xl mx-auto">
-          <Alert variant="danger" title="Maʼlumotni yuklab boʻlmadi">
+          <Alert variant="danger" title={t('map.error.loadTitle')}>
             {layersState.message}
           </Alert>
         </div>
@@ -211,8 +230,8 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
       {layersState.status === 'ready' && layersState.layers.length === 0 && (
         <div className="max-w-3xl mx-auto">
-          <Alert variant="info" title="Ochiq qatlamlar mavjud emas">
-            Hozircha xaritada koʻrsatiladigan ochiq GIS qatlami yoʻq.
+          <Alert variant="info" title={t('map.empty.title')}>
+            {t('map.empty.body')}
           </Alert>
         </div>
       )}
@@ -223,7 +242,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
             {layersState.layers.length > 1 && (
               <div className="w-full sm:w-72">
                 <Select
-                  aria-label="Qatlamni tanlash"
+                  aria-label={t('map.layer.selectLabel')}
                   value={selectedCode ?? ''}
                   onChange={(event) => setSelectedCode(event.target.value)}
                   options={layersState.layers.map((layer) => ({
@@ -233,14 +252,17 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                 />
               </div>
             )}
-            <div className="flex gap-2 sm:ml-auto" title="Bandlik holati hozircha mavjud emas">
-              {['Barchasi', 'Faqat boʻsh', 'Band'].map((label) => (
+            {/* Present but inert: the public feature payload carries no
+                occupancy attribute at all, so these can never do anything
+                until an endpoint exists to filter against. */}
+            <div className="flex gap-2 sm:ml-auto" title={t('map.filter.disabledHint')}>
+              {['all', 'free', 'taken'].map((filter) => (
                 <span
-                  key={label}
+                  key={filter}
                   aria-disabled="true"
                   className="px-4 py-2.5 rounded-lg border border-[#E4E7EA] text-[#9AA3AB] text-sm font-semibold cursor-not-allowed select-none"
                 >
-                  {label}
+                  {t(`map.filter.${filter}`)}
                 </span>
               ))}
             </div>
@@ -260,7 +282,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
               )}
               {featuresState?.status === 'error' && (
                 <div className="p-6">
-                  <Alert variant="danger" title="Xaritani yuklab boʻlmadi">
+                  <Alert variant="danger" title={t('map.error.mapTitle')}>
                     {featuresState.message}
                   </Alert>
                 </div>
@@ -270,20 +292,28 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
             <div className="bg-white flex flex-col">
               <div className="px-6 py-5 border-b border-[#E4E7EA]">
                 <div className="text-xs font-extrabold text-[#767F87] uppercase tracking-wider">
-                  Konturlar roʻyxati
+                  {t('map.list.title')}
                 </div>
-                <p className="mt-2 text-sm text-[#5A646D]">
-                  Roʻyxatdan tanlang — xaritada belgilanadi
-                </p>
+                <p className="mt-2 text-sm text-[#5A646D]">{t('map.list.hint')}</p>
               </div>
 
+              {/* A real listbox: ONE tab stop on the container, arrow keys
+                  moving the selection, and `aria-activedescendant` naming the
+                  current option. Every row used to carry `tabIndex={0}`,
+                  which is the pattern's one forbidden shape — a keyboard
+                  user tabbed through every contour one at a time, and a
+                  screen reader announced a composite widget whose options
+                  were all separately focusable. */}
               <div
                 role="listbox"
-                aria-label="Konturlar roʻyxati"
+                aria-label={t('map.list.title')}
+                tabIndex={0}
+                aria-activedescendant={selectedFeatureId ? optionId(selectedFeatureId) : undefined}
+                onKeyDown={onListKeyDown}
                 className="p-4 flex flex-col gap-2.5 flex-grow overflow-y-auto max-h-[420px]"
               >
                 {collection?.features.length === 0 && (
-                  <p className="text-sm text-[#5A646D] p-3">Bu qatlamda obyekt topilmadi.</p>
+                  <p className="text-sm text-[#5A646D] p-3">{t('map.list.empty')}</p>
                 )}
                 {collection?.features.map((feature, index) => {
                   const isSelected = feature.id === selectedFeatureId;
@@ -292,17 +322,11 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                   return (
                     <div
                       key={feature.id}
+                      id={optionId(feature.id)}
                       data-testid="contour-row"
                       role="option"
                       aria-selected={isSelected}
-                      tabIndex={0}
                       onClick={() => setSelectedFeatureId(feature.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault();
-                          setSelectedFeatureId(feature.id);
-                        }
-                      }}
                       className={`cursor-pointer rounded-xl border px-4 py-3.5 transition-colors ${
                         isSelected ? 'border-[#7FB98A] bg-[#F7FBF8]' : 'border-[#E4E7EA] bg-white hover:border-[#D9EBDC]'
                       }`}
@@ -310,20 +334,20 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                       <div className="flex items-center justify-between gap-3">
                         <span className="flex items-center gap-2 font-extrabold text-[#123522]">
                           <MapPin className="w-4 h-4 text-[#2E7D4F]" />
-                          {featureLabel(feature, language, index)}
+                          {featureLabel(feature, language, index, t('map.contour.fallbackName'))}
                         </span>
                         <span className="px-2.5 py-0.5 rounded-full bg-[#F1F3F4] text-[#6C757C] text-xs font-bold">
-                          {OCCUPANCY_UNKNOWN_LABEL}
+                          {t('map.contour.occupancyUnknown')}
                         </span>
                       </div>
                       <div className="mt-2.5 flex items-center gap-4 text-xs text-[#767F87]">
                         <span>
-                          Maydon:{' '}
-                          <b className="text-[#1A1F24]">{area ?? 'Maʼlum emas'}</b>
+                          {t('map.contour.areaLabel')}{' '}
+                          <b className="text-[#1A1F24]">{area ?? DASH}</b>
                         </span>
                         <span>
-                          Sigʻim:{' '}
-                          <b className="text-[#1A1F24]">{capacity ?? 'Maʼlum emas'}</b>
+                          {t('map.contour.capacityLabel')}{' '}
+                          <b className="text-[#1A1F24]">{capacity ?? DASH}</b>
                         </span>
                       </div>
                     </div>
@@ -333,19 +357,22 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
               <div className="px-6 py-5 border-t border-[#E4E7EA] bg-[#F8F9FA]">
                 <div className="text-xs font-extrabold text-[#767F87] uppercase tracking-wider">
-                  Tanlangan kontur
+                  {t('map.selected.title')}
                 </div>
                 {selectedFeature ? (
                   <>
                     <div className="mt-2.5 flex items-baseline gap-2.5">
                       <span className="text-2xl font-black text-[#123522]">
-                        {featureLabel(selectedFeature, language, Math.max(selectedIndex, 0))}
+                        {featureLabel(
+                          selectedFeature,
+                          language,
+                          Math.max(selectedIndex, 0),
+                          t('map.contour.fallbackName'),
+                        )}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-[#5A646D] leading-relaxed">
-                      Ushbu kontur boʻyicha bandlik holati bu sahifada koʻrsatilmaydi. Ariza
-                      topshirilganda oʻrmon xoʻjaligi mutaxassisi hududni koʻrib chiqib yakuniy
-                      javob beradi.
+                      {t('map.selected.note')}
                     </p>
                     <Button
                       variant="primary"
@@ -354,11 +381,11 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                       className="mt-4"
                       onClick={() => onNavigate?.('applicant_wizard')}
                     >
-                      Shu kontur boʻyicha ariza berish
+                      {t('map.selected.apply')}
                     </Button>
                   </>
                 ) : (
-                  <p className="mt-2.5 text-sm text-[#5A646D]">Roʻyxatdan konturni tanlang.</p>
+                  <p className="mt-2.5 text-sm text-[#5A646D]">{t('map.selected.empty')}</p>
                 )}
               </div>
             </div>
@@ -367,17 +394,15 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
           <div className="max-w-5xl mx-auto flex items-start gap-3 px-4 py-3.5 rounded-xl bg-[#FEF7ED] border border-[#F5DEB8]">
             <TriangleAlert className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
             <p className="text-xs leading-relaxed text-[#3F4A52]">
-              <b className="text-[#1A1F24]">Bandlik maʼlumoti bu sahifada mavjud emas.</b> Yakuniy
-              qaror ariza koʻrib chiqilganda oʻrmon xoʻjaligi mutaxassisi tomonidan qabul qilinadi
-              — kontur ayni damda boshqa arizada band boʻlishi mumkin.
+              <b className="text-[#1A1F24]">{t('map.warning.bold')}</b> {t('map.warning.rest')}
             </p>
           </div>
 
           {selectedLayer && (
             <p className="max-w-5xl mx-auto text-xs text-[#9AA3AB] text-center">
-              Qatlam: {pickName(selectedLayer.name, language, selectedLayer.code)}
+              {t('map.layer.label')} {pickName(selectedLayer.name, language, selectedLayer.code)}
               {featuresState?.status === 'ready' && featuresState.collection.truncated && (
-                <> — natijalar qisqartirildi, aniqroq koʻrish uchun xaritani kattalashtiring.</>
+                <> — {t('map.layer.truncated')}</>
               )}
             </p>
           )}

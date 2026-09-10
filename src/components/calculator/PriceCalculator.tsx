@@ -7,6 +7,7 @@ import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 import { pickName } from '../../lib/localized';
+import { DASH } from '../../lib/format';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { components } from '../../api/schema';
 
@@ -29,9 +30,10 @@ type QuantityKind = 'livestock' | 'quantity' | 'none';
 
 interface ActivityFieldConfig {
   kind: QuantityKind;
-  /** LOCAL CONSTANT — see the note below `ACTIVITY_FIELDS`. */
-  label?: string;
-  unit?: string;
+  /** `tariffs.calculator.field.*`; absent for the two kinds that have no
+   *  quantity field, and the default falls back to the generic
+   *  `tariffs.calculator.quantityLabel`. */
+  labelKey?: string;
 }
 
 /**
@@ -44,38 +46,33 @@ interface ActivityFieldConfig {
  * The public catalogue deliberately does NOT carry `quantity_unit`
  * (`PublicActivityTypeOut`'s own docstring: that field is for the
  * authenticated `/refs/*` router only), so this mapping is the landing's
- * own. LOCAL CONSTANT: no `tariffs.calculator.field.*` i18n key exists yet
- * for these labels — `src/i18n/*` belongs to another track. Uzbek Latin
- * only, matching every other string already on this page.
+ * own — but only the mapping. The labels themselves were Uzbek Latin
+ * constants here, which is why the whole calculator stayed Uzbek when the
+ * switcher said Russian.
  */
 const ACTIVITY_FIELDS: Record<string, ActivityFieldConfig> = {
   [GRAZING_CODE]: { kind: 'livestock' },
-  haymaking: { kind: 'quantity', label: 'Oʻrim maydoni (ga)', unit: 'ga' },
-  apiary: { kind: 'quantity', label: 'Uyalar soni', unit: 'uya' },
-  recreation: { kind: 'quantity', label: 'Maydon (ga)', unit: 'ga' },
-  deadwood: { kind: 'quantity', label: 'Hajm (m³)', unit: 'm³' },
+  haymaking: { kind: 'quantity', labelKey: 'tariffs.calculator.field.haymaking' },
+  apiary: { kind: 'quantity', labelKey: 'tariffs.calculator.field.apiary' },
+  recreation: { kind: 'quantity', labelKey: 'tariffs.calculator.field.recreation' },
+  deadwood: { kind: 'quantity', labelKey: 'tariffs.calculator.field.deadwood' },
   [SCIENCE_CODE]: { kind: 'none' },
 };
 
-const DEFAULT_FIELD_CONFIG: ActivityFieldConfig = { kind: 'quantity', label: 'Miqdor', unit: '' };
+const DEFAULT_FIELD_CONFIG: ActivityFieldConfig = {
+  kind: 'quantity',
+  labelKey: 'tariffs.calculator.quantityLabel',
+};
 
 function fieldConfigFor(code: string | undefined): ActivityFieldConfig {
   if (!code) return DEFAULT_FIELD_CONFIG;
   return ACTIVITY_FIELDS[code] ?? DEFAULT_FIELD_CONFIG;
 }
 
-// LOCAL CONSTANTS — the same i18n gap as `ACTIVITY_FIELDS` above.
-const SCIENCE_SUM_LABEL = 'Imtiyozli';
-const SCIENCE_SUM_UNIT = 'ariza asosida';
-const SCIENCE_NOTE =
-  'Ilmiy tadqiqot uchun toʻlov miqdori belgilanmagan — har bir ariza alohida koʻrib chiqiladi.';
-const TARIFF_NOT_PUBLISHED_NOTE =
-  'Ushbu faoliyat turi uchun stavka hali eʼlon qilinmagan (VMQ 689-son qaror 5-ilovasi kutilmoqda). Summani hozircha koʻrsatib boʻlmaydi.';
-const HEAD_COUNT_SUFFIX = 'bosh soni';
-const CALCULATOR_INTRO_BULLETS = [
-  'VMQ 689 normalari asosida',
-  'Roʻyxatdan oʻtmasdan foydalanish mumkin',
-  'Yakuniy summa ariza koʻrib chiqilgach tasdiqlanadi',
+const INTRO_BULLET_KEYS = [
+  'tariffs.calculator.bullet.norms',
+  'tariffs.calculator.bullet.anonymous',
+  'tariffs.calculator.bullet.finalSum',
 ];
 
 function addMonthsIso(base: Date, months: number): string {
@@ -154,12 +151,13 @@ function CalculatorSum({
  *  dependency, so it renders identically whether the refs below are still
  *  loading, failed, or ready. */
 function CalculatorIntro({ heading, description }: { heading: string; description: string }) {
+  const t = useT();
   return (
     <div className="p-6 sm:p-8 lg:p-10 bg-[#F0F7F1]">
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#D9EBDC]">
         <Calculator className="w-3.5 h-3.5 text-[#23653F]" />
         <span className="text-xs font-bold uppercase tracking-wider text-[#23653F]">
-          Onlayn kalkulyator
+          {t('tariffs.calculator.badge')}
         </span>
       </div>
       <h2 className="mt-4 text-2xl sm:text-[28px] leading-tight font-black text-[#123522] tracking-tight">
@@ -167,10 +165,10 @@ function CalculatorIntro({ heading, description }: { heading: string; descriptio
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-[#5A646D]">{description}</p>
       <ul className="mt-6 flex flex-col gap-3">
-        {CALCULATOR_INTRO_BULLETS.map((bullet) => (
-          <li key={bullet} className="flex items-center gap-2.5 text-sm text-[#1A1F24]">
+        {INTRO_BULLET_KEYS.map((key) => (
+          <li key={key} className="flex items-center gap-2.5 text-sm text-[#1A1F24]">
             <Check className="w-4 h-4 text-[#2E7D4F] shrink-0" />
-            <span>{bullet}</span>
+            <span>{t(key)}</span>
           </li>
         ))}
       </ul>
@@ -227,7 +225,7 @@ export const PriceCalculator: React.FC = () => {
             <div className="space-y-6" data-testid="calculator-loading">
               <Skeleton height="h-10" />
               <Skeleton height="h-24" />
-              <CalculatorSum label={resultLabel} primary="—" />
+              <CalculatorSum label={resultLabel} primary={DASH} />
             </div>
           )}
 
@@ -237,7 +235,7 @@ export const PriceCalculator: React.FC = () => {
                 {t('tariffs.error.loadFailedPrefix')}{' '}
                 {refs.message ?? (refs.messageKey ? t(refs.messageKey) : null)}
               </Alert>
-              <CalculatorSum label={resultLabel} primary="—" />
+              <CalculatorSum label={resultLabel} primary={DASH} />
             </div>
           )}
 
@@ -379,14 +377,14 @@ function CalculatorForm({
       </div>
 
       {isPriceless ? (
-        <Alert variant="info">{SCIENCE_NOTE}</Alert>
+        <Alert variant="info">{t('tariffs.calculator.science.note')}</Alert>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {isGrazing ? (
             safeLivestock.map((lt) => {
               const inputId = `head-${lt.code}`;
               return (
-                <FormField key={lt.id} htmlFor={inputId} label={`${pickName(lt.name, language, lt.code)}, ${HEAD_COUNT_SUFFIX}`}>
+                <FormField key={lt.id} htmlFor={inputId} label={`${pickName(lt.name, language, lt.code)}, ${t('tariffs.calculator.headCountSuffix')}`}>
                   <Input
                     id={inputId}
                     type="number"
@@ -413,7 +411,10 @@ function CalculatorForm({
               );
             })
           ) : (
-            <FormField htmlFor="calculator-quantity" label={fieldConfig.label ?? DEFAULT_FIELD_CONFIG.label}>
+            <FormField
+              htmlFor="calculator-quantity"
+              label={t(fieldConfig.labelKey ?? DEFAULT_FIELD_CONFIG.labelKey!)}
+            >
               <Input
                 id="calculator-quantity"
                 type="number"
@@ -463,7 +464,11 @@ function CalculatorForm({
       )}
 
       {isPriceless ? (
-        <CalculatorSum label={resultLabel} primary={SCIENCE_SUM_LABEL} unit={SCIENCE_SUM_UNIT} />
+        <CalculatorSum
+          label={resultLabel}
+          primary={t('tariffs.calculator.science.sumLabel')}
+          unit={t('tariffs.calculator.science.sumUnit')}
+        />
       ) : estimate.kind === 'ready' ? (
         <CalculatorSum
           label={resultLabel}
@@ -471,20 +476,25 @@ function CalculatorForm({
           unit="UZS"
         />
       ) : estimate.kind === 'loading' ? (
-        <CalculatorSum label={resultLabel} primary="—" note={t('tariffs.calculator.loading')} noteVariant="loading" />
+        <CalculatorSum label={resultLabel} primary={DASH} note={t('tariffs.calculator.loading')} noteVariant="loading" />
       ) : estimate.kind === 'not_published' ? (
-        <CalculatorSum label={resultLabel} primary="—" note={TARIFF_NOT_PUBLISHED_NOTE} noteVariant="warning" />
+        <CalculatorSum
+          label={resultLabel}
+          primary={DASH}
+          note={t('tariffs.calculator.tariffNotPublished')}
+          noteVariant="warning"
+        />
       ) : estimate.kind === 'refused' ? (
         <CalculatorSum
           label={resultLabel}
-          primary="—"
+          primary={DASH}
           note={estimate.message.kind === 'server' ? estimate.message.text : t(estimate.message.key)}
           noteVariant="error"
         />
       ) : (
         <CalculatorSum
           label={resultLabel}
-          primary="—"
+          primary={DASH}
           note={isGrazing ? t('tariffs.calculator.idle.grazing') : t('tariffs.calculator.idle.default')}
         />
       )}

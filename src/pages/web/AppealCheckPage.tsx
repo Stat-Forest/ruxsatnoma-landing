@@ -6,13 +6,11 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import type { StatusType } from '../../components/ui/StatusBadge';
 import { Alert } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
-import { apiError } from '../../api/errors';
-import type { ApiError } from '../../api/errors';
+import { apiError, formatApiError } from '../../api/errors';
 import type { components } from '../../api/schema';
 import { useT } from '../../i18n/useT';
 
 type AppealStatusOut = components['schemas']['AppealStatusOut'];
-type TFunction = ReturnType<typeof useT>;
 
 type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
 
@@ -32,20 +30,6 @@ const STATUS_LABEL_KEY: Record<string, string> = {
   answered: 'appeal.status.answered',
   closed: 'appeal.status.closed',
 };
-
-/** Same rate-limit (`ERR-SYS-006`) special-case as `OpenDataPage`'s own local
- * helper — written again here rather than shared, per the plan's own call:
- * two lines is not worth a cross-file dependency for. */
-function formatCheckError(t: TFunction, err: ApiError): string {
-  if (err.code === 'ERR-SYS-006') {
-    const details = err.details as { retry_after_seconds?: unknown } | undefined;
-    const seconds = typeof details?.retry_after_seconds === 'number' ? details.retry_after_seconds : null;
-    if (seconds !== null) {
-      return `${t('appeal.error.rateLimited.before')} ${seconds} ${t('appeal.error.rateLimited.after')}`;
-    }
-  }
-  return `${err.message} (${err.code})`;
-}
 
 type FileState = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -109,7 +93,7 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
         });
         if (apiErr || !data) {
           setState('error');
-          setError(formatCheckError(t, apiError(apiErr ?? {})));
+          setError(formatApiError(t, apiError(apiErr ?? {})));
           return;
         }
         setAssignedNumber(data.number);
@@ -255,7 +239,7 @@ export const AppealCheckPage: React.FC = () => {
         });
         if (error) {
           setStatus('error');
-          setErrorMessage(formatCheckError(t, apiError(error)));
+          setErrorMessage(formatApiError(t, apiError(error)));
           return;
         }
         const body = data as AppealStatusOut;

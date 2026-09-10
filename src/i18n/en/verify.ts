@@ -41,4 +41,26 @@ export const verify = {
   'verify.map.title': 'Contour map',
   'verify.map.heading': 'On the map',
   'verify.map.legend': 'Permitted contour',
+
+  /* The two-tab switcher and the whole "application status" arm — added
+     as `LOCAL_COPY` in Uzbek Latin only, so a Russian reader met an
+     entirely Uzbek tab. */
+  'verify.tabs.label': 'Type of check',
+  'verify.tabs.permit': 'Permit',
+  'verify.tabs.application': 'Application status',
+  'verify.application.numberLabel': 'Application number',
+  'verify.application.numberPlaceholder': 'For example: AR-2026-004518',
+  'verify.application.phoneLabel': 'Phone',
+  'verify.application.phonePlaceholder': '+998 90 123 45 67',
+  'verify.application.validation': 'Enter the application number and the phone number',
+  'verify.application.missTitle': 'Application not found',
+  'verify.application.missMessage':
+    'Nothing was found for the application number and phone number given. Check the details and try again.',
+  'verify.application.privacyBold': 'Privacy:',
+  'verify.application.privacyAfter':
+    'the phone number is used only to confirm that the application is yours.',
+  'verify.application.activityLabel': 'Type of activity',
+  'verify.application.organizationLabel': 'Forestry enterprise',
+  'verify.application.submittedLabel': 'Date filed',
+  'verify.application.nextStepLabel': 'Next step',
 } as const;

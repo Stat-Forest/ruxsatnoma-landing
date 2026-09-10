@@ -38,6 +38,7 @@ function renderVerify(initialEntries: string[] = ['/check']) {
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   (api.GET as ReturnType<typeof vi.fn>).mockReset();
   (checkApplication as ReturnType<typeof vi.fn>).mockReset();
 });
@@ -49,6 +50,35 @@ async function searchPermit(user: ReturnType<typeof userEvent.setup>, series: st
 }
 
 describe('VerifyPage — tab switcher', () => {
+  /**
+   * The defect this pins: `role="tablist"`/`role="tab"` with no `tabpanel`
+   * anywhere and no `aria-controls` — a screen reader was told a tab widget
+   * existed and then handed nothing it controlled. Both tabs point at the
+   * one panel; its `aria-labelledby` follows the selection.
+   */
+  it('wires the tabs to a real tabpanel', async () => {
+    renderVerify();
+
+    const permit = screen.getByRole('tab', { name: /^ruxsatnoma$/i });
+    const application = screen.getByRole('tab', { name: /ariza holati/i });
+    const panel = screen.getByRole('tabpanel');
+
+    expect(permit).toHaveAttribute('aria-controls', panel.id);
+    expect(application).toHaveAttribute('aria-controls', panel.id);
+    expect(panel).toHaveAttribute('aria-labelledby', permit.id);
+
+    // Roving tabindex, so the widget is ONE tab stop — which is only safe
+    // because the arrow keys below can reach the other tab.
+    expect(permit).toHaveAttribute('tabindex', '0');
+    expect(application).toHaveAttribute('tabindex', '-1');
+
+    permit.focus();
+    await userEvent.keyboard('{ArrowRight}');
+
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', application.id);
+    expect(application).toHaveFocus();
+  });
+
   it('switches between the permit and application arms', async () => {
     renderVerify();
     const user = userEvent.setup();
@@ -250,4 +280,21 @@ describe('VerifyPage — application arm', () => {
     // `next_step` is an omitted row, not an em dash, when absent.
     expect(screen.queryByText('Keyingi qadam')).not.toBeInTheDocument();
   });
+});
+
+/**
+ * These three screens (and `/check`'s application tab, and the price
+ * calculator) had their copy as local constants in Uzbek Latin, so switching
+ * to Russian changed only the header and the footer. The switcher stores the
+ * pick in `localStorage`, which is what this sets.
+ */
+it('translates the application tab, which used to be Uzbek in every language', async () => {
+  window.localStorage.setItem('lang', 'ru');
+  renderVerify();
+  const user = userEvent.setup();
+
+  await user.click(screen.getByRole('tab', { name: /статус заявки/i }));
+
+  expect(screen.getByLabelText(/номер заявки/i)).toBeInTheDocument();
+  expect(screen.getByText(/Конфиденциальность:/)).toBeInTheDocument();
 });

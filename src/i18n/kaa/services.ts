@@ -4,7 +4,6 @@ export const services = {
   'services.title': 'Orman Fondınan Paydalanıw Xızmetleri',
   'services.subtitle': 'Birden-bir interaktiv portal arqalı barlıq túrdegi ruxsatnamalarǵa arza tapsırıwıńız múmkin.',
 
-  'services.card.termLabel': 'Kórip shıǵıw múddeti:',
   'services.card.daysUnit': 'kún',
   'services.card.apply': 'Arza beriw',
 

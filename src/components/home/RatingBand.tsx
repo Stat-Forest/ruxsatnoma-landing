@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react';
 import { useLanguage } from '../../i18n/useT';
 import { BASE_URL } from '../../api/client';
+import { DASH } from '../../lib/format';
 import type { UiLanguage } from '../../i18n/context';
 
 /**
@@ -45,8 +46,6 @@ export type RatingBandState =
 export interface RatingBandProps {
   state: RatingBandState;
 }
-
-const DASH = '—';
 
 /** Every string this band needs that has no existing i18n key — this track
  *  cannot touch `src/i18n/*`, so it is translated locally into all five

@@ -44,9 +44,6 @@ export const appeal = {
   'appeal.status.answered': 'Answered',
   'appeal.status.closed': 'Closed',
 
-  'appeal.error.rateLimited.before': 'Request limit reached. Please try again in',
-  'appeal.error.rateLimited.after': 'seconds.',
-
   'appeal.result.numberLabel': 'Appeal Number',
   'appeal.result.subjectLabel': 'Subject',
   'appeal.result.answerHeading': 'Response',

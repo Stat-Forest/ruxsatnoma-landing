@@ -46,9 +46,6 @@ export const appeal = {
   'appeal.status.answered': 'Дан ответ',
   'appeal.status.closed': 'Закрыто',
 
-  'appeal.error.rateLimited.before': 'Превышен лимит запросов. Повторите попытку через',
-  'appeal.error.rateLimited.after': 'сек.',
-
   'appeal.result.numberLabel': 'Номер обращения',
   'appeal.result.subjectLabel': 'Тема',
   'appeal.result.answerHeading': 'Ответ',

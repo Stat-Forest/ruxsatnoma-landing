@@ -28,4 +28,23 @@ export const tariffs = {
   'tariffs.calculator.estimateFailed': 'Ҳисоблаш хизматига уланиб бўлмади.',
   'tariffs.calculator.disclaimer':
     'Фақат тахминий ҳисоб-китоб — мажбурий тўлов эмас. Ҳақиқий ер участкаси танланмаганлиги сабабли норма, мавсумийлик ва ёнғин хавфсизлиги текширувлари ўтказилмади ҳамда имтиёз қўлланилмади. Якуний сумма ариза бериш жараёнида аниқланади.',
+
+  /* `PriceCalculator`'s own copy, which lived in the component as local
+     constants in Uzbek Latin only. The default quantity field keeps using
+     `tariffs.calculator.quantityLabel` above. */
+  'tariffs.calculator.badge': 'Онлайн калкулятор',
+  'tariffs.calculator.bullet.norms': 'ВМҚ 689 нормалари асосида',
+  'tariffs.calculator.bullet.anonymous': 'Рўйхатдан ўтмасдан фойдаланиш мумкин',
+  'tariffs.calculator.bullet.finalSum': 'Якуний сумма ариза кўриб чиқилгач тасдиқланади',
+  'tariffs.calculator.field.haymaking': 'Ўрим майдони (га)',
+  'tariffs.calculator.field.apiary': 'Уялар сони',
+  'tariffs.calculator.field.recreation': 'Майдон (га)',
+  'tariffs.calculator.field.deadwood': 'Ҳажм (м³)',
+  'tariffs.calculator.headCountSuffix': 'бош сони',
+  'tariffs.calculator.science.sumLabel': 'Имтиёзли',
+  'tariffs.calculator.science.sumUnit': 'ариза асосида',
+  'tariffs.calculator.science.note':
+    'Илмий тадқиқот учун тўлов миқдори белгиланмаган — ҳар бир ариза алоҳида кўриб чиқилади.',
+  'tariffs.calculator.tariffNotPublished':
+    'Ушбу фаолият тури учун ставка ҳали эълон қилинмаган (ВМҚ 689-сон қарор 5-иловаси кутилмоқда). Суммани ҳозирча кўрсатиб бўлмайди.',
 } as const;

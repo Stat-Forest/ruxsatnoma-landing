@@ -9,9 +9,7 @@ export const common = {
   'nav.documents': 'Документы',
   'nav.about': 'О портале',
   'nav.contact': 'Контакты',
-  'nav.faq': 'Вопросы',
 
-  'action.login': 'Вход (OneID)',
   'action.cabinet': 'Кабинет',
   'action.submitApplication': 'Подать заявку',
   'action.language': 'Язык',
@@ -34,7 +32,6 @@ export const common = {
   'footer.about':
     'Официальная информационная система разрешений Государственного комитета лесного хозяйства Республики Узбекистан.',
   'footer.services': 'Услуги',
-  'footer.documents': 'Документы',
   'footer.portal': 'Портал',
   'footer.contacts': 'Контакты',
   'footer.link.howToApply': 'Порядок подачи заявки',
@@ -43,12 +40,8 @@ export const common = {
   'footer.link.map': 'Карта свободных контуров',
   'footer.link.news': 'Новости и объявления',
   'footer.link.appealStatus': 'Подать обращение и проверить статус',
-  'footer.link.gis': 'ГИС-карта лесных зон',
   'footer.link.documents': 'Документы и нормативы',
   'footer.link.faq': 'Часто задаваемые вопросы',
-  'footer.link.norms': 'Геоботанические нормы и правила',
-  'footer.link.prosecutor': 'Цифровой надзор (портал прокуратуры)',
-  'footer.address': 'Агентство по увеличению лесных и зеленых зон, борьбе с опустыниванием',
   'footer.copyright': '© 2026 Государственный комитет лесного хозяйства. Все права защищены.',
   'footer.wcag': 'Дизайн-система, соответствующая WCAG 2.2 AA',
 } as const;

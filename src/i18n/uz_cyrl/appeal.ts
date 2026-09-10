@@ -44,9 +44,6 @@ export const appeal = {
   'appeal.status.answered': 'Жавоб берилди',
   'appeal.status.closed': 'Ёпилган',
 
-  'appeal.error.rateLimited.before': 'Сўровлар сони чегарасига етилди. Илтимос,',
-  'appeal.error.rateLimited.after': 'сониядан кейин қайта уриниб кўринг.',
-
   'appeal.result.numberLabel': 'Мурожаат рақами',
   'appeal.result.subjectLabel': 'Мавзу',
   'appeal.result.answerHeading': 'Жавоб',

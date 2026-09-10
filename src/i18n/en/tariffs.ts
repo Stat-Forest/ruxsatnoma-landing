@@ -28,4 +28,24 @@ export const tariffs = {
   'tariffs.calculator.estimateFailed': 'Could not connect to the calculation service.',
   'tariffs.calculator.disclaimer':
     'Approximate estimate only — not a binding bill. Because no specific parcel was selected, seasonal norms, fire bans, and benefits were not applied. The final amount is determined when submitting an application.',
+
+  /* `PriceCalculator`'s own copy, which lived in the component as local
+     constants in Uzbek Latin only. The default quantity field keeps using
+     `tariffs.calculator.quantityLabel` above. */
+  'tariffs.calculator.badge': 'Online calculator',
+  'tariffs.calculator.bullet.norms': 'Based on the norms of Cabinet Resolution 689',
+  'tariffs.calculator.bullet.anonymous': 'Usable without signing in',
+  'tariffs.calculator.bullet.finalSum':
+    'The final sum is confirmed once the application is reviewed',
+  'tariffs.calculator.field.haymaking': 'Mowing area (ha)',
+  'tariffs.calculator.field.apiary': 'Number of hives',
+  'tariffs.calculator.field.recreation': 'Area (ha)',
+  'tariffs.calculator.field.deadwood': 'Volume (m³)',
+  'tariffs.calculator.headCountSuffix': 'head count',
+  'tariffs.calculator.science.sumLabel': 'Exempt',
+  'tariffs.calculator.science.sumUnit': 'per application',
+  'tariffs.calculator.science.note':
+    'No fee is set for scientific research — each application is considered separately.',
+  'tariffs.calculator.tariffNotPublished':
+    'The rate for this type of activity has not been published yet (annex 5 to Cabinet Resolution No. 689 is awaited). The sum cannot be shown for now.',
 } as const;

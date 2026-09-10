@@ -30,6 +30,7 @@ import { fetchNews, formatNewsDate, HOME_NEWS_COUNT, type NewsItem } from '../..
 import { fetchServices, type Service } from '../../api/services';
 import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
+import { DASH } from '../../lib/format';
 import type { components } from '../../api/schema';
 
 type OpenDataStats = components['schemas']['OpenDataStatsOut'];
@@ -42,11 +43,6 @@ type StatsState =
 type NewsState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: NewsItem[] };
 
 type ServicesState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; items: Service[] };
-
-/** Shown instead of a figure until the aggregates endpoint has answered — an
- *  em dash is a statement that the number is not known yet, which is the
- *  honest one. Never a placeholder digit. */
-const DASH = '—';
 
 /**
  * Copy for the redesigned sections that has no existing i18n key — this

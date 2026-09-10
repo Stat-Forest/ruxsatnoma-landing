@@ -94,6 +94,7 @@ function mockApi(layers: unknown[] = [demoLayer], features: unknown = demoCollec
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   vi.mocked(api.GET).mockReset();
   addSource.mockClear();
   addLayer.mockClear();
@@ -162,6 +163,32 @@ it('sends the selected contour to the application wizard', async () => {
   expect(onNavigate).toHaveBeenCalledWith('applicant_wizard');
 });
 
+/**
+ * The listbox pattern this used to violate: every option carried
+ * `tabIndex={0}`, so a keyboard user tabbed through the contours one at a
+ * time and the composite widget had no single tab stop. One stop on the
+ * container, arrow keys inside it.
+ */
+it('moves the selection with the arrow keys from a single tab stop', async () => {
+  mockApi();
+  renderMap();
+
+  const rows = await screen.findAllByTestId('contour-row');
+  for (const row of rows) {
+    expect(row).not.toHaveAttribute('tabindex');
+  }
+
+  const list = screen.getByRole('listbox');
+  expect(list).toHaveAttribute('tabindex', '0');
+  expect(list).toHaveAttribute('aria-activedescendant', rows[0].id);
+
+  await userEvent.click(list);
+  await userEvent.keyboard('{ArrowDown}');
+
+  expect(rows[1]).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('listbox')).toHaveAttribute('aria-activedescendant', rows[1].id);
+});
+
 it('keeps the free/taken filter chips disabled rather than faking a state', async () => {
   mockApi();
   renderMap();
@@ -169,4 +196,21 @@ it('keeps the free/taken filter chips disabled rather than faking a state', asyn
   await screen.findAllByTestId('contour-row');
   const chip = screen.getByText('Faqat boʻsh');
   expect(chip).toHaveAttribute('aria-disabled', 'true');
+});
+
+/**
+ * These three screens (and `/check`'s application tab, and the price
+ * calculator) had their copy as local constants in Uzbek Latin, so switching
+ * to Russian changed only the header and the footer. The switcher stores the
+ * pick in `localStorage`, which is what this sets.
+ */
+it('follows the language switcher', async () => {
+  window.localStorage.setItem('lang', 'ru');
+  mockApi();
+  renderMap();
+
+  expect(await screen.findByRole('heading', { name: /Найдите контуры на карте/i })).toBeInTheDocument();
+  expect(screen.getByText('Список контуров')).toBeInTheDocument();
+  // The contour rows arrive on a second fetch, after the layer list.
+  expect((await screen.findAllByText('Занятость: неизвестно')).length).toBeGreaterThan(0);
 });

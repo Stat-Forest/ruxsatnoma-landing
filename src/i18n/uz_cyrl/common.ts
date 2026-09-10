@@ -9,9 +9,7 @@ export const common = {
   'nav.documents': 'Ҳужжатлар',
   'nav.about': 'Портал ҳақида',
   'nav.contact': 'Алоқа',
-  'nav.faq': 'Саволлар',
 
-  'action.login': 'Кириш (OneID)',
   'action.cabinet': 'Кабинет',
   'action.submitApplication': 'Ариза топшириш',
   'action.language': 'Тил',
@@ -34,7 +32,6 @@ export const common = {
   'footer.about':
     'Ўзбекистон Республикаси Ўрмон хўжалиги давлат қўмитасининг расмий рухсатномалар ахборот тизими.',
   'footer.services': 'Хизматлар',
-  'footer.documents': 'Ҳужжатлар',
   'footer.portal': 'Портал',
   'footer.contacts': 'Алоқа',
   'footer.link.howToApply': 'Ариза бериш тартиби',
@@ -43,12 +40,8 @@ export const common = {
   'footer.link.map': 'Бўш контурлар харитаси',
   'footer.link.news': 'Янгиликлар ва эълонлар',
   'footer.link.appealStatus': 'Мурожаат юбориш ва текшириш',
-  'footer.link.gis': 'Ўрмон зоналари GIS картаси',
   'footer.link.documents': 'Ҳужжатлар ва нормалар',
   'footer.link.faq': 'Кўп бериладиган саволлар',
-  'footer.link.norms': 'Геоботаник нормалар ва қоидалар',
-  'footer.link.prosecutor': 'Рақамли Назорат (Прокуратура Портали)',
-  'footer.address': 'Ўрмон ва яшил ҳудудларни кўпайтириш, чўлланишга қарши курашиш агентлиги',
   'footer.copyright': '© 2026 Ўрмон хўжалиги давлат қўмитаси. Барча ҳуқуқлар ҳимояланган.',
   'footer.wcag': 'WCAG 2.2 AA Мувофиқ дизайн-системаси',
 } as const;

@@ -9,9 +9,7 @@ export const common = {
   'nav.documents': 'Hujjatlar',
   'nav.about': 'Portal haqida',
   'nav.contact': 'Aloqa',
-  'nav.faq': 'Savollar',
 
-  'action.login': 'Kirish (OneID)',
   'action.cabinet': 'Kabinet',
   'action.submitApplication': 'Ariza topshirish',
   'action.language': 'Til',
@@ -34,7 +32,6 @@ export const common = {
   'footer.about':
     'Oʻzbekiston Respublikasi Oʻrmon xoʻjaligi davlat qoʻmitasining rasmiy ruxsatnomalar axborot tizimi.',
   'footer.services': 'Xizmatlar',
-  'footer.documents': 'Hujjatlar',
   'footer.portal': 'Portal',
   'footer.contacts': 'Aloqa',
   'footer.link.howToApply': 'Ariza berish tartibi',
@@ -43,12 +40,8 @@ export const common = {
   'footer.link.map': 'Boʻsh konturlar xaritasi',
   'footer.link.news': 'Yangiliklar va eʼlonlar',
   'footer.link.appealStatus': 'Murojaat yuborish va tekshirish',
-  'footer.link.gis': 'Oʻrmon zonalari GIS kartasi',
   'footer.link.documents': 'Hujjatlar va normalar',
   'footer.link.faq': 'Koʻp beriladigan savollar',
-  'footer.link.norms': 'Geobotanik normalar va qoidalar',
-  'footer.link.prosecutor': 'Raqamli Nazorat (Prokuratura Portali)',
-  'footer.address': "O'rmon va yashil hududlarni ko'paytirish, cho'llanishga qarshi kurashish agentligi",
   'footer.copyright': '© 2026 Oʻrmon xoʻjaligi davlat qoʻmitasi. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-sistemasi',
 } as const;

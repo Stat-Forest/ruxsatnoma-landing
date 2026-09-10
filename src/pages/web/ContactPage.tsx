@@ -3,7 +3,7 @@ import { ArrowRight, Clock, Mail, MapPin, Phone, ShieldCheck } from 'lucide-reac
 import { Button } from '../../components/ui/button';
 import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
-import { useLanguage } from '../../i18n/useT';
+import { useLanguage, useT } from '../../i18n/useT';
 import { AppealForm } from './AppealCheckPage';
 
 export interface ContactPageProps {
@@ -42,6 +42,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   onNavigate,
   siteSettings = { status: 'loading' },
 }) => {
+  const t = useT();
   const { uiLanguage } = useLanguage();
 
   const contacts = siteSettings.status === 'ready' ? siteSettings.data.contacts : null;
@@ -53,7 +54,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   if (contacts?.phone) {
     cards.push({
       icon: <Phone className="w-5 h-5 text-[#2E7D4F]" />,
-      label: 'Ishonch telefoni',
+      label: t('contact.card.phone'),
       value: contacts.phone,
       note: hours || '',
     });
@@ -61,15 +62,15 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   if (contacts?.email) {
     cards.push({
       icon: <Mail className="w-5 h-5 text-[#2E7D4F]" />,
-      label: 'Elektron pochta',
+      label: t('contact.card.email'),
       value: contacts.email,
-      note: 'Rasmiy xatlar uchun',
+      note: t('contact.card.emailNote'),
     });
   }
   if (address) {
     cards.push({
       icon: <MapPin className="w-5 h-5 text-[#2E7D4F]" />,
-      label: 'Manzil',
+      label: t('contact.card.address'),
       value: address,
       note: '',
     });
@@ -79,15 +80,12 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     <div data-testid="contact-page" className="space-y-10">
       <section className="reveal space-y-3 max-w-2xl">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#23653F] bg-[#F0F7F1] px-3 py-1 rounded-full border border-[#D9EBDC]">
-          Aloqa
+          {t('nav.contact')}
         </span>
         <h1 className="text-3xl sm:text-4xl font-black text-[#123522] leading-tight">
-          Biz bilan bogʻlanish
+          {t('contact.hero.title')}
         </h1>
-        <p className="text-base text-[#5A646D] leading-relaxed">
-          Tizimdan foydalanish, ariza holati yoki toʻlovlar boʻyicha savolingiz boʻlsa — ishonch
-          telefoniga qoʻngʻiroq qiling yoki quyidagi shakl orqali rasmiy murojaat yuboring.
-        </p>
+        <p className="text-base text-[#5A646D] leading-relaxed">{t('contact.hero.body')}</p>
       </section>
 
       {loaded && cards.length > 0 && (
@@ -112,10 +110,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
         <div className="flex flex-col gap-6">
           <div className="border border-[#E4E7EA] rounded-2xl p-7">
-            <h3 className="text-lg font-bold text-[#123522]">Murojaat holatini tekshirish</h3>
-            <p className="mt-2 text-sm text-[#5A646D] leading-relaxed">
-              Murojaat raqami va telefon raqamingiz orqali javob holatini bilib oling.
-            </p>
+            <h3 className="text-lg font-bold text-[#123522]">{t('contact.appeal.title')}</h3>
+            <p className="mt-2 text-sm text-[#5A646D] leading-relaxed">{t('contact.appeal.body')}</p>
             <Button
               variant="outline"
               size="md"
@@ -123,7 +119,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               className="mt-4"
               onClick={() => onNavigate?.('appeal_check')}
             >
-              Tekshirish <ArrowRight className="w-4 h-4" />
+              {t('appeal.form.submit')} <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
@@ -131,26 +127,23 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-[#23653F]" />
               <span className="text-base font-extrabold text-[#123522]">
-                Hududiy oʻrmon xoʻjaliklari
+                {t('contact.leshoz.title')}
               </span>
             </div>
-            <p className="mt-2.5 text-sm text-[#3F4A52] leading-relaxed">
-              Kontur, maydon va joyida tekshiruv boʻyicha savollar bilan oʻz hududingizdagi oʻrmon
-              xoʻjaligiga murojaat qiling — ularning roʻyxati va kontaktlari hujjatlar boʻlimida.
-            </p>
+            <p className="mt-2.5 text-sm text-[#3F4A52] leading-relaxed">{t('contact.leshoz.body')}</p>
             <button
               type="button"
               onClick={() => onNavigate?.('documents')}
               className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#23653F] hover:text-[#2E7D4F]"
             >
-              Hujjatlar boʻlimi <ArrowRight className="w-4 h-4" />
+              {t('contact.leshoz.cta')} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           {(contacts?.social.telegram || contacts?.social.youtube) && (
             <div className="border border-[#E4E7EA] rounded-2xl p-7">
               <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#767F87]">
-                <Clock className="w-3.5 h-3.5" /> Ijtimoiy tarmoqlar
+                <Clock className="w-3.5 h-3.5" /> {t('contact.social.title')}
               </div>
               <div className="mt-3 flex flex-col gap-2 text-sm">
                 {contacts.social.telegram && (
