@@ -19,7 +19,9 @@
 .drift-b { animation: drift 68s linear infinite reverse; }
 @keyframes drift { from { transform: translateX(-180px); } to { transform: translateX(180px); } }
 
-.flock { animation: flock 34s linear infinite; }
+/* Starts 5s in so the birds are already over the right edge on the first
+ * frame; from the true start they took ~3s just to enter the frame. */
+.flock { animation: flock 34s linear -5s infinite; }
 @keyframes flock { from { transform: translate(1300px, 40px); } to { transform: translate(-500px, -60px); } }
 
 .wing-a { animation: wing 1.1s ease-in-out infinite; }
