@@ -1,5 +1,6 @@
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { HomePage } from './HomePage';
 import { I18nProvider } from '../../i18n';
@@ -10,6 +11,69 @@ vi.mock('../../api/client', () => ({
 }));
 
 import { api } from '../../api/client';
+
+/**
+ * Two more anonymous endpoints reach the page through the bare `fetch`
+ * global rather than the typed `api.GET` client, because neither is in
+ * `schema.d.ts` yet (`src/api/site.ts`'s own docstring explains why for
+ * `/site-settings`; `RatingBand.tsx`'s does the same for `/ratings/summary`).
+ * This mirrors `PublicLayout.test.tsx`'s own `mockSiteSettingsFetch` idiom —
+ * this project has no `msw` dependency (see the foundation track's report),
+ * so a bare-fetch endpoint is stubbed with `vi.stubGlobal('fetch', ...)`
+ * rather than `server.use(http.get(...))`. Defaults to a network failure for
+ * both routes so a test that doesn't care sees the honest "unavailable"
+ * shape, same as a real outage.
+ */
+type FetchAnswers = {
+  ratings?: unknown;
+  ratingsFails?: boolean;
+  siteSettings?: unknown;
+  siteSettingsFails?: boolean;
+};
+
+function mockFetch({ ratings, ratingsFails, siteSettings, siteSettingsFails }: FetchAnswers = {}) {
+  const fetchMock = vi.fn((url: string) => {
+    if (url.includes('/ratings/summary')) {
+      if (ratingsFails) return Promise.reject(new Error('network error'));
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            ratings ?? { published: false, average: null, count: 0, histogram: null, threshold: 5 },
+          ),
+      });
+    }
+    if (url.includes('/site-settings')) {
+      if (siteSettingsFails) return Promise.reject(new Error('network error'));
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            siteSettings ?? {
+              contacts: {
+                phone: '',
+                email: '',
+                address: { uz_latn: '', ru: '' },
+                hours: { uz_latn: '', ru: '' },
+                social: { telegram: null, youtube: null },
+              },
+              season_windows: {
+                grazing: [],
+                haymaking: [],
+                apiary: [],
+                recreation: [],
+                deadwood: [],
+                science: [],
+              },
+            },
+          ),
+      });
+    }
+    return Promise.reject(new Error(`unexpected fetch: ${url}`));
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
 
 /**
  * The defect these pin (stage 7.3 walkthrough, finding F7): this page
@@ -100,6 +164,11 @@ function mockBackend({
 beforeEach(() => {
   window.localStorage.clear();
   vi.mocked(api.GET).mockReset();
+  mockFetch();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 /** The page links to `/news/:id` and reads `#calculator` off the location, so
@@ -113,6 +182,44 @@ function renderHome() {
     </MemoryRouter>,
   );
 }
+
+it('opens with the hero slider', () => {
+  mockBackend();
+  renderHome();
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
+});
+
+it('sends the quick-check strip to the verify page with what was typed', async () => {
+  mockBackend();
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+
+  await userEvent.type(screen.getByPlaceholderText('Seriya'), 'AB');
+  await userEvent.type(screen.getByPlaceholderText(/Raqam/i), '000123');
+  await userEvent.click(screen.getByRole('button', { name: /^Tekshirish$/i }));
+
+  expect(onNavigate).toHaveBeenCalledWith('verify', { query: 'AB 000123' });
+});
+
+/**
+ * The two tiles this pins ALWAYS show a dash — `by_organization`/`by_region`
+ * are k-anonymity-suppressed per-cut breakdowns (#109), not a total count.
+ * Reading the array's length used to turn a suppressed cut into a false
+ * zero; this test would have caught that regression.
+ */
+it('never turns a suppressed cut into a false zero for organizations or regions', async () => {
+  mockBackend();
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.getByTestId('home-stat-organizations')).toHaveTextContent('—');
+  expect(screen.getByTestId('home-stat-regions')).toHaveTextContent('—');
+});
 
 it('shows the figures the aggregates endpoint returns, not constants', async () => {
   mockBackend();
@@ -180,6 +287,131 @@ it('shows the services the catalog returns, not the six that used to be constant
   // catalogue for its own dropdown, so the name appears twice on the page.
   const section = await screen.findByTestId('home-activities');
   expect(within(section).getByText('Chorva mollarini boqish')).toBeInTheDocument();
+});
+
+/**
+ * The rating band's own three states (#174) — pinned here too, at the page
+ * level, in addition to `RatingBand.test.tsx`'s unit coverage: this is what
+ * actually reaches a visitor, wired to the real `fetch` call.
+ */
+it('says there are not enough ratings yet rather than printing an average', async () => {
+  mockBackend();
+  mockFetch({ ratings: { published: false, average: null, count: 2, histogram: null, threshold: 5 } });
+  renderHome();
+  expect(await screen.findByTestId('home-rating')).toHaveTextContent(/yetarli baho/i);
+  expect(screen.queryByText(/4[,.]\d/)).not.toBeInTheDocument();
+});
+
+it('draws the average and histogram once the rating summary is published', async () => {
+  mockBackend();
+  mockFetch({
+    ratings: {
+      published: true,
+      average: '4.2',
+      count: 128,
+      histogram: { 1: 1, 2: 2, 3: 5, 4: 20, 5: 100 },
+      threshold: 5,
+    },
+  });
+  renderHome();
+  expect(await screen.findByText('4,2')).toBeInTheDocument();
+  expect(screen.getByText(/128/)).toBeInTheDocument();
+});
+
+it('says the ratings are unavailable rather than blank when the summary fails to load', async () => {
+  mockBackend();
+  mockFetch({ ratingsFails: true });
+  renderHome();
+  expect(await screen.findByTestId('home-rating')).toHaveTextContent(/vaqtincha mavjud emas/i);
+});
+
+/**
+ * Ruling R3: the season strip may only ever show months the settings
+ * endpoint actually returned — never a fallback set invented locally.
+ */
+it('draws the season strip from the site-settings response', async () => {
+  mockBackend();
+  mockFetch({
+    siteSettings: {
+      contacts: {
+        phone: '', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: '', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: {
+        grazing: [9], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [],
+      },
+    },
+  });
+  renderHome();
+  expect(await screen.findByTestId('season-row-grazing')).toBeInTheDocument();
+  expect(screen.getByRole('note')).toHaveTextContent(/Agentlik tomonidan tasdiqlanadi/i);
+});
+
+it('renders no season strip at all when the settings fetch fails', async () => {
+  mockBackend();
+  mockFetch({ siteSettingsFails: true });
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByTestId('season-row-grazing')).not.toBeInTheDocument();
+  expect(screen.queryByRole('note')).not.toBeInTheDocument();
+});
+
+it('sends the map band to the map page', async () => {
+  mockBackend();
+  const onNavigate = vi.fn();
+  render(
+    <MemoryRouter>
+      <I18nProvider>
+        <HomePage onNavigate={onNavigate} />
+      </I18nProvider>
+    </MemoryRouter>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: /Xaritani ochish/i }));
+  expect(onNavigate).toHaveBeenCalledWith('map');
+});
+
+it('shows the live phone in the support CTA once site-settings answers', async () => {
+  mockBackend();
+  mockFetch({
+    siteSettings: {
+      contacts: {
+        phone: '+998 71 000 00 00', email: '', address: { uz_latn: '', ru: '' }, hours: { uz_latn: 'Dushanba – juma', ru: '' },
+        social: { telegram: null, youtube: null },
+      },
+      season_windows: { grazing: [], haymaking: [], apiary: [], recreation: [], deadwood: [], science: [] },
+    },
+  });
+  renderHome();
+  expect(await screen.findByText('+998 71 000 00 00')).toBeInTheDocument();
+});
+
+it('hides the CTA phone row rather than inventing one when contacts are unavailable', async () => {
+  mockBackend();
+  mockFetch({ siteSettingsFails: true });
+  renderHome();
+  await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+  expect(screen.queryByText(/^\+998/)).not.toBeInTheDocument();
+});
+
+/** As `GET /public/refs/activity-types` might one day answer with the full
+ *  catalogue — one row per `Scene` kind, in that component's own order. */
+const sixActivities = [
+  { id: 'a1', code: 'grazing', name: { uz_latn: 'Chorva mollarini boqish' }, description: null, processing_days: 15 },
+  { id: 'a2', code: 'haymaking', name: { uz_latn: 'Pichan tayyorlash' }, description: null, processing_days: 15 },
+  { id: 'a3', code: 'apiary', name: { uz_latn: 'Asalarichilik' }, description: null, processing_days: 15 },
+  { id: 'a4', code: 'recreation', name: { uz_latn: 'Dam olish va turizm' }, description: null, processing_days: 15 },
+  { id: 'a5', code: 'deadwood', name: { uz_latn: 'Quruq shox-shabba yigʻish' }, description: null, processing_days: 15 },
+  { id: 'a6', code: 'science', name: { uz_latn: 'Ilmiy tadqiqot' }, description: null, processing_days: 15 },
+];
+
+it('renders six direction cards, each with its own illustration', async () => {
+  mockBackend({ services: sixActivities });
+  renderHome();
+
+  const cards = await screen.findAllByTestId('direction-card');
+  expect(cards).toHaveLength(6);
+  const svgIds = cards.map((c) => c.querySelector('linearGradient')?.id);
+  expect(new Set(svgIds).size).toBe(6);
 });
 
 const sampleActivities = [
