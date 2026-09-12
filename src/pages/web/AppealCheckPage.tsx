@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Search, Lock, Loader2, FileCheck, Send } from 'lucide-react';
+import {
+  Search,
+  Lock,
+  Loader2,
+  FileCheck,
+  Send,
+  FileText,
+  Mail,
+  Phone,
+  Sparkles,
+  User,
+} from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input, FormField, Textarea } from '../../components/ui/FormControls';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -40,13 +51,11 @@ export interface AppealFormProps {
    *  asking them to retype both immediately after filing is how a person
    *  loses the number. */
   onFiled?: (filed: { number: string; phone: string; email: string }) => void;
+  className?: string;
 }
 
 /**
- * Screen: file a citizen's appeal (`POST /api/v1/public/appeals`, anonymous).
- *
- * It did not exist until the stage 7.3 walkthrough went looking for it
- * (finding F8): the backend had the route, this site had the status-check
+ * Task 14 (filing half) — `/appeal-check`. Until this was added to the
  * page, the adminka had the four staff routes for answering — and
  * `adminka/src/pages/support/appeals/api.ts` stated in a comment that the
  * citizen's filing form "shipped on the public site". It had not. **A citizen
@@ -57,7 +66,7 @@ export interface AppealFormProps {
  * shared secret proving the filer is the one asking later — so this form
  * refuses locally rather than sending a body the API will reject.
  */
-export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
+export const AppealForm: React.FC<AppealFormProps> = ({ onFiled, className = '' }) => {
   const t = useT();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -107,13 +116,29 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
   };
 
   return (
-    <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
-      <div>
-        <h2 className="text-base font-bold text-[#1A1F24]">{t('appeal.file.title')}</h2>
-        <p className="text-xs text-[#5A646D]">{t('appeal.file.subtitle')}</p>
+    <div
+      className={`relative bg-white/95 backdrop-blur-md border border-[#CCE4D3] rounded-3xl p-6 sm:p-8 sm:p-9 shadow-[0_12px_40px_-15px_rgba(18,53,34,0.08)] space-y-6 overflow-hidden transition-all duration-300 ${className}`}
+    >
+      {/* Top emerald gradient line */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#1B5E20] via-[#2E7D4F] to-[#34D399]" />
+
+      {/* Decorative ambient background glow */}
+      <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#34D399]/5 blur-3xl pointer-events-none" />
+
+      <div className="space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF7EE] border border-[#BCE7C7] text-xs font-bold text-[#1E5631]">
+          <Sparkles className="w-3.5 h-3.5 text-[#2E7D4F]" />
+          <span>Rasmiy murojaat</span>
+        </div>
+        <h2 className="text-xl sm:text-2xl font-black text-[#123522] tracking-tight">
+          {t('appeal.file.title')}
+        </h2>
+        <p className="text-xs sm:text-sm text-[#4E6354] leading-relaxed max-w-xl">
+          {t('appeal.file.subtitle')}
+        </p>
       </div>
 
-      <form onSubmit={handleFile} className="space-y-4">
+      <form onSubmit={handleFile} className="space-y-5">
         <FormField label={t('appeal.file.nameLabel')} htmlFor="appeal-file-name">
           <Input
             id="appeal-file-name"
@@ -122,6 +147,9 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
             required
             maxLength={255}
             touchSize
+            leftIcon={<User className="w-4 h-4 text-[#2E7D4F]" />}
+            placeholder="Familiya Ism Sharifingiz"
+            className="!rounded-xl border-[#CFDFD4] focus:border-[#2E7D4F] transition-all"
           />
         </FormField>
 
@@ -137,6 +165,9 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
               onChange={(e) => setPhone(e.target.value)}
               maxLength={32}
               touchSize
+              leftIcon={<Phone className="w-4 h-4 text-[#2E7D4F]" />}
+              placeholder="+998 90 123 45 67"
+              className="!rounded-xl border-[#CFDFD4] focus:border-[#2E7D4F] transition-all"
             />
           </FormField>
           <FormField label={t('appeal.file.emailLabel')} htmlFor="appeal-file-email">
@@ -146,6 +177,9 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               touchSize
+              leftIcon={<Mail className="w-4 h-4 text-[#2E7D4F]" />}
+              placeholder="namuna@domain.uz"
+              className="!rounded-xl border-[#CFDFD4] focus:border-[#2E7D4F] transition-all"
             />
           </FormField>
         </div>
@@ -158,6 +192,9 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
             required
             maxLength={255}
             touchSize
+            leftIcon={<FileText className="w-4 h-4 text-[#2E7D4F]" />}
+            placeholder="Murojaatning qisqacha mazmuni"
+            className="!rounded-xl border-[#CFDFD4] focus:border-[#2E7D4F] transition-all"
           />
         </FormField>
 
@@ -168,13 +205,28 @@ export const AppealForm: React.FC<AppealFormProps> = ({ onFiled }) => {
             onChange={(e) => setBody(e.target.value)}
             required
             maxLength={5000}
-            rows={6}
+            rows={5}
+            placeholder="Murojaatingiz matnini batafsil bayon eting..."
+            className="!rounded-xl border-[#CFDFD4] focus:border-[#2E7D4F] transition-all"
           />
         </FormField>
 
-        <Button type="submit" variant="primary" size="lg" isLoading={state === 'sending'}>
-          <Send className="w-4 h-4" /> {t('appeal.file.submit')}
-        </Button>
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            isLoading={state === 'sending'}
+            className="!rounded-xl !bg-gradient-to-r !from-[#1B5E20] !via-[#2E7D4F] !to-[#256F44] hover:!from-[#144A18] hover:!to-[#1E5D38] !py-3.5 !px-8 shadow-md shadow-[#2E7D4F]/25 hover:shadow-xl hover:shadow-[#2E7D4F]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 font-bold text-sm sm:text-base cursor-pointer group"
+          >
+            <Send className="w-4 h-4 text-white group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-300" />
+            <span>{t('appeal.file.submit')}</span>
+          </Button>
+          <div className="flex items-center gap-2 text-xs text-[#526B5A]">
+            <Lock className="w-3.5 h-3.5 text-[#2E7D4F]" />
+            <span>Maʼlumotlar xavfsizligi kafolatlangan</span>
+          </div>
+        </div>
       </form>
 
       {state === 'sent' && (

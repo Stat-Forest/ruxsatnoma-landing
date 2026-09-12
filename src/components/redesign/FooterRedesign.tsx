@@ -8,7 +8,8 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
-import logoImg from '../../assets/img/logo.png';
+import logoImg from '../../assets/img/ormonlogo.png';
+import digitalCenterLogo from '../../assets/img/raqamlashtirishlogo.png';
 import { I18nContext } from '../../i18n/context';
 import type { SiteSettingsState } from '../../api/site';
 import { pickLocalized } from '../../lib/localized';
@@ -43,6 +44,7 @@ const FALLBACK_STRINGS: Record<string, string> = {
   'footer.link.faq': 'Koʻp beriladigan savollar',
   'footer.copyright': '© 2026 Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-tizimi',
+  'footer.developedBy': '“Oʻrmon xoʻjaligini raqamlashtirish markazi” tomonidan ishlab chiqilgan',
   'nav.about': 'Portal haqida',
   'nav.contact': 'Bogʻlanish',
 };
@@ -578,13 +580,24 @@ export const FooterRedesign: React.FC<FooterRedesignProps> = ({
             </div>
           </div>
 
-          {/* ── 4. Bottom Bar: Copyright, WCAG & Scroll-to-Top ─────────────── */}
-          <div className="border-t border-white/15 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-emerald-200/70 gap-4">
-            <div className="text-center sm:text-left">
+          {/* ── 4. Bottom Bar: Copyright, Developer, WCAG & Scroll-to-Top ─────────────── */}
+          <div className="border-t border-white/15 pt-6 flex flex-col lg:flex-row justify-between items-center text-xs text-emerald-200/70 gap-4">
+            <div className="text-center lg:text-left">
               {t('footer.copyright')}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="flex items-center gap-2.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-1.5 rounded-xl transition-colors shadow-sm">
+                <img
+                  src={digitalCenterLogo}
+                  alt="Oʻrmon xoʻjaligini raqamlashtirish markazi"
+                  className="w-7 h-7 object-contain shrink-0 drop-shadow"
+                />
+                <span className="text-[11.5px] text-emerald-100/90 font-medium">
+                  {t('footer.developedBy')}
+                </span>
+              </div>
+
               <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300/80">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#2ED177]" />
                 <span>{t('footer.wcag')}</span>

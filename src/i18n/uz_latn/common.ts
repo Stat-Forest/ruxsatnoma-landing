@@ -50,4 +50,5 @@ export const common = {
   'footer.link.faq': 'Koʻp beriladigan savollar',
   'footer.copyright': '© 2026 Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-sistemasi',
+  'footer.developedBy': '“Oʻrmon xoʻjaligini raqamlashtirish markazi” tomonidan ishlab chiqilgan',
 } as const;

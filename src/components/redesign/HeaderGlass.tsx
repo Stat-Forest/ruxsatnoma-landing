@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Globe, ChevronDown, Check, User, Send, Menu, X, ArrowUpRight } from 'lucide-react';
-import logoImg from '@/assets/img/logo.png';
+import logoImg from '@/assets/img/ormonlogo.png';
 import { I18nContext, LANGUAGES, type Language } from '../../i18n/context';
 import { CABINET_PATHS, goToCabinet } from '../../lib/cabinet';
 

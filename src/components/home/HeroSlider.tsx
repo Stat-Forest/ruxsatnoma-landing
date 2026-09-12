@@ -289,45 +289,48 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
       <div className="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6">
         <div className="max-w-xl lg:max-w-2xl">
-          <div className="reveal-top inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-white/25 backdrop-blur-md">
-            <span className="live w-1.5 h-1.5 rounded-full bg-[#4ADE80] shadow-[0_0_0_4px_rgba(74,222,128,.22)]" />
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{copy.badge}</span>
+          {/* Animated content keying on slide index ensures smooth animations replay whenever text changes */}
+          <div key={slide}>
+            <div className="hero-badge-in inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-white/25 backdrop-blur-md">
+              <span className="live w-1.5 h-1.5 rounded-full bg-[#4ADE80] shadow-[0_0_0_4px_rgba(74,222,128,.22)]" />
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{copy.badge}</span>
+            </div>
+
+            <h1
+              className="hero-fade-up mt-5 text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-[1.1] tracking-tight"
+              style={{ animationDelay: '.1s' }}
+            >
+              {copy.title}
+              <span className="hero-fade-up block text-[#9CE3AE]" style={{ animationDelay: '.2s' }}>{copy.titleAccent}</span>
+            </h1>
+
+            <p
+              className="hero-fade-up mt-4 text-xs sm:text-sm leading-relaxed text-[#DCE8DE] max-w-lg"
+              style={{ animationDelay: '.3s' }}
+            >
+              {copy.subtitle}
+            </p>
+
+            <div className="hero-fade-up mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: '.4s' }}>
+              <button
+                type="button"
+                onClick={() => onNavigate?.(actions.primary)}
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-[0_14px_34px_rgba(46,125,79,.5)] transition-colors"
+              >
+                <span>{copy.ctaPrimary}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate?.(actions.secondary)}
+                className="inline-flex items-center h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+              >
+                {copy.ctaSecondary}
+              </button>
+            </div>
           </div>
 
-          <h1
-            className="reveal-left mt-5 text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-[1.1] tracking-tight"
-            style={{ animationDelay: '.15s' }}
-          >
-            {copy.title}
-            <span className="reveal-right block text-[#9CE3AE]" style={{ animationDelay: '.3s' }}>{copy.titleAccent}</span>
-          </h1>
-
-          <p
-            className="reveal-zoom mt-4 text-xs sm:text-sm leading-relaxed text-[#DCE8DE] max-w-lg"
-            style={{ animationDelay: '.45s' }}
-          >
-            {copy.subtitle}
-          </p>
-
-          <div className="reveal mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: '.6s' }}>
-            <button
-              type="button"
-              onClick={() => onNavigate?.(actions.primary)}
-              className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-[0_14px_34px_rgba(46,125,79,.5)] transition-colors"
-            >
-              <span>{copy.ctaPrimary}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate?.(actions.secondary)}
-              className="inline-flex items-center h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors"
-            >
-              {copy.ctaSecondary}
-            </button>
-          </div>
-
-          <div className="reveal-right mt-8 flex flex-wrap items-center gap-5" style={{ animationDelay: '.75s' }}>
+          <div className="reveal-right mt-8 flex flex-wrap items-center gap-5" style={{ animationDelay: '.4s' }}>
             {[t('hero.trust.fast'), t('hero.trust.qr'), t('hero.trust.online')].map((label) => (
               <div key={label} className="flex items-center gap-2 text-xs font-semibold text-[#C7DCCB]">
                 <Check className="w-4 h-4 text-[#7FE0A0]" />

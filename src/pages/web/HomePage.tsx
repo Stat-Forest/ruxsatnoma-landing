@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useInRouterContext, useLocation } from 'react-router';
 import {
   Search,
@@ -7,10 +7,12 @@ import {
   FileCheck2,
   Users,
   Trees,
+  ChevronLeft,
   ChevronRight,
   PhoneCall,
   ExternalLink,
   MapPin,
+  Sparkles,
   UserRound,
   Map as MapIcon,
   Calculator as CalculatorIcon,
@@ -348,6 +350,20 @@ export const HomePage: React.FC<HomePageProps> = ({
   // the section says plainly when there is nothing to show rather than
   // inventing something (same posture as the statistics above).
   const [newsState, setNewsState] = useState<NewsState>({ status: 'loading' });
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [enableTransition, setEnableTransition] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -357,6 +373,10 @@ export const HomePage: React.FC<HomePageProps> = ({
         if (!cancelled) {
           if (data && Array.isArray(data.items)) {
             setNewsState({ status: 'ready', items: data.items });
+            // Initialize slideIndex to items.length (start of middle set) when >= 3
+            if (data.items.length >= 3) {
+              setSlideIndex(data.items.length);
+            }
           } else {
             setNewsState({ status: 'error' });
           }
@@ -369,6 +389,92 @@ export const HomePage: React.FC<HomePageProps> = ({
       cancelled = true;
     };
   }, []);
+
+  // Re-enable transition after boundary wrap
+  useEffect(() => {
+    if (!enableTransition) {
+      const raf1 = requestAnimationFrame(() => {
+        const raf2 = requestAnimationFrame(() => {
+          setEnableTransition(true);
+        });
+        return () => cancelAnimationFrame(raf2);
+      });
+      return () => cancelAnimationFrame(raf1);
+    }
+  }, [enableTransition]);
+
+  // Auto-advance news swiper steadily every 3.8 seconds ("slide bir tekisda aylanib tursin")
+  useEffect(() => {
+    if (newsState.status !== 'ready') return;
+    const items = newsState.items ?? [];
+    if (items.length <= 1) return;
+
+    const timer = setInterval(() => {
+      if (items.length >= 3) {
+        setIsTransitioning(true);
+        setSlideIndex((prev) => prev + 1);
+      } else {
+        setSlideIndex((prev) => (prev + 1) % items.length);
+      }
+    }, 3800);
+
+    return () => clearInterval(timer);
+  }, [newsState]);
+
+  const handlePrevNews = useCallback(() => {
+    if (newsState.status !== 'ready') return;
+    const items = newsState.items ?? [];
+    if (items.length <= 1 || isTransitioning) return;
+
+    if (items.length >= 3) {
+      setIsTransitioning(true);
+      setSlideIndex((prev) => prev - 1);
+    } else {
+      setSlideIndex((prev) => (prev - 1 + items.length) % items.length);
+    }
+  }, [newsState, isTransitioning]);
+
+  const handleNextNews = useCallback(() => {
+    if (newsState.status !== 'ready') return;
+    const items = newsState.items ?? [];
+    if (items.length <= 1 || isTransitioning) return;
+
+    if (items.length >= 3) {
+      setIsTransitioning(true);
+      setSlideIndex((prev) => prev + 1);
+    } else {
+      setSlideIndex((prev) => (prev + 1) % items.length);
+    }
+  }, [newsState, isTransitioning]);
+
+  const handleTransitionEnd = () => {
+    setIsTransitioning(false);
+    if (newsState.status !== 'ready') return;
+    const items = newsState.items ?? [];
+    const count = items.length;
+    if (count < 3) return;
+
+    // Invisible seamless boundary reset
+    if (slideIndex >= 2 * count) {
+      setEnableTransition(false);
+      setSlideIndex(slideIndex - count);
+    } else if (slideIndex < count) {
+      setEnableTransition(false);
+      setSlideIndex(slideIndex + count);
+    }
+  };
+
+  const handleDotClick = (targetIdx: number) => {
+    if (newsState.status !== 'ready' || isTransitioning) return;
+    const items = newsState.items ?? [];
+    const count = items.length;
+    if (count < 3) {
+      setSlideIndex(targetIdx);
+      return;
+    }
+    setIsTransitioning(true);
+    setSlideIndex(count + targetIdx);
+  };
 
   // The six activity cards below used to be constants — a title, a
   // description and a badge per service, hand-typed in the translation files.
@@ -723,67 +829,69 @@ export const HomePage: React.FC<HomePageProps> = ({
           {/* Luminous pipeline connecting line behind cards on desktop */}
           <div className="hidden lg:block absolute left-8 right-8 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[#2E7D4F]/15 via-[#34D399]/35 to-[#2E7D4F]/15 z-0 pointer-events-none" />
 
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-4">
             {[
-              { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: 'OneID / E-IMZO' },
-              { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: 'GIS Maydon' },
-              { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: 'Avto Toʻlov' },
-              { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: 'Rasmiy QR PDF' },
-            ].map(({ Icon, bg, tag }, idx) => (
+              { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: 'OneID / E-IMZO', cosmosClass: 'cosmos-a' },
+              { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: 'GIS Maydon', cosmosClass: 'cosmos-b' },
+              { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: 'Avto Toʻlov', cosmosClass: 'cosmos-c' },
+              { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: 'Rasmiy QR PDF', cosmosClass: 'cosmos-d' },
+            ].map(({ Icon, bg, tag, cosmosClass }, idx) => (
               <div
                 key={idx}
-                className={`group relative card-lift ${
-                  stepsInView ? 'reveal' : 'opacity-0'
-                } bg-white/95 backdrop-blur-sm border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl p-4 sm:p-4.5 shadow-[0_4px_20px_rgba(18,53,34,0.05)] hover:shadow-[0_14px_32px_rgba(18,53,34,0.11)] transition-all duration-300 flex flex-col justify-between overflow-hidden`}
+                className={`relative ${stepsInView ? 'reveal' : 'opacity-0'}`}
                 style={{ animationDelay: `${idx * 0.12}s` }}
               >
-                {/* Top green accent sheen on hover */}
-                <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#2E7D4F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div
+                  className={`group relative ${cosmosClass} bg-white/95 backdrop-blur-md border border-[#D6E6DB] hover:border-[#2E7D4F] rounded-2xl p-4 sm:p-5 transition-all duration-500 flex flex-col justify-between h-full overflow-hidden hover:[animation-play-state:paused] hover:-translate-y-3 hover:shadow-[0_24px_48px_rgba(18,53,34,0.16),0_0_25px_rgba(74,222,128,0.22)]`}
+                >
+                  {/* Top green accent sheen on hover */}
+                  <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#2E7D4F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                {/* Soft ambient corner light */}
-                <div className="absolute -top-8 -right-8 w-20 h-20 bg-[#2E7D4F]/5 rounded-full blur-xl group-hover:bg-[#2E7D4F]/12 transition-colors pointer-events-none" />
+                  {/* Soft ambient corner light */}
+                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-xl group-hover:bg-[#2E7D4F]/15 transition-colors pointer-events-none" />
 
-                <div>
-                  {/* Top row: Gradient icon + Watermark Step Number */}
-                  <div className="flex items-center justify-between gap-2.5 mb-3">
-                    <div
-                      className="w-9 h-9 rounded-lg flex items-center justify-center shadow-[0_3px_12px_rgba(18,53,34,0.15)] group-hover:scale-105 group-hover:shadow-[0_5px_16px_rgba(46,125,79,0.25)] transition-all duration-300"
-                      style={{ background: bg }}
-                    >
-                      <Icon className="w-4.5 h-4.5 text-[#A7F3D0]" />
+                  <div>
+                    {/* Top row: Gradient icon + Watermark Step Number */}
+                    <div className="flex items-center justify-between gap-2.5 mb-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_3px_12px_rgba(18,53,34,0.15)] group-hover:scale-110 group-hover:rotate-2 group-hover:shadow-[0_6px_18px_rgba(46,125,79,0.3)] transition-all duration-300"
+                        style={{ background: bg }}
+                      >
+                        <Icon className="w-5 h-5 text-[#A7F3D0]" />
+                      </div>
+                      <span className="font-mono text-2xl font-black text-[#123522]/15 group-hover:text-[#2E7D4F]/30 tracking-tighter transition-colors">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
                     </div>
-                    <span className="font-mono text-xl font-black text-[#123522]/15 group-hover:text-[#2E7D4F]/30 tracking-tighter transition-colors">
-                      {String(idx + 1).padStart(2, '0')}
+
+                    {/* Step Sub-label & Title & Desc */}
+                    <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] animate-pulse" />
+                      {`Qadam 0${idx + 1}`}
+                    </div>
+                    <h3 className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
+                      {t(`home.steps.0${idx + 1}.title`)}
+                    </h3>
+                    <p className="mt-1 text-[11.5px] leading-relaxed text-[#5A646D]">
+                      {t(`home.steps.0${idx + 1}.desc`)}
+                    </p>
+                  </div>
+
+                  {/* Bottom Divider & Micro-badge */}
+                  <div className="mt-3.5 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
+                    <span className="text-[9.5px] font-bold text-[#23653F] bg-[#F0F8F3] px-2 py-0.5 rounded-full border border-[#D5EBDC]">
+                      {tag}
+                    </span>
+                    <span className="text-[9.5px] font-semibold text-[#8A969F]">
+                      {`${idx + 1} / 4`}
                     </span>
                   </div>
-
-                  {/* Step Sub-label & Title & Desc */}
-                  <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F]" />
-                    {`Qadam 0${idx + 1}`}
-                  </div>
-                  <h3 className="mt-1 text-[13.5px] sm:text-[14px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
-                    {t(`home.steps.0${idx + 1}.title`)}
-                  </h3>
-                  <p className="mt-1 text-[11.5px] leading-relaxed text-[#5A646D]">
-                    {t(`home.steps.0${idx + 1}.desc`)}
-                  </p>
-                </div>
-
-                {/* Bottom Divider & Micro-badge */}
-                <div className="mt-3 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
-                  <span className="text-[9.5px] font-bold text-[#23653F] bg-[#F0F8F3] px-2 py-0.5 rounded-full border border-[#D5EBDC]">
-                    {tag}
-                  </span>
-                  <span className="text-[9.5px] font-semibold text-[#8A969F]">
-                    {`${idx + 1} / 4`}
-                  </span>
                 </div>
 
                 {/* Forward pipeline connector arrow to next step (for desktop) */}
                 {idx < 3 && (
-                  <div className="hidden lg:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-4.5 h-4.5 rounded-full bg-white border border-[#C6E5CF] items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-110 group-hover:border-[#2E7D4F] transition-all">
-                    <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
+                  <div className="hidden lg:flex absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full bg-white border border-[#C6E5CF] items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-110 group-hover:border-[#2E7D4F] transition-all pointer-events-none">
+                    <ArrowRight className="w-2.5 h-2.5" />
                   </div>
                 )}
               </div>
@@ -987,52 +1095,269 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ── 7. NEWS & ANNOUNCEMENTS ──────────────────────────────────── */}
+      {/* ── 7. NEWS & ANNOUNCEMENTS — 3-CARD SWIPER ──────────────────── */}
       <section ref={newsRef} className="relative z-10">
-        <div className={`flex items-end justify-between mb-7 ${newsInView ? 'reveal' : 'opacity-0'}`}>
+        <div className={`flex items-end justify-between mb-6 ${newsInView ? 'reveal' : 'opacity-0'}`}>
           <div>
-            <h2 className="text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
+              Soʻnggi xabarlar
+            </span>
+            <h2 className="mt-1.5 text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
               {t('home.news.sectionTitle')}
             </h2>
           </div>
+
           <SafeLink
             to="/news"
-            className="shrink-0 inline-flex items-center gap-2 text-sm font-bold text-[#2E7D4F] hover:underline"
+            className="shrink-0 inline-flex items-center gap-2 text-sm font-bold text-[#2E7D4F] hover:text-[#1B5E20] hover:underline transition-colors"
           >
-            {t('home.news.viewAllLink')} <ExternalLink className="w-3.5 h-3.5" />
+            <span>{t('home.news.viewAllLink')}</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </SafeLink>
         </div>
 
-        <div data-testid="home-news">
+        <div
+          data-testid="home-news"
+          className="relative group/swiper px-1 sm:px-2"
+        >
+          {/* Side Arrow Buttons (positioned on the sides of the cards) */}
+          {newsState.status === 'ready' && (newsState.items ?? []).length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevNews}
+                aria-label="Oldingi yangilik"
+                className="absolute -left-2 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-md border border-[#D5E6DA] hover:border-[#2E7D4F] text-[#123522] hover:text-[#2E7D4F] hover:bg-[#F0F7F1] flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-95"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextNews}
+                aria-label="Keyingi yangilik"
+                className="absolute -right-2 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-md border border-[#D5E6DA] hover:border-[#2E7D4F] text-[#123522] hover:text-[#2E7D4F] hover:bg-[#F0F7F1] flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-95"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
           {newsState.status === 'loading' && <p className="text-xs text-[#5A646D]">{t('home.news.loading')}</p>}
           {newsState.status === 'error' && <p className="text-xs text-[#92400E]">{t('home.news.failed')}</p>}
           {newsState.status === 'ready' && (newsState.items ?? []).length === 0 && (
             <p className="text-xs text-[#5A646D]">{t('home.news.empty')}</p>
           )}
-          {newsState.status === 'ready' && (newsState.items ?? []).length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {(newsState.items ?? []).map((item, idx) => (
+
+          {/* 1 Item view */}
+          {newsState.status === 'ready' && (newsState.items ?? []).length === 1 && (
+            <div className="max-w-xl mx-auto py-2">
+              {(newsState.items ?? []).map((item) => (
                 <SafeLink
                   key={item.id}
                   to={`/news/${item.id}`}
                   data-testid={`home-news-${item.id}`}
-                  className={`card-lift ${
-                    newsInView ? 'reveal' : 'opacity-0'
-                  } block bg-white/95 backdrop-blur-xs border border-[#D6E6DB] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(18,53,34,0.04)] hover:border-[#7FB98A]`}
-                  style={{ animationDelay: `${idx * 0.15}s` }}
+                  className="block bg-white border-2 border-[#2E7D4F]/60 rounded-2xl overflow-hidden shadow-[0_16px_36px_rgba(18,53,34,0.12)] ring-4 ring-[#2E7D4F]/10 hover:shadow-[0_22px_44px_rgba(18,53,34,0.16)] transition-all duration-300 group"
                 >
-                  <div className="h-2 bg-[#2E7D4F]" />
-                  <div className="p-6">
-                    <span className="text-[12.5px] text-[#767F87]">{formatNewsDate(item.publish_from)}</span>
-                    <h3 className="mt-3.5 text-lg leading-snug font-bold text-[#123522]">
-                      {pickLocalized(item.title, language)}
-                    </h3>
-                    <p className="mt-2.5 text-sm leading-relaxed text-[#5A646D] line-clamp-3">
-                      {pickLocalized(item.body, language)}
-                    </p>
+                  <div className="h-2 bg-gradient-to-r from-[#1B5E20] via-[#34D399] to-[#2E7D4F]" />
+                  <div className="p-6 sm:p-7 flex flex-col justify-between min-h-[220px]">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-xs text-[#767F87] font-semibold">{formatNewsDate(item.publish_from)}</span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] text-[#1E5631] text-[10.5px] font-extrabold uppercase tracking-wide border border-[#C2E3CB]">
+                          <Sparkles className="w-3 h-3 text-[#2E7D4F]" /> Dolzarb
+                        </span>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black text-[#123522] group-hover:text-[#1E6B3D] transition-colors leading-snug">
+                        {pickLocalized(item.title, language)}
+                      </h3>
+                      <p className="mt-2.5 text-sm leading-relaxed text-[#5A646D] line-clamp-3">
+                        {pickLocalized(item.body, language)}
+                      </p>
+                    </div>
+                    <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
+                      <span className="flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform">
+                        Batafsil oʻqish <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="text-[10.5px] font-normal text-[#8A969F]">
+                        Rasmiy xabar
+                      </span>
+                    </div>
                   </div>
                 </SafeLink>
               ))}
+            </div>
+          )}
+
+          {/* 2 Items view */}
+          {newsState.status === 'ready' && (newsState.items ?? []).length === 2 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto py-2 items-stretch">
+              {(newsState.items ?? []).map((item, idx) => {
+                const isCenter = idx === (slideIndex % 2);
+                return (
+                  <div key={item.id} className="h-full flex flex-col">
+                    <SafeLink
+                      to={`/news/${item.id}`}
+                      data-testid={`home-news-${item.id}`}
+                      onClick={() => setSlideIndex(idx)}
+                      className={`flex flex-col justify-between h-full rounded-2xl overflow-hidden transition-all duration-500 group ${
+                        isCenter
+                          ? 'bg-white border-2 border-[#2E7D4F] shadow-none md:scale-105 z-20'
+                          : 'bg-white/95 border border-[#D6E6DB] hover:border-[#7FB98A]'
+                      }`}
+                    >
+                      <div className={`h-2 shrink-0 ${isCenter ? 'bg-gradient-to-r from-[#1B5E20] via-[#34D399] to-[#2E7D4F]' : 'bg-[#2E7D4F]'}`} />
+                      <div className="p-6 flex flex-col justify-between flex-1">
+                        <div>
+                          <span className="text-[12.5px] text-[#767F87] font-semibold">{formatNewsDate(item.publish_from)}</span>
+                          <h3 className="mt-3 text-base sm:text-lg font-bold text-[#123522] group-hover:text-[#1E6B3D] transition-colors leading-snug">
+                            {pickLocalized(item.title, language)}
+                          </h3>
+                          <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-[#5A646D] line-clamp-3">
+                            {pickLocalized(item.body, language)}
+                          </p>
+                        </div>
+                        <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
+                          <span className="flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform">
+                            Batafsil oʻqish <ArrowRight className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </div>
+                    </SafeLink>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 3+ Items: Infinite Smooth Sliding Carousel */}
+          {newsState.status === 'ready' && (newsState.items ?? []).length >= 3 && (
+            <div className="space-y-6 py-2">
+              <div className="overflow-hidden py-4 -my-4">
+                <div
+                  onTransitionEnd={handleTransitionEnd}
+                  style={{
+                    transform: `translateX(-${
+                      isMobile
+                        ? slideIndex * 100
+                        : (slideIndex - 1) * (100 / 3)
+                    }%)`,
+                    transition: enableTransition
+                      ? 'transform 700ms cubic-bezier(0.25, 1, 0.5, 1)'
+                      : 'none',
+                  }}
+                  className="flex items-stretch will-change-transform"
+                >
+                  {[
+                    ...(newsState.items ?? []),
+                    ...(newsState.items ?? []),
+                    ...(newsState.items ?? []),
+                  ].map((item, idx) => {
+                    const isCenter = idx === slideIndex;
+                    return (
+                      <div
+                        key={`slide-${idx}-${item.id}`}
+                        className="w-full md:w-1/3 shrink-0 px-2.5 sm:px-3 py-3 flex flex-col"
+                      >
+                        <SafeLink
+                          to={`/news/${item.id}`}
+                          data-testid={idx === slideIndex ? `home-news-${item.id}` : undefined}
+                          onClick={(e) => {
+                            if (!isCenter) {
+                              e.preventDefault();
+                              if (!isTransitioning) {
+                                setIsTransitioning(true);
+                                setSlideIndex(idx);
+                              }
+                            }
+                          }}
+                          className={`flex flex-col justify-between h-full rounded-2xl overflow-hidden transition-all duration-700 ease-out group cursor-pointer ${
+                            isCenter
+                              ? 'bg-white border-2 border-[#2E7D4F] shadow-none md:scale-105 z-20'
+                              : 'bg-white/95 border border-[#D6E6DB] hover:border-[#7FB98A] md:scale-95 opacity-80 hover:opacity-100 z-10'
+                          }`}
+                        >
+                          {/* Top accent bar */}
+                          <div
+                            className={`h-2 shrink-0 transition-all duration-700 ${
+                              isCenter
+                                ? 'bg-gradient-to-r from-[#1B5E20] via-[#34D399] to-[#2E7D4F]'
+                                : 'bg-[#2E7D4F]/30 group-hover:bg-[#2E7D4F]'
+                            }`}
+                          />
+
+                          {/* Equalized Content Body */}
+                          <div className="p-6 sm:p-6.5 flex flex-col justify-between flex-1">
+                            <div>
+                              <div className="flex items-center justify-between gap-2 min-h-[24px]">
+                                <span className="text-xs font-semibold text-[#767F87] flex items-center gap-1.5">
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      isCenter ? 'bg-[#2E7D4F]' : 'bg-[#767F87]'
+                                    }`}
+                                  />
+                                  {formatNewsDate(item.publish_from)}
+                                </span>
+                                {isCenter ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] text-[#1E5631] text-[10.5px] font-extrabold uppercase tracking-wide border border-[#C2E3CB]">
+                                    <Sparkles className="w-3 h-3 text-[#2E7D4F]" />
+                                    Dolzarb
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] font-medium text-[#8A969F]">
+                                    Rasmiy
+                                  </span>
+                                )}
+                              </div>
+
+                              <h3
+                                className="mt-3 font-bold text-[#123522] group-hover:text-[#1E6B3D] transition-colors leading-snug line-clamp-2 text-base sm:text-lg min-h-[3rem]"
+                              >
+                                {pickLocalized(item.title, language)}
+                              </h3>
+
+                              <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-[#5A646D] line-clamp-3 min-h-[4rem]">
+                                {pickLocalized(item.body, language)}
+                              </p>
+                            </div>
+
+                            <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
+                              <span className="group-hover:translate-x-0.5 transition-transform flex items-center gap-1.5">
+                                {isCenter ? 'Batafsil oʻqish' : 'Koʻrish'}{' '}
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </span>
+                              <span className="text-[10.5px] font-normal text-[#8A969F]">
+                                Rasmiy xabar
+                              </span>
+                            </div>
+                          </div>
+                        </SafeLink>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Pagination Dots */}
+              <div className="flex items-center justify-center gap-2 pt-3">
+                {(newsState.items ?? []).map((dotItem, dotIdx) => {
+                  const rawCount = (newsState.items ?? []).length;
+                  const activeDot = rawCount > 0 ? ((slideIndex % rawCount) + rawCount) % rawCount : 0;
+                  const isActive = dotIdx === activeDot;
+                  return (
+                    <button
+                      key={dotItem.id}
+                      type="button"
+                      onClick={() => handleDotClick(dotIdx)}
+                      aria-label={`Yangilik ${dotIdx + 1}`}
+                      className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        isActive
+                          ? 'w-8 bg-[#2E7D4F] shadow-xs'
+                          : 'w-2 bg-[#D1DFD6] hover:bg-[#A6BEAF]'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
