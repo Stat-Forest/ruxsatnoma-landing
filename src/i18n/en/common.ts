@@ -50,4 +50,5 @@ export const common = {
   'footer.link.faq': 'Frequently Asked Questions',
   'footer.copyright': '© 2026 Agency for Forestry and Greenery Development, Combating Desertification. All rights reserved.',
   'footer.wcag': 'WCAG 2.2 AA Compliant Design System',
+  'footer.developedBy': 'Developed by "Forestry Digitalization Center"',
 } as const;

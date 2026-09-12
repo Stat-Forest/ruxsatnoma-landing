@@ -15,7 +15,7 @@ export type NewsItem = components['schemas']['AnnouncementLandingOut'];
 export type NewsPage = components['schemas']['Page_AnnouncementLandingOut_'];
 
 /** How many the home page's own section shows. The list page asks for more. */
-export const HOME_NEWS_COUNT = 3;
+export const HOME_NEWS_COUNT = 6;
 export const NEWS_PAGE_SIZE = 10;
 
 export async function fetchNews(params: { page: number; pageSize: number }): Promise<NewsPage> {

@@ -21,6 +21,12 @@ export const NewsItemPage: React.FC = () => {
   const [state, setState] = useState<ItemState>({ status: 'loading' });
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  }, [newsId]);
+
+  useEffect(() => {
     if (!newsId) {
       setState({ status: 'missing' });
       return;
@@ -46,6 +52,9 @@ export const NewsItemPage: React.FC = () => {
     <article className="max-w-3xl mx-auto space-y-6 font-sans">
       <Link
         to="/news"
+        onClick={() => {
+          if (typeof window !== 'undefined') window.scrollTo(0, 0);
+        }}
         className="reveal inline-flex items-center gap-1.5 text-xs font-bold text-[#2E7D4F] hover:underline"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> {t('news.backToList')}

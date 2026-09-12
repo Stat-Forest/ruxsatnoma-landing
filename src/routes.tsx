@@ -1,6 +1,6 @@
 import React from 'react';
 import type { RouteObject } from 'react-router';
-import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
+import { Navigate, Outlet, ScrollRestoration, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
 import { CALCULATOR_ANCHOR } from './components/calculator/PriceCalculator';
@@ -142,8 +142,15 @@ function Layout() {
     ? 'news_item'
     : (PATH_TO_PAGE[location.pathname] ?? 'home');
 
+  React.useEffect(() => {
+    if (!location.hash && typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   return (
     <PublicLayout onNavigate={onNavigate} activeNav={activeNav} siteSettings={siteSettings}>
+      <ScrollRestoration />
       <Outlet context={{ onNavigate, siteSettings } satisfies LandingOutletContext} />
     </PublicLayout>
   );
@@ -174,6 +181,10 @@ function ServicesRoute() {
   return <ServicesPage onNavigate={useLandingNavigate()} />;
 }
 
+function DocumentsRoute() {
+  return <DocumentsPage onNavigate={useLandingNavigate()} />;
+}
+
 function AboutRoute() {
   return <AboutPage onNavigate={useLandingNavigate()} />;
 }
@@ -198,7 +209,7 @@ export const routeConfig: RouteObject[] = [
       // `/tariffs` was the calculator's own screen until the news register took
       // its place in the header; the bookmarks that already exist keep working.
       { path: 'tariffs', element: <Navigate to={CALCULATOR_PATH} replace /> },
-      { path: 'documents', element: <DocumentsPage /> },
+      { path: 'documents', element: <DocumentsRoute /> },
       { path: 'about', element: <AboutRoute /> },
       { path: 'contact', element: <ContactRoute /> },
       { path: 'map', element: <MapRoute /> },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
-import logoImg from '@/assets/img/logo.png';
+import logoImg from '@/assets/img/ormonlogo.png';
+import digitalCenterLogo from '@/assets/img/raqamlashtirishlogo.png';
 import { Button } from '../ui/button';
 import { useLanguage, useT } from '../../i18n/useT';
 import { LanguageMenu } from './LanguageMenu';
@@ -36,6 +37,54 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
     setMobileMenuOpen(false);
   }, [activeNav]);
 
+  const [pill, setPill] = React.useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    ready: boolean;
+  }>({ left: 0, top: 0, width: 0, height: 0, ready: false });
+
+  const navRef = React.useRef<HTMLElement | null>(null);
+  const buttonRefs = React.useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  const updatePill = React.useCallback(() => {
+    const currentKey = activeNav === 'news_item' ? 'news' : activeNav;
+    const btn = buttonRefs.current.get(currentKey);
+    if (btn && btn.offsetWidth > 0) {
+      setPill({
+        left: btn.offsetLeft,
+        top: btn.offsetTop,
+        width: btn.offsetWidth,
+        height: btn.offsetHeight,
+        ready: true,
+      });
+      return;
+    }
+    setPill((prev) => (prev.ready ? { ...prev, ready: false } : prev));
+  }, [activeNav]);
+
+  React.useLayoutEffect(() => {
+    updatePill();
+  }, [updatePill, uiLanguage]);
+
+  React.useEffect(() => {
+    updatePill();
+    const nav = navRef.current;
+    if (typeof ResizeObserver !== 'undefined' && nav) {
+      const ro = new ResizeObserver(() => {
+        updatePill();
+      });
+      ro.observe(nav);
+      for (const btn of buttonRefs.current.values()) {
+        ro.observe(btn);
+      }
+      return () => ro.disconnect();
+    }
+    window.addEventListener('resize', updatePill);
+    return () => window.removeEventListener('resize', updatePill);
+  }, [updatePill, activeNav]);
+
   const navLinks = [
     { id: 'home', labelKey: 'nav.home', page: 'home' },
     { id: 'services', labelKey: 'nav.services', page: 'services' },
@@ -53,8 +102,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
   const hours = contacts ? pickLocalized(contacts.hours, uiLanguage) : '';
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans text-[#1A1F24] overflow-x-hidden ${
-      activeNav === 'home' ? 'bg-[#D8ECDE]' : 'bg-white'
+    <div className={`min-h-screen flex flex-col font-sans text-[#1A1F24] overflow-x-clip ${
+      activeNav === 'home' ? 'bg-[#D8ECDE]' : activeNav === 'services' || activeNav === 'news' || activeNav === 'news_item' || activeNav === 'documents' || activeNav === 'about' || activeNav === 'contact' ? 'bg-[#EFF7F2]' : 'bg-white'
     }`}>
       {/* ── Top Header ─────────────────────────────────────────── */}
       <header className={`sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 ${
@@ -93,18 +142,40 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
             </div>
           </button>
 
-          {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center justify-center space-x-0.5 xl:space-x-1 px-2">
+          {/* Navigation Links with Smooth Sliding Indicator */}
+          <nav
+            ref={navRef}
+            className="relative hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 px-2"
+          >
+            {/* Smooth Sliding Pill Indicator */}
+            {pill.ready && (
+              <span
+                aria-hidden="true"
+                className="nav-sliding-pill absolute rounded-xl bg-[#237443] border border-white/30 shadow-sm pointer-events-none"
+                style={{
+                  left: `${pill.left}px`,
+                  top: `${pill.top}px`,
+                  width: `${pill.width}px`,
+                  height: `${pill.height}px`,
+                  opacity: pill.ready ? 1 : 0,
+                }}
+              />
+            )}
+
             {navLinks.map((link) => {
               const isActive = activeNav === link.id || (link.id === 'news' && activeNav === 'news_item');
               return (
                 <button
                   key={link.id}
+                  ref={(el) => {
+                    if (el) buttonRefs.current.set(link.id, el);
+                    else buttonRefs.current.delete(link.id);
+                  }}
                   onClick={() => onNavigate?.(link.page)}
-                  className={`px-2 xl:px-3 py-2 rounded-xl text-[13px] xl:text-sm font-semibold whitespace-nowrap transition-colors ${
+                  className={`relative z-10 px-2.5 xl:px-3.5 py-2 rounded-xl text-[13px] xl:text-sm font-semibold whitespace-nowrap transition-colors duration-300 cursor-pointer ${
                     isActive
-                      ? 'text-white bg-[#237443] border border-white/30 shadow-sm'
-                      : 'text-gray-200 hover:bg-white/15 hover:text-white'
+                      ? `text-white ${!pill.ready ? 'bg-[#237443] border border-white/30 shadow-sm' : ''}`
+                      : 'text-gray-200 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   {t(link.labelKey)}
@@ -394,9 +465,22 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-400 gap-4">
-          <div>{t('footer.copyright')}</div>
-          <div>{t('footer.wcag')}</div>
+        <div className="max-w-7xl mx-auto px-6 border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 gap-4">
+          <div className="space-y-1 text-center md:text-left">
+            <div>{t('footer.copyright')}</div>
+            <div className="text-[11px] text-gray-400/80">{t('footer.wcag')}</div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-2 rounded-xl transition-colors shadow-sm">
+            <img
+              src={digitalCenterLogo}
+              alt="Oʻrmon xoʻjaligini raqamlashtirish markazi"
+              className="w-8 h-8 object-contain shrink-0 drop-shadow"
+            />
+            <span className="text-[12px] text-gray-200 font-medium">
+              {t('footer.developedBy')}
+            </span>
+          </div>
         </div>
       </footer>
     </div>
