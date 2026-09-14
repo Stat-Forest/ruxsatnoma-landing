@@ -48,4 +48,8 @@ export const tariffs = {
     'No fee is set for scientific research — each application is considered separately.',
   'tariffs.calculator.tariffNotPublished':
     'The rate for this type of activity has not been published yet (annex 5 to Cabinet Resolution No. 689 is awaited). The sum cannot be shown for now.',
+  'tariffs.calculator.badge.automated': 'Automated calculation',
+  'tariffs.calculator.badge.vmq': 'Based on PCM 689 norms',
+  'tariffs.calculator.disclaimer.note': 'Note:',
+  'tariffs.calculator.secure': 'Secure application submission via Yagona Id.egov.uz',
 } as const;

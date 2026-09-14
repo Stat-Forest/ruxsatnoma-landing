@@ -129,6 +129,7 @@ function CalculatorSum({
   note?: React.ReactNode;
   noteVariant?: 'idle' | 'loading' | 'warning' | 'error';
 }) {
+  const t = useT();
   const noteColor =
     noteVariant === 'error'
       ? 'text-[#FCA5A5]'
@@ -176,9 +177,9 @@ function CalculatorSum({
       <div className="relative z-10 hidden sm:flex flex-col items-end justify-center shrink-0 pl-4 border-l border-white/10">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs text-[11px] font-semibold text-[#B9F3CB]">
           <CheckCircle2 className="w-3.5 h-3.5 text-[#4ADE80]" />
-          <span>Avtomatlashtirilgan hisob</span>
+          <span>{t('tariffs.calculator.badge.automated')}</span>
         </div>
-        <span className="text-[10px] text-[#86B492] mt-1 font-mono tracking-tight">VMQ 689 normalari asosida</span>
+        <span className="text-[10px] text-[#86B492] mt-1 font-mono tracking-tight">{t('tariffs.calculator.badge.vmq')}</span>
       </div>
     </div>
   );
@@ -559,7 +560,7 @@ function CalculatorForm({
             <Info className="w-3.5 h-3.5" />
           </div>
           <p className="flex-1">
-            <strong className="text-[#1D4A2D] font-semibold mr-1">Eslatma:</strong>
+            <strong className="text-[#1D4A2D] font-semibold mr-1">{t('tariffs.calculator.disclaimer.note')}</strong>
             {t('tariffs.calculator.disclaimer') || estimate.result.disclaimer}
           </p>
         </div>
@@ -572,7 +573,7 @@ function CalculatorForm({
             <ShieldCheck className="w-3.5 h-3.5" />
           </div>
           <span className="text-[11.5px] font-medium text-[#4B5660]">
-            Yagona Id.egov.uz orqali xavfsiz ariza topshirish
+            {t('tariffs.calculator.secure')}
           </span>
         </div>
 

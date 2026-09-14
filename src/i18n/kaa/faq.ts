@@ -30,4 +30,8 @@ export const faq = {
   'faq.item4.question': 'Ruxsatnama múddeti pitkende onı sozıw múmkin be?',
   'faq.item4.answer':
     'Awa, ruxsatnama múddeti pitiwinen aldın jeke kabinet arqalı ruxsatnamanı onlayn sozıw arzasın tapsırıwıńız múmkin.',
+
+  'faq.footer.title': "Jáne sorawlarıńız bar ma?",
+  'faq.footer.body': "Eger sorawıńızǵa juwap taba almaǵan bolsaańız, qollap-quwatlaw xızmetine múrájat etiń.",
+  'faq.footer.cta': "Baylanıw",
 } as const;

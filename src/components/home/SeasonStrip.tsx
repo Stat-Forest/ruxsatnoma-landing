@@ -36,6 +36,8 @@ const TEXT: Record<
     open: string;
     closed: string;
     unknown: string;
+    direction: string;
+    status: string;
   }
 > = {
   uz_latn: {
@@ -50,6 +52,8 @@ const TEXT: Record<
     open: 'Ochiq',
     closed: 'Yopiq',
     unknown: 'Nomaʼlum',
+    direction: 'Yoʻnalish',
+    status: 'Holat',
   },
   ru: {
     badge: 'Календарь сезонов',
@@ -63,6 +67,8 @@ const TEXT: Record<
     open: 'Открыто',
     closed: 'Закрыто',
     unknown: 'Неизвестно',
+    direction: 'Направление',
+    status: 'Статус',
   },
   en: {
     badge: 'Season calendar',
@@ -76,6 +82,8 @@ const TEXT: Record<
     open: 'Open',
     closed: 'Closed',
     unknown: 'Unknown',
+    direction: 'Direction',
+    status: 'Status',
   },
   uz_cyrl: {
     badge: 'Мавсумлар жадвали',
@@ -89,6 +97,8 @@ const TEXT: Record<
     open: 'Очиқ',
     closed: 'Ёпиқ',
     unknown: 'Номаълум',
+    direction: 'Йўналиш',
+    status: 'Ҳолат',
   },
   kaa: {
     badge: 'Máwsim kestesi',
@@ -102,6 +112,8 @@ const TEXT: Record<
     open: 'Ashıq',
     closed: 'Jabıq',
     unknown: 'Belgisiz',
+    direction: 'Baǵdar',
+    status: 'Jaǵday',
   },
 };
 
@@ -211,7 +223,7 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
         <div className="min-w-[680px]">
           {/* Months Header Row */}
           <div className="grid gap-2.5 items-center mb-2 px-2.5" style={{ gridTemplateColumns: '175px 1fr 78px' }}>
-            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">Yoʻnalish</div>
+            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">{text.direction}</div>
             <div className="grid grid-cols-12 gap-1">
               {months.short.map((label, idx) => {
                 const isCurrent = idx + 1 === currentMonth;
@@ -230,7 +242,7 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                 );
               })}
             </div>
-            <div className="text-right text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">Holat</div>
+            <div className="text-right text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">{text.status}</div>
           </div>
 
           {/* Compact Activity Rows */}

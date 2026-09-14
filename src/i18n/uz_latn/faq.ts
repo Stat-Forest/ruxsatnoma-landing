@@ -29,4 +29,8 @@ export const faq = {
   'faq.item4.question': 'Ruxsatnoma muddati tugaganda uni uzaytirish mumkinmi?',
   'faq.item4.answer':
     'Ha, ruxsatnoma muddati tugashidan oldin shaxsiy kabinet orqali ruxsatnomani onlayn uzaytirish arizasini topshirishingiz mumkin.',
+
+  'faq.footer.title': "Yana savollaringiz bormi?",
+  'faq.footer.body': "Agar savolingizga javob topa olmagan boʻlsangiz, qoʻllab-quvvatlash xizmatiga murojaat qiling.",
+  'faq.footer.cta': "Bogʻlanish",
 } as const;

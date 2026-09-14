@@ -47,4 +47,8 @@ export const tariffs = {
     'Ilmiy tadqiqot uchun toʻlov miqdori belgilanmagan — har bir ariza alohida koʻrib chiqiladi.',
   'tariffs.calculator.tariffNotPublished':
     'Ushbu faoliyat turi uchun stavka hali eʼlon qilinmagan (VMQ 689-son qaror 5-ilovasi kutilmoqda). Summani hozircha koʻrsatib boʻlmaydi.',
+  'tariffs.calculator.badge.automated': 'Avtomatlashtirilgan hisob',
+  'tariffs.calculator.badge.vmq': 'VMQ 689 normalari asosida',
+  'tariffs.calculator.disclaimer.note': 'Eslatma:',
+  'tariffs.calculator.secure': 'Yagona Id.egov.uz orqali xavfsiz ariza topshirish',
 } as const;

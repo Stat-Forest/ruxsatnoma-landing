@@ -48,4 +48,8 @@ export const tariffs = {
     'Размер платы за научные исследования не установлен — каждая заявка рассматривается отдельно.',
   'tariffs.calculator.tariffNotPublished':
     'Ставка для этого вида деятельности пока не опубликована (ожидается приложение 5 к ПКМ № 689). Сумму показать пока невозможно.',
+  'tariffs.calculator.badge.automated': 'Автоматизированный расчет',
+  'tariffs.calculator.badge.vmq': 'На основе норм ПКМ 689',
+  'tariffs.calculator.disclaimer.note': 'Примечание:',
+  'tariffs.calculator.secure': 'Безопасная подача заявки через Yagona Id.egov.uz',
 } as const;

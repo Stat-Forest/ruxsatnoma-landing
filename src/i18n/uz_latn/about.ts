@@ -1,6 +1,6 @@
 /** AboutPage (`/about`), every string on it but the FAQ accordion's own `faq.*` fallback */
 export const about = {
-  'about.hero.badge': 'Portal haqida',
+  'about.hero.badge': 'Biz haqimizda',
   'about.hero.title':
     'Oʻrmon fondi yerlaridan foydalanish — qogʻozsiz, oydin va tekshiriladigan tartibda',
   'about.hero.body':

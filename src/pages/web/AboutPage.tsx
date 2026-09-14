@@ -50,27 +50,27 @@ interface AboutBannerText {
 const ABOUT_BANNER_TEXT: Record<UiLanguage, AboutBannerText> = {
   uz_latn: {
     homeBreadcrumb: 'Bosh sahifa',
-    aboutBreadcrumb: 'Portal haqida',
+    aboutBreadcrumb: 'Biz haqimizda',
     scrollCue: "Batafsil ma'lumot",
   },
   ru: {
     homeBreadcrumb: 'Главная',
-    aboutBreadcrumb: 'О портале',
+    aboutBreadcrumb: 'О нас',
     scrollCue: 'Подробнее о портале',
   },
   uz_cyrl: {
     homeBreadcrumb: 'Бош саҳифа',
-    aboutBreadcrumb: 'Портал ҳақида',
+    aboutBreadcrumb: 'Биз ҳақимизда',
     scrollCue: 'Батафсил маълумот',
   },
   en: {
     homeBreadcrumb: 'Home',
-    aboutBreadcrumb: 'About Portal',
+    aboutBreadcrumb: 'About us',
     scrollCue: 'Learn more',
   },
   kaa: {
     homeBreadcrumb: 'Bas bet',
-    aboutBreadcrumb: 'Portal haqqında',
+    aboutBreadcrumb: 'Biz haqqımızda',
     scrollCue: 'Tolıqraq maǵlıwmat',
   },
 };
@@ -87,6 +87,7 @@ interface WhyExtras {
   principlesBadge: string;
   principlesTitle: string;
   principlesSubtitle: string;
+  principlesStateStandard: string;
 }
 
 const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
@@ -110,6 +111,7 @@ const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
     principlesBadge: 'Xavfsizlik va standartlar',
     principlesTitle: 'Tizimning asosiy tamoyillari',
     principlesSubtitle: 'Shaffoflik, xavfsizlik va huquqiy kafolatga asoslangan 4 ustun',
+    principlesStateStandard: 'Yagona davlat standarti',
   },
   ru: {
     badge: 'Трансформация и результат',
@@ -131,6 +133,7 @@ const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
     principlesBadge: 'Безопасность и стандарты',
     principlesTitle: 'Основные принципы системы',
     principlesSubtitle: '4 столпа прозрачности, безопасности и правовой гарантии',
+    principlesStateStandard: 'Единый государственный стандарт',
   },
   uz_cyrl: {
     badge: 'Трансформация ва натижа',
@@ -152,6 +155,7 @@ const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
     principlesBadge: 'Хавфсизлик ва стандартлар',
     principlesTitle: 'Тизимнинг асосий тамойиллари',
     principlesSubtitle: 'Шаффофлик, хавфсизлик ва ҳуқуқий кафолатга асосланган 4 устун',
+    principlesStateStandard: 'Ягона давлат стандарти',
   },
   en: {
     badge: 'Transformation & Results',
@@ -173,6 +177,7 @@ const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
     principlesBadge: 'Security & Standards',
     principlesTitle: 'Core System Principles',
     principlesSubtitle: '4 pillars of transparency, security and legal guarantee',
+    principlesStateStandard: 'Unified State Standard',
   },
   kaa: {
     badge: 'Transformatsiya hám nátiyje',
@@ -194,6 +199,7 @@ const WHY_EXTRAS: Record<UiLanguage, WhyExtras> = {
     principlesBadge: 'Qáwipsizlik hám standartlar',
     principlesTitle: 'Sistemanıń tiykarǵı principleri',
     principlesSubtitle: 'Ashıqlıq, qáwipsizlik hám yuridikalıq kepillikke tiykarlanǵan 4 ustın',
+    principlesStateStandard: 'Birimlesken mámleketlik standart',
   },
 };
 
@@ -703,11 +709,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               </div>
               <div className="hero-fade-up hidden sm:inline-flex items-center gap-2 text-xs font-bold text-[#23653F] bg-white px-4 py-2 rounded-2xl border border-[#CCE4D3] shadow-2xs shrink-0" style={{ animationDelay: '.22s' }}>
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E] live inline-block" />
-                <span>Yagona davlat standarti</span>
+                <span>{whyExtras.principlesStateStandard}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
               {PRINCIPLES.map(({ key, Icon }, idx) => {
                 const meta = PRINCIPLE_METAS[key];
                 const tag = meta.tag[uiLanguage] ?? meta.tag.uz_latn;
@@ -717,7 +723,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
                 return (
                   <div
                     key={key}
-                    className="hero-fade-up card-lift group relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-7 border border-[#D5E6DA] hover:border-[#2E7D4F] shadow-[0_4px_24px_rgba(18,53,34,0.04)] hover:shadow-[0_20px_40px_-10px_rgba(26,77,46,0.16)] transition-all duration-700 ease-out hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between cursor-default"
+                    className={`hero-fade-up card-lift group relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-7 border border-[#D5E6DA] hover:border-[#2E7D4F] shadow-[0_4px_24px_rgba(18,53,34,0.04)] hover:shadow-[0_20px_40px_-10px_rgba(26,77,46,0.16)] transition-all duration-1000 ease-in-out hover:-translate-y-1.5 hover:!rotate-0 overflow-hidden flex flex-col justify-between cursor-default ${idx % 2 === 0 ? '-rotate-1' : 'rotate-1'}`}
                     style={{ animationDelay: `${idx * 0.12}s` }}
                   >
                     {/* Top glowing animated bar */}
@@ -797,7 +803,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-8 mt-6 border-t border-[#E8F2EB]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8 mt-6 border-t border-[#E8F2EB]">
                 {serviceCount !== null && (
                   <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-[#F4FAF6] border border-[#D5EADB]">
                     <div className="w-11 h-11 rounded-xl bg-[#E3F4E8] text-[#2E7D4F] flex items-center justify-center shrink-0 shadow-2xs">

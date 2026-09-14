@@ -1,6 +1,6 @@
 /** AboutPage (`/about`), every string on it but the FAQ accordion's own `faq.*` fallback — Karakalpak copy. */
 export const about = {
-  'about.hero.badge': 'Portal haqqında',
+  'about.hero.badge': 'Biz haqqımızda',
   'about.hero.title':
     'Orman fondı jerlerinen paydalanıw — qaǵazsız, ashıq hám tekseriletuǵın tártipte',
   'about.hero.body':

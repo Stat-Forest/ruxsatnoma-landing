@@ -13,7 +13,7 @@ export const common = {
   'nav.services': 'Xizmatlar',
   'nav.news': 'Yangiliklar',
   'nav.documents': 'Hujjatlar',
-  'nav.about': 'Portal haqida',
+  'nav.about': 'Biz haqimizda',
   'nav.contact': 'Aloqa',
 
   'action.cabinet': 'Kabinet',

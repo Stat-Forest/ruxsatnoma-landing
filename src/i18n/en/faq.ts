@@ -30,4 +30,8 @@ export const faq = {
   'faq.item4.question': 'Can a permit be extended when it expires?',
   'faq.item4.answer':
     'Yes, before your permit expires you can submit an online extension request through your personal cabinet.',
+
+  'faq.footer.title': "Still have questions?",
+  'faq.footer.body': "If you didn't find the answer to your question, contact our support team.",
+  'faq.footer.cta': "Contact support",
 } as const;

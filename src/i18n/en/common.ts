@@ -13,7 +13,7 @@ export const common = {
   'nav.services': 'Services',
   'nav.news': 'News',
   'nav.documents': 'Documents',
-  'nav.about': 'About',
+  'nav.about': 'About us',
   'nav.contact': 'Contact',
 
   'action.cabinet': 'Cabinet',

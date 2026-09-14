@@ -1,6 +1,6 @@
 /** AboutPage (`/about`), every string on it but the FAQ accordion's own `faq.*` fallback — Cyrillic Uzbek. */
 export const about = {
-  'about.hero.badge': 'Портал ҳақида',
+  'about.hero.badge': 'Биз ҳақимизда',
   'about.hero.title':
     'Ўрмон фонди ерларидан фойдаланиш — қоғозсиз, ойдин ва текшириладиган тартибда',
   'about.hero.body':

@@ -48,4 +48,8 @@ export const tariffs = {
     'Ilimiy izertlew ushın tólem muǵdarı belgilenbegen — hár bir arza ayrıqsha kórip shıǵıladı.',
   'tariffs.calculator.tariffNotPublished':
     'Bul xızmet túri ushın stavka ele járiyalanbaǵan (MKQ № 689 qararınıń 5-qosımtası kútilmekte). Summanı házirshe kórsetip bolmaydı.',
+  'tariffs.calculator.badge.automated': 'Avtomatlastırılǵan esap',
+  'tariffs.calculator.badge.vmq': 'VMQ 689 normaları tiykarında',
+  'tariffs.calculator.disclaimer.note': 'Esletpe:',
+  'tariffs.calculator.secure': 'Yagona Id.egov.uz arqalı qáwipsiz arıza tapsırıw',
 } as const;
