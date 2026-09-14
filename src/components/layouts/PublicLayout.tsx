@@ -470,7 +470,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
             <img
               src={digitalCenterLogo}
               alt="Oʻrmon xoʻjaligini raqamlashtirish markazi"
-              className="w-8 h-8 object-contain shrink-0 drop-shadow"
+              className="w-11 h-11 object-contain shrink-0 drop-shadow"
             />
             <div className="space-y-1">
               <div>{t('footer.copyright')}</div>
