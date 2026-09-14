@@ -42,10 +42,10 @@ const FALLBACK_STRINGS: Record<string, string> = {
   'footer.link.appealStatus': 'Murojaat holati',
   'footer.link.documents': 'Hujjatlar va meʼyorlar',
   'footer.link.faq': 'Koʻp beriladigan savollar',
-  'footer.copyright': '© 2026 Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi. Barcha huquqlar himoyalangan.',
+  'footer.copyright': '© 2026 “Oʻrmon xoʻjaligini raqamlashtirish markazi”. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-tizimi',
   'footer.developedBy': '“Oʻrmon xoʻjaligini raqamlashtirish markazi” tomonidan ishlab chiqilgan',
-  'nav.about': 'Portal haqida',
+  'nav.about': 'Biz haqimizda',
   'nav.contact': 'Bogʻlanish',
 };
 

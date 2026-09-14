@@ -47,4 +47,8 @@ export const tariffs = {
     'Илмий тадқиқот учун тўлов миқдори белгиланмаган — ҳар бир ариза алоҳида кўриб чиқилади.',
   'tariffs.calculator.tariffNotPublished':
     'Ушбу фаолият тури учун ставка ҳали эълон қилинмаган (ВМҚ 689-сон қарор 5-иловаси кутилмоқда). Суммани ҳозирча кўрсатиб бўлмайди.',
+  'tariffs.calculator.badge.automated': 'Автоматлаштирилган ҳисоб',
+  'tariffs.calculator.badge.vmq': 'ВМҚ 689 нормалари асосида',
+  'tariffs.calculator.disclaimer.note': 'Эслатма:',
+  'tariffs.calculator.secure': 'Ягона Id.egov.uz орқали хавфсиз ариза топшириш',
 } as const;

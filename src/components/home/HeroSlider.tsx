@@ -241,7 +241,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
   return (
     <section
-      className="relative overflow-hidden h-[460px] sm:h-[540px] lg:h-[580px]"
+      className="relative overflow-hidden min-h-[580px] sm:min-h-[620px] lg:min-h-[660px] py-12 sm:py-0 flex flex-col justify-center"
 
 
       // Hover and keyboard focus both pause: a reader must never be moved
@@ -287,7 +287,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6">
+      <div className="relative w-full max-w-7xl mx-auto flex-1 flex items-center px-4 sm:px-6 mt-10 sm:mt-0 pb-16 sm:pb-0">
         <div className="max-w-xl lg:max-w-2xl">
           {/* Animated content keying on slide index ensures smooth animations replay whenever text changes */}
           <div key={slide}>

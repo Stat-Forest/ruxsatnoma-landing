@@ -256,7 +256,7 @@ export const NewsPage: React.FC = () => {
                 style={{ animationDelay: '.18s' }}
               >
                 <Newspaper className="w-3.5 h-3.5 text-[#7FE0A0]" />
-                <span>{state.total} ta e'lon mavjud</span>
+                <span>{state.total} {t('news.totalSuffix')}</span>
               </div>
             )}
           </div>
@@ -430,9 +430,9 @@ function NewsCard({
       {/* Grid: 2 columns matching the user's reference screenshot */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
         {/* Left column: Text content */}
-        <div className="lg:col-span-7 flex flex-col justify-between h-full space-y-5">
+        <div className="order-last lg:order-first lg:col-span-7 flex flex-col justify-between h-full space-y-5">
           {/* Header pill row */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-[#EAF7EE] text-[#1E5631] text-xs font-black font-mono border border-[#C2E3CB]">
               #{String(index + 1).padStart(2, '0')}
             </span>
@@ -466,9 +466,9 @@ function NewsCard({
           </p>
 
           {/* Bottom Action Row (with //// and arrow matching reference design) */}
-          <div className="pt-5 border-t border-[#E6EFE8] flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 text-[#2E7D4F]">
-              <span className="font-mono text-base font-black tracking-widest opacity-85">////</span>
+          <div className="pt-5 border-t border-[#E6EFE8] flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2.5 text-[#2E7D4F]">
+              <span className="hidden sm:inline-block font-mono text-base font-black tracking-widest opacity-85">////</span>
               <div className="w-6 h-6 rounded-full bg-[#E8F3EB] flex items-center justify-center border border-[#CCE4D3] text-[#2E7D4F] group-hover:bg-[#2E7D4F] group-hover:text-white transition-all">
                 <ArrowRight className="w-3.5 h-3.5 transform -rotate-45" />
               </div>
@@ -477,7 +477,7 @@ function NewsCard({
               </span>
             </div>
 
-            <div className="inline-flex items-center gap-2 text-xs font-extrabold text-[#2E7D4F] group-hover:text-[#1E5631] group-hover:translate-x-1 transition-all">
+            <div className="inline-flex items-center shrink-0 gap-2 text-xs font-extrabold text-[#2E7D4F] group-hover:text-[#1E5631] group-hover:translate-x-1 transition-all whitespace-nowrap">
               <span>{readMoreLabel}</span>
               <ArrowRight className="w-4 h-4" />
             </div>
@@ -485,7 +485,7 @@ function NewsCard({
         </div>
 
         {/* Right column: Image */}
-        <div className="lg:col-span-5 w-full">
+        <div className="order-first lg:order-last lg:col-span-5 w-full">
           <div className="relative w-full h-56 sm:h-64 lg:h-76 rounded-2xl overflow-hidden border border-[#D5E6DA] shadow-md group-hover:border-[#2E7D4F]/50 transition-all">
             <img
               src={image}

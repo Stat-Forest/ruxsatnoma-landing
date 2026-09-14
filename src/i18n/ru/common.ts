@@ -13,7 +13,7 @@ export const common = {
   'nav.services': 'Услуги',
   'nav.news': 'Новости',
   'nav.documents': 'Документы',
-  'nav.about': 'О портале',
+  'nav.about': 'О нас',
   'nav.contact': 'Контакты',
 
   'action.cabinet': 'Кабинет',
@@ -48,7 +48,7 @@ export const common = {
   'footer.link.appealStatus': 'Подать обращение и проверить статус',
   'footer.link.documents': 'Документы и нормативы',
   'footer.link.faq': 'Часто задаваемые вопросы',
-  'footer.copyright': '© 2026 Агентство по увеличению лесных и зелёных зон, борьбе с опустыниванием. Все права защищены.',
+  'footer.copyright': '© 2026 Центр цифровизации лесного хозяйства. Все права защищены.',
   'footer.wcag': 'Дизайн-система, соответствующая WCAG 2.2 AA',
   'footer.developedBy': 'Разработано «Центром цифровизации лесного хозяйства»',
 } as const;

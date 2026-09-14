@@ -13,7 +13,7 @@ export const common = {
   'nav.services': 'Хизматлар',
   'nav.news': 'Янгиликлар',
   'nav.documents': 'Ҳужжатлар',
-  'nav.about': 'Портал ҳақида',
+  'nav.about': 'Биз ҳақимизда',
   'nav.contact': 'Алоқа',
 
   'action.cabinet': 'Кабинет',
@@ -48,7 +48,7 @@ export const common = {
   'footer.link.appealStatus': 'Мурожаат юбориш ва текшириш',
   'footer.link.documents': 'Ҳужжатлар ва нормалар',
   'footer.link.faq': 'Кўп бериладиган саволлар',
-  'footer.copyright': '© 2026 Ўрмон ва яшил ҳудудларни кўпайтириш, чўлланишга қарши курашиш агентлиги. Барча ҳуқуқлар ҳимояланган.',
+  'footer.copyright': '© 2026 “Ўрмон хўжалигини рақамлаштириш маркази”. Барча ҳуқуқлар ҳимояланган.',
   'footer.wcag': 'WCAG 2.2 AA Мувофиқ дизайн-системаси',
   'footer.developedBy': '«Ўрмон хўжалигини рақамлаштириш маркази» томонидан ишлаб чиқилган',
 } as const;

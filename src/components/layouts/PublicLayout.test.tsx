@@ -55,7 +55,7 @@ it('opens and closes mobile menu on hamburger button click', async () => {
   expect(mobileMenu).toBeInTheDocument();
 
   // Navigation items are inside mobile menu
-  const aboutLink = within(mobileMenu).getByRole('button', { name: 'Portal haqida' });
+  const aboutLink = within(mobileMenu).getByRole('button', { name: 'Biz haqimizda' });
   expect(aboutLink).toBeInTheDocument();
 
   // Click a navigation item
@@ -68,11 +68,11 @@ it('opens and closes mobile menu on hamburger button click', async () => {
 
 it('offers six nav items and no open-data entry', () => {
   renderLayout();
-  // "Portal haqida" and "Aloqa" also label the footer's own Portal-column
+  // "Biz haqimizda" and "Aloqa" also label the footer's own Portal-column
   // links (the approved footer repeats them, decision: port as-is) — scoped
   // to the header landmark so that legitimate repeat doesn't read as ambiguity.
   const header = within(screen.getByRole('banner'));
-  for (const label of ['Bosh sahifa', 'Xizmatlar', 'Yangiliklar', 'Hujjatlar', 'Portal haqida', 'Aloqa']) {
+  for (const label of ['Bosh sahifa', 'Xizmatlar', 'Yangiliklar', 'Hujjatlar', 'Biz haqimizda', 'Aloqa']) {
     expect(header.getByRole('button', { name: label })).toBeInTheDocument();
   }
   expect(screen.queryByText(/ochiq maʼlumotlar/i)).not.toBeInTheDocument();

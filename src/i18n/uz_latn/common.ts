@@ -13,7 +13,7 @@ export const common = {
   'nav.services': 'Xizmatlar',
   'nav.news': 'Yangiliklar',
   'nav.documents': 'Hujjatlar',
-  'nav.about': 'Portal haqida',
+  'nav.about': 'Biz haqimizda',
   'nav.contact': 'Aloqa',
 
   'action.cabinet': 'Kabinet',
@@ -48,7 +48,7 @@ export const common = {
   'footer.link.appealStatus': 'Murojaat yuborish va tekshirish',
   'footer.link.documents': 'Hujjatlar va normalar',
   'footer.link.faq': 'Koʻp beriladigan savollar',
-  'footer.copyright': '© 2026 Oʻrmon va yashil hududlarni koʻpaytirish, choʻllanishga qarshi kurashish agentligi. Barcha huquqlar himoyalangan.',
+  'footer.copyright': '© 2026 “Oʻrmon xoʻjaligini raqamlashtirish markazi”. Barcha huquqlar himoyalangan.',
   'footer.wcag': 'WCAG 2.2 AA Muvofiq dizayn-sistemasi',
   'footer.developedBy': '“Oʻrmon xoʻjaligini raqamlashtirish markazi” tomonidan ishlab chiqilgan',
 } as const;

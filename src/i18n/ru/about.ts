@@ -1,6 +1,6 @@
 /** AboutPage (`/about`), every string on it but the FAQ accordion's own `faq.*` fallback — Russian copy. */
 export const about = {
-  'about.hero.badge': 'О портале',
+  'about.hero.badge': 'О нас',
   'about.hero.title':
     'Пользование землями лесного фонда — без бумаг, прозрачно и с возможностью проверки',
   'about.hero.body':

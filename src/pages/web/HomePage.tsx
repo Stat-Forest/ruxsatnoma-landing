@@ -831,10 +831,10 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-4">
             {[
-              { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: 'OneID / E-IMZO', cosmosClass: 'cosmos-a' },
-              { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: 'GIS Maydon', cosmosClass: 'cosmos-b' },
-              { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: 'Avto Toʻlov', cosmosClass: 'cosmos-c' },
-              { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: 'Rasmiy QR PDF', cosmosClass: 'cosmos-d' },
+              { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: t('home.steps.01.tag'), cosmosClass: 'cosmos-a' },
+              { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: t('home.steps.02.tag'), cosmosClass: 'cosmos-b' },
+              { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: t('home.steps.03.tag'), cosmosClass: 'cosmos-c' },
+              { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: t('home.steps.04.tag'), cosmosClass: 'cosmos-d' },
             ].map(({ Icon, bg, tag, cosmosClass }, idx) => (
               <div
                 key={idx}
@@ -867,7 +867,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     {/* Step Sub-label & Title & Desc */}
                     <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] animate-pulse" />
-                      {`Qadam 0${idx + 1}`}
+                      {`${t('home.steps.stepPrefix')} 0${idx + 1}`}
                     </div>
                     <h3 className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
                       {t(`home.steps.0${idx + 1}.title`)}
@@ -1010,10 +1010,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse" />
               <span>
                 {mapMode === 'satellite'
-                  ? "Sun'iy yo'ldosh (Orbita)"
+                  ? t('home.map.satellite')
                   : mapMode === 'topo'
-                    ? 'Topografik Relyef'
-                    : 'OpenStreetMap'}
+                    ? t('home.map.topo')
+                    : t('home.map.osm')}
               </span>
             </div>
 
@@ -1021,9 +1021,9 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center gap-1 bg-[#0A1D13]/90 backdrop-blur-md p-1 rounded-xl border border-white/20 shadow-lg pointer-events-auto">
               {(
                 [
-                  { id: 'street', label: "Ko'cha" },
-                  { id: 'satellite', label: "Yo'ldosh" },
-                  { id: 'topo', label: 'Relyef' },
+                  { id: 'street', label: t('home.map.mode.street') },
+                  { id: 'satellite', label: t('home.map.mode.satellite') },
+                  { id: 'topo', label: t('home.map.mode.topo') },
                 ] as const
               ).map((mode) => (
                 <button
@@ -1063,7 +1063,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2.5 rounded-xl bg-[#0D2618]/95 backdrop-blur-md border border-[#2E7D4F]/60 shadow-xl text-white z-30 pointer-events-none">
                     <div className="text-xs font-black text-white">{spot.name}</div>
                     <div className="mt-0.5 text-[10px] text-[#A3E5B5] flex items-center justify-between">
-                      <span>Maydoni:</span>
+                      <span>{t('home.map.area')}</span>
                       <span className="font-bold font-mono">{spot.area}</span>
                     </div>
                     <div className="text-[9.5px] text-white/60 mt-0.5">{spot.type}</div>
@@ -1089,7 +1089,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#123522]/90 hover:bg-[#123522] text-white text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-105 cursor-pointer pointer-events-auto ml-auto"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[#9CE3AE]" />
-              <span>Xaritani to'liq ochish</span>
+              <span>{t('home.map.openFull')}</span>
             </button>
           </div>
         </div>
@@ -1100,7 +1100,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className={`flex items-end justify-between mb-6 ${newsInView ? 'reveal' : 'opacity-0'}`}>
           <div>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
-              Soʻnggi xabarlar
+              {t('home.news.badge')}
             </span>
             <h2 className="mt-1.5 text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
               {t('home.news.sectionTitle')}
@@ -1164,7 +1164,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <span className="text-xs text-[#767F87] font-semibold">{formatNewsDate(item.publish_from)}</span>
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] text-[#1E5631] text-[10.5px] font-extrabold uppercase tracking-wide border border-[#C2E3CB]">
-                          <Sparkles className="w-3 h-3 text-[#2E7D4F]" /> Dolzarb
+                          <Sparkles className="w-3 h-3 text-[#2E7D4F]" /> {t('home.news.urgent')}
                         </span>
                       </div>
                       <h3 className="text-lg sm:text-xl font-black text-[#123522] group-hover:text-[#1E6B3D] transition-colors leading-snug">
@@ -1176,10 +1176,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </div>
                     <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
                       <span className="flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform">
-                        Batafsil oʻqish <ArrowRight className="w-3.5 h-3.5" />
+                        {t('home.news.readMore')} <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                       <span className="text-[10.5px] font-normal text-[#8A969F]">
-                        Rasmiy xabar
+                        {t('home.news.officialNews')}
                       </span>
                     </div>
                   </div>
@@ -1218,7 +1218,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                         </div>
                         <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
                           <span className="flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform">
-                            Batafsil oʻqish <ArrowRight className="w-3.5 h-3.5" />
+                            {t('home.news.readMore')} <ArrowRight className="w-3.5 h-3.5" />
                           </span>
                         </div>
                       </div>
@@ -1300,11 +1300,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                                 {isCenter ? (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] text-[#1E5631] text-[10.5px] font-extrabold uppercase tracking-wide border border-[#C2E3CB]">
                                     <Sparkles className="w-3 h-3 text-[#2E7D4F]" />
-                                    Dolzarb
+                                    {t('home.news.urgent')}
                                   </span>
                                 ) : (
                                   <span className="text-[11px] font-medium text-[#8A969F]">
-                                    Rasmiy
+                                    {t('home.news.official')}
                                   </span>
                                 )}
                               </div>
@@ -1322,11 +1322,11 @@ export const HomePage: React.FC<HomePageProps> = ({
 
                             <div className="mt-5 pt-3 border-t border-[#F0F5F2] flex items-center justify-between text-xs font-bold text-[#2E7D4F]">
                               <span className="group-hover:translate-x-0.5 transition-transform flex items-center gap-1.5">
-                                {isCenter ? 'Batafsil oʻqish' : 'Koʻrish'}{' '}
+                                {isCenter ? t('home.news.readMore') : t('home.news.view')}{' '}
                                 <ArrowRight className="w-3.5 h-3.5" />
                               </span>
                               <span className="text-[10.5px] font-normal text-[#8A969F]">
-                                Rasmiy xabar
+                                {t('home.news.officialNews')}
                               </span>
                             </div>
                           </div>

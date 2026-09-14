@@ -13,4 +13,6 @@ export const news = {
   'news.backToList': 'Барча янгиликлар',
   'news.prev': 'Орқага',
   'news.next': 'Олдинга',
+
+  'news.totalSuffix': "та эълон мавжуд",
 };

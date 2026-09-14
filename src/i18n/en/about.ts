@@ -1,6 +1,6 @@
 /** AboutPage (`/about`), every string on it but the FAQ accordion's own `faq.*` fallback — English copy. */
 export const about = {
-  'about.hero.badge': 'About the portal',
+  'about.hero.badge': 'About us',
   'about.hero.title': 'Using forest fund land — paperless, transparent and verifiable',
   'about.hero.body':
     'The permit portal lets citizens and businesses obtain a permit for the use of forest fund land online: from filing the application to downloading the official document signed with E-IMZO.',

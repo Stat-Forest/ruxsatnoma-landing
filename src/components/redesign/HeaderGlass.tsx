@@ -40,7 +40,7 @@ const DEFAULT_NAV_ITEMS: HeaderGlassNavItem[] = [
   { id: 'services', label: 'Xizmatlar', page: 'services' },
   { id: 'news', label: 'Yangiliklar', page: 'news' },
   { id: 'documents', label: 'Hujjatlar', page: 'documents' },
-  { id: 'about', label: 'Portal haqida', page: 'about' },
+  { id: 'about', label: 'Biz haqimizda', page: 'about' },
   { id: 'contact', label: 'Aloqa', page: 'contact' },
 ];
 
