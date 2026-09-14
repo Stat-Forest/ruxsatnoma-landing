@@ -56,20 +56,41 @@ export default function ContourMap({ collection, selectedId }: ContourMapProps) 
         type: 'fill',
         source: 'map-features',
         filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-        paint: { 'fill-color': '#2E7D4F', 'fill-opacity': 0.26 },
+        paint: { 
+          'fill-color': [
+            'case',
+            ['==', ['get', 'is_occupied', ['get', 'props']], true], '#ef4444',
+            '#2E7D4F'
+          ], 
+          'fill-opacity': 0.26 
+        },
       });
       map.addLayer({
         id: 'map-features-line',
         type: 'line',
         source: 'map-features',
-        paint: { 'line-color': '#2E7D4F', 'line-width': 2 },
+        paint: { 
+          'line-color': [
+            'case',
+            ['==', ['get', 'is_occupied', ['get', 'props']], true], '#dc2626',
+            '#2E7D4F'
+          ],
+          'line-width': 2 
+        },
       });
       map.addLayer({
         id: 'map-features-circle',
         type: 'circle',
         source: 'map-features',
         filter: ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
-        paint: { 'circle-radius': 6, 'circle-color': '#2E7D4F' },
+        paint: { 
+          'circle-radius': 6, 
+          'circle-color': [
+            'case',
+            ['==', ['get', 'is_occupied', ['get', 'props']], true], '#ef4444',
+            '#2E7D4F'
+          ]
+        },
       });
 
       const bounds = new maplibregl.LngLatBounds();
