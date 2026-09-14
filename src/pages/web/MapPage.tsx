@@ -4,6 +4,7 @@ import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { Button } from '../../components/ui/button';
 import { Select } from '../../components/ui/FormControls';
 import type { OpenDataFeature, OpenDataFeatureCollection } from '../../components/map/types';
+import { searchMapFeature } from '../../api/map';
 import { api } from '../../api/client';
 import { apiError, formatApiError } from '../../api/errors';
 import { pickName } from '../../lib/localized';
@@ -120,6 +121,9 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [featuresState, setFeaturesState] = useState<FeaturesState | null>(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'free' | 'taken'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -193,17 +197,30 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
   }, [layersState, selectedCode]);
 
   const collection = featuresState?.status === 'ready' ? featuresState.collection : null;
+  const filteredCollection = useMemo(() => {
+    if (!collection) return null;
+    if (filterType === 'all') return collection;
+    const isFree = filterType === 'free';
+    return {
+      ...collection,
+      features: collection.features.filter((f) => {
+        const occupied = !!f.properties.props?.is_occupied;
+        return isFree ? !occupied : occupied;
+      }),
+    };
+  }, [collection, filterType]);
+
   const selectedFeature =
-    collection?.features.find((feature) => feature.id === selectedFeatureId) ?? null;
-  const selectedIndex = collection
-    ? collection.features.findIndex((feature) => feature.id === selectedFeatureId)
+    filteredCollection?.features.find((feature) => feature.id === selectedFeatureId) ?? null;
+  const selectedIndex = filteredCollection
+    ? filteredCollection.features.findIndex((feature) => feature.id === selectedFeatureId)
     : -1;
 
   /** Arrow / Home / End move the selection inside the single tab stop, which
    *  is what makes `role="listbox"` a listbox rather than a list of buttons
    *  wearing one. */
   const onListKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const features = collection?.features ?? [];
+    const features = filteredCollection?.features ?? [];
     if (features.length === 0) return;
     const current = selectedIndex >= 0 ? selectedIndex : 0;
     let next: number | null = null;
@@ -251,7 +268,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
       {layersState.status === 'ready' && layersState.layers.length > 0 && (
         <>
-          <div className="flex flex-wrap items-center gap-3 max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 max-w-5xl mx-auto">
             {layersState.layers.length > 1 && (
               <div className="w-full sm:w-72">
                 <Select
@@ -265,18 +282,56 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                 />
               </div>
             )}
-            {/* Present but inert: the public feature payload carries no
-                occupancy attribute at all, so these can never do anything
-                until an endpoint exists to filter against. */}
-            <div className="flex gap-2 sm:ml-auto" title={t('map.filter.disabledHint')}>
-              {['all', 'free', 'taken'].map((filter) => (
-                <span
+            
+            <form 
+              className="flex items-center w-full sm:w-auto relative" 
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!searchQuery.trim()) return;
+                setIsSearching(true);
+                try {
+                  const res = await searchMapFeature(searchQuery.trim());
+                  if (res.feature) {
+                    // Assuming we somehow navigate or show the feature
+                    setSelectedFeatureId(res.feature.id);
+                  } else {
+                    alert('Qidiruv boʻyicha maʼlumot topilmadi.');
+                  }
+                } finally {
+                  setIsSearching(false);
+                }
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Ariza/Ruxsatnoma ID"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-[#E4E7EA] focus:outline-none focus:border-[#2E7D4F] text-sm"
+              />
+              <button 
+                type="submit" 
+                disabled={isSearching}
+                className="absolute right-2 text-[#2E7D4F] font-bold text-sm"
+              >
+                {isSearching ? '...' : 'Qidirish'}
+              </button>
+            </form>
+
+            <div className="flex gap-2 sm:ml-auto">
+              {(['all', 'free', 'taken'] as const).map((filter) => (
+                <button
                   key={filter}
-                  aria-disabled="true"
-                  className="px-4 py-2.5 rounded-lg border border-[#E4E7EA] text-[#9AA3AB] text-sm font-semibold cursor-not-allowed select-none"
+                  type="button"
+                  onClick={() => setFilterType(filter)}
+                  className={`px-4 py-2.5 rounded-lg border text-sm font-semibold select-none transition-colors ${
+                    filterType === filter 
+                      ? 'border-[#2E7D4F] bg-[#F0F7F1] text-[#123522]' 
+                      : 'border-[#E4E7EA] text-[#5A646D] hover:bg-gray-50'
+                  }`}
                 >
                   {t(`map.filter.${filter}`)}
-                </span>
+                </button>
               ))}
             </div>
           </div>
@@ -285,7 +340,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
             <div className="min-h-[420px] border-b lg:border-b-0 lg:border-r border-[#E4E7EA]">
               {featuresState?.status === 'ready' && (
                 <Suspense fallback={<Skeleton height="h-full" width="w-full" />}>
-                  <LazyContourMap collection={featuresState.collection} selectedId={selectedFeatureId} />
+                  <LazyContourMap collection={filteredCollection!} selectedId={selectedFeatureId} />
                 </Suspense>
               )}
               {featuresState?.status === 'loading' && (
@@ -325,10 +380,10 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                 onKeyDown={onListKeyDown}
                 className="p-4 flex flex-col gap-2.5 flex-grow overflow-y-auto max-h-[420px]"
               >
-                {collection?.features.length === 0 && (
+                {filteredCollection?.features.length === 0 && (
                   <p className="text-sm text-[#5A646D] p-3">{t('map.list.empty')}</p>
                 )}
-                {collection?.features.map((feature, index) => {
+                {filteredCollection?.features.map((feature, index) => {
                   const isSelected = feature.id === selectedFeatureId;
                   const area = areaLabel(feature);
                   const capacity = capacityLabel(feature);
@@ -349,8 +404,12 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                           <MapPin className="w-4 h-4 text-[#2E7D4F]" />
                           {featureLabel(feature, language, index, t('map.contour.fallbackName'))}
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#F1F3F4] text-[#6C757C] text-xs font-bold">
-                          {t('map.contour.occupancyUnknown')}
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                          feature.properties.props?.is_occupied
+                            ? 'bg-[#FEE2E2] text-[#DC2626]'
+                            : 'bg-[#F0F7F1] text-[#2E7D4F]'
+                        }`}>
+                          {feature.properties.props?.is_occupied ? t('map.filter.taken') : t('map.filter.free')}
                         </span>
                       </div>
                       <div className="mt-2.5 flex items-center gap-4 text-xs text-[#767F87]">
