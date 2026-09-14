@@ -48,7 +48,7 @@ export const common = {
   'footer.link.appealStatus': 'Múrjat jiberiw hám tekseriw',
   'footer.link.documents': 'Hújjetler hám normalar',
   'footer.link.faq': 'Kóp beriletuǵın sorawlar',
-  'footer.copyright': '© 2026 Orman hám jasıl aymaqlardı kóbeytiw, shólistanıwǵa qarsı gúresiw agentligi. Barlıq huqıqlar qorǵalǵan.',
+  'footer.copyright': '© 2026 “Orman xojalıǵın sanlastırıw orayı”. Barlıq huqıqlar qorǵalǵan.',
   'footer.wcag': 'WCAG 2.2 AA Saykes dizayn-sisteması',
   'footer.developedBy': '«Orman xojalıǵın sanlastırıw orayı» tárepinen islep shıǵılǵan',
 } as const;

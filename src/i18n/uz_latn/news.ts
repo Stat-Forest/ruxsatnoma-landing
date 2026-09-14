@@ -15,4 +15,6 @@ export const news = {
   'news.backToList': 'Barcha yangiliklar',
   'news.prev': 'Orqaga',
   'news.next': 'Oldinga',
+
+  'news.totalSuffix': "ta e'lon mavjud",
 };

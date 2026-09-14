@@ -256,7 +256,7 @@ export const NewsPage: React.FC = () => {
                 style={{ animationDelay: '.18s' }}
               >
                 <Newspaper className="w-3.5 h-3.5 text-[#7FE0A0]" />
-                <span>{state.total} ta e'lon mavjud</span>
+                <span>{state.total} {t('news.totalSuffix')}</span>
               </div>
             )}
           </div>

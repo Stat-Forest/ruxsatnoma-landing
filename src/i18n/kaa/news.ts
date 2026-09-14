@@ -13,4 +13,6 @@ export const news = {
   'news.backToList': 'Barlıq jańalıqlar',
   'news.prev': 'Artqa',
   'news.next': 'Aldıǵa',
+
+  'news.totalSuffix': "daǵaza bar",
 };

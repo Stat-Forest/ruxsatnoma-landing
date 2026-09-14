@@ -13,4 +13,6 @@ export const news = {
   'news.backToList': 'All News',
   'news.prev': 'Previous',
   'news.next': 'Next',
+
+  'news.totalSuffix': "announcements available",
 };

@@ -48,7 +48,7 @@ export const common = {
   'footer.link.appealStatus': 'Submit & Track Appeals',
   'footer.link.documents': 'Documents & Regulations',
   'footer.link.faq': 'Frequently Asked Questions',
-  'footer.copyright': '© 2026 Agency for Forestry and Greenery Development, Combating Desertification. All rights reserved.',
+  'footer.copyright': '© 2026 Forestry Digitalization Center. All rights reserved.',
   'footer.wcag': 'WCAG 2.2 AA Compliant Design System',
   'footer.developedBy': 'Developed by "Forestry Digitalization Center"',
 } as const;

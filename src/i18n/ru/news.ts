@@ -15,4 +15,6 @@ export const news = {
   'news.backToList': 'Все новости',
   'news.prev': 'Назад',
   'news.next': 'Вперёд',
+
+  'news.totalSuffix': "объявлений",
 };
