@@ -466,20 +466,16 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
         </div>
 
         <div className="max-w-7xl mx-auto px-6 border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 gap-4">
-          <div className="space-y-1 text-center md:text-left">
-            <div>{t('footer.copyright')}</div>
-            <div className="text-[11px] text-gray-400/80">{t('footer.wcag')}</div>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-3.5 py-2 rounded-xl transition-colors shadow-sm">
+          <div className="flex items-center gap-3 text-center md:text-left">
             <img
               src={digitalCenterLogo}
               alt="Oʻrmon xoʻjaligini raqamlashtirish markazi"
               className="w-8 h-8 object-contain shrink-0 drop-shadow"
             />
-            <span className="text-[12px] text-gray-200 font-medium">
-              {t('footer.developedBy')}
-            </span>
+            <div className="space-y-1">
+              <div>{t('footer.copyright')}</div>
+              <div className="text-[11px] text-gray-400/80">{t('footer.wcag')}</div>
+            </div>
           </div>
         </div>
       </footer>
