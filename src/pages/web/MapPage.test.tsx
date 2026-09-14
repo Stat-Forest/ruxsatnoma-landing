@@ -229,13 +229,13 @@ it('moves the selection with the arrow keys from a single tab stop', async () =>
   expect(screen.getByRole('listbox')).toHaveAttribute('aria-activedescendant', rows[1].id);
 });
 
-it('keeps the free/taken filter chips disabled rather than faking a state', async () => {
+it('allows filtering by free/taken state', async () => {
   mockApi();
   renderMap();
 
   await screen.findAllByTestId('contour-row');
   const chip = screen.getByText('Faqat boʻsh');
-  expect(chip).toHaveAttribute('aria-disabled', 'true');
+  expect(chip).not.toHaveAttribute('aria-disabled');
 });
 
 /**

@@ -204,8 +204,9 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     return {
       ...collection,
       features: collection.features.filter((f) => {
-        const occupied = !!f.properties.props?.is_occupied;
-        return isFree ? !occupied : occupied;
+        const occupied = f.properties.props?.is_occupied;
+        if (isFree) return occupied === false; // Must be explicitly false for free
+        return occupied === true; // Must be explicitly true for taken
       }),
     };
   }, [collection, filterType]);
@@ -405,11 +406,17 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                           {featureLabel(feature, language, index, t('map.contour.fallbackName'))}
                         </span>
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          feature.properties.props?.is_occupied
+                          feature.properties.props?.is_occupied === true
                             ? 'bg-[#FEE2E2] text-[#DC2626]'
-                            : 'bg-[#F0F7F1] text-[#2E7D4F]'
+                            : feature.properties.props?.is_occupied === false
+                              ? 'bg-[#F0F7F1] text-[#2E7D4F]'
+                              : 'bg-[#F1F3F4] text-[#6C757C]'
                         }`}>
-                          {feature.properties.props?.is_occupied ? t('map.filter.taken') : t('map.filter.free')}
+                          {feature.properties.props?.is_occupied === true
+                            ? t('map.filter.taken')
+                            : feature.properties.props?.is_occupied === false
+                              ? t('map.filter.free')
+                              : t('map.contour.occupancyUnknown')}
                         </span>
                       </div>
                       <div className="mt-2.5 flex items-center gap-4 text-xs text-[#767F87]">
