@@ -1004,11 +1004,11 @@ export const HomePage: React.FC<HomePageProps> = ({
           />
 
           {/* Top Floating Control Bar */}
-          <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between gap-2 pointer-events-none">
+          <div className="absolute top-3 inset-x-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
             {/* Status chip */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D2417]/90 backdrop-blur-md border border-[#2E7D4F]/50 shadow-lg text-[11px] font-bold text-white pointer-events-auto">
-              <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse" />
-              <span>
+              <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse shrink-0" />
+              <span className="whitespace-nowrap">
                 {mapMode === 'satellite'
                   ? t('home.map.satellite')
                   : mapMode === 'topo'

@@ -6,6 +6,8 @@ export interface SkewedCarouselProps {
 
 export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({ items }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   if (!items || items.length === 0) return null;
 
@@ -45,8 +47,41 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({ items }) => {
     };
   };
 
+
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 40;
+    const isRightSwipe = distance < -40;
+
+    if (isLeftSwipe) {
+      setActiveIndex((prev) => (prev + 1) % count);
+    } else if (isRightSwipe) {
+      setActiveIndex((prev) => (prev - 1 + count) % count);
+    }
+    
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
   return (
-    <div className="relative w-full max-w-7xl mx-auto py-10 overflow-hidden" style={{ perspective: '1000px' }}>
+    <div 
+      className="relative w-full max-w-7xl mx-auto py-10 overflow-hidden touch-pan-y" 
+      style={{ perspective: '1000px' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <div 
         className="relative flex items-center justify-center min-h-[480px] sm:min-h-[520px] w-full"
         style={{ transformStyle: 'preserve-3d' }}
