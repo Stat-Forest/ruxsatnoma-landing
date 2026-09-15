@@ -35,6 +35,7 @@ export const verify = {
   'verify.result.validityLabel': 'Срок действия',
   'verify.result.signaturesValid': 'Электронные подписи действительны (E-IMZO)',
   'verify.result.signaturesPending': 'Электронные подписи ещё не полностью подтверждены',
+  'verify.result.signaturesTitle': 'Подписи на документе',
 
   /* The map panel is mounted ONLY when `GET /public/permits/check` actually
      sent a `contour` — a legend may only name what is drawn. */

@@ -105,6 +105,7 @@ describe('VerifyPage — permit arm', () => {
     organization: 'Burchmulla',
     activity_type: 'Chorva',
     signatures_valid: true,
+    signatures: [],
     holder: 'A*** V***',
   };
 
@@ -125,7 +126,11 @@ describe('VerifyPage — permit arm', () => {
 
     await searchPermit(user, 'A', '123');
 
-    expect(await screen.findByText(/амалда/i)).toBeInTheDocument();
+    // The badge text follows the UI language (uz_latn here) through
+    // `status_label`, the way the application arm's already did; the
+    // Cyrillic `status` word is the colour key, not the caption.
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.queryByText('амалда')).not.toBeInTheDocument();
     expect(screen.queryByTestId('permit-contour')).not.toBeInTheDocument();
     expect(screen.queryByText('Kontur xaritasi')).not.toBeInTheDocument();
     // The leshoz is still named — as text on the result card, not as a map.
@@ -143,6 +148,135 @@ describe('VerifyPage — permit arm', () => {
     await searchPermit(user, 'A', '123');
 
     expect(await screen.findByTestId('permit-contour')).toBeInTheDocument();
+  });
+
+  /**
+   * The document's own signature LINES (never a signer's name), each with
+   * the calendar date it was signed — decision #215 R5. The UI language
+   * here defaults to `uz_latn`, so the assertions read the `uz_latn` labels.
+   */
+  it('lists the document signature lines with their labels and dates', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: {
+        ...foundPermit,
+        signatures: [
+          {
+            line: 'application_submit',
+            line_label: {
+              ru: 'Заявитель (подпись заявления)',
+              uz_latn: 'Ariza beruvchi (ariza imzosi)',
+              uz_cyrl: 'Аризачи (ариза имзоси)',
+            },
+            signed_on: '2027-04-01',
+            kind: 'simple',
+          },
+          {
+            line: 'permit_head',
+            line_label: {
+              ru: 'Директор лесхоза',
+              uz_latn: 'Xoʻjalik rahbari',
+              uz_cyrl: 'Хўжалик раҳбари',
+            },
+            signed_on: '2027-04-02',
+            kind: 'eri',
+          },
+        ],
+      },
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('Ariza beruvchi (ariza imzosi)')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-01')).toBeInTheDocument();
+    expect(screen.getByText('Xoʻjalik rahbari')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-02')).toBeInTheDocument();
+  });
+
+  /**
+   * A returned-and-resubmitted application signs `application_submit` again
+   * (same line, a later `signed_on`) — designed behaviour, not a data bug.
+   * Both rows must render (and React must not warn about a duplicate key,
+   * which is what keying by `row.line` alone would produce).
+   */
+  it('renders both dates when the same signature line repeats', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: {
+        ...foundPermit,
+        signatures: [
+          {
+            line: 'application_submit',
+            line_label: { ru: 'Заявитель (подпись заявления)', uz_latn: 'Ariza beruvchi (ariza imzosi)', uz_cyrl: 'Аризачи (ариза имзоси)' },
+            signed_on: '2027-03-10',
+            kind: 'simple',
+          },
+          {
+            line: 'application_submit',
+            line_label: { ru: 'Заявитель (подпись заявления)', uz_latn: 'Ariza beruvchi (ariza imzosi)', uz_cyrl: 'Аризачи (ариза имзоси)' },
+            signed_on: '2027-04-01',
+            kind: 'simple',
+          },
+        ],
+      },
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('2027-03-10')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-01')).toBeInTheDocument();
+    const keyWarning = consoleError.mock.calls.some((args) =>
+      args.some((arg) => typeof arg === 'string' && arg.includes('same key')),
+    );
+    expect(keyWarning).toBe(false);
+    consoleError.mockRestore();
+  });
+
+  /**
+   * An empty `signatures` array must render no caption at all — a heading
+   * over nothing would be the "hiding data" defect direction inverted: it
+   * would claim signature lines exist when none were reported.
+   */
+  it('renders no signatures caption when the API sends an empty list', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: foundPermit,
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.queryByText('Hujjatdagi imzolar')).not.toBeInTheDocument();
+  });
+
+  /**
+   * `signatures` arrived with #213. The landing has a single `main` and may
+   * deploy before the core does, so a card WITHOUT the field must render the
+   * rest of the card and no caption — `result.signatures.length` threw on
+   * `undefined` and the whole card went with it (final review, I5).
+   */
+  it('renders the card, and no signatures caption, when the API sends no signatures field at all', async () => {
+    const { signatures: _omitted, ...withoutSignatures } = foundPermit;
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: withoutSignatures,
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.getByText('Burchmulla')).toBeInTheDocument();
+    expect(screen.getByText('A*** V***')).toBeInTheDocument();
+    expect(screen.queryByText('Hujjatdagi imzolar')).not.toBeInTheDocument();
   });
 
   it('renders the miss alert, not a crash, on a found: false response', async () => {
