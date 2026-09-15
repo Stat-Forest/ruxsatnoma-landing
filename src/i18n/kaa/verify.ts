@@ -35,6 +35,7 @@ export const verify = {
   'verify.result.validityLabel': 'Ámel Qılıw Múddeti',
   'verify.result.signaturesValid': 'Sanlı qol tańbalar haqıyqıy (E-IMZO)',
   'verify.result.signaturesPending': 'Sanlı qol tańbalar ele tolıq tastıyıqlanbaǵan',
+  'verify.result.signaturesTitle': 'Hújjettegi qollar',
 
   /* The map panel is mounted ONLY when `GET /public/permits/check` actually
      sent a `contour` — a legend may only name what is drawn. */

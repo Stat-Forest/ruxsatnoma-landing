@@ -35,6 +35,7 @@ export const verify = {
   'verify.result.validityLabel': 'Amal Qilish Muddati',
   'verify.result.signaturesValid': 'Raqamli imzolar haqiqiy (E-IMZO)',
   'verify.result.signaturesPending': 'Raqamli imzolar hali toʻliq tasdiqlanmagan',
+  'verify.result.signaturesTitle': 'Hujjatdagi imzolar',
 
   /* The map panel is mounted ONLY when `GET /public/permits/check` actually
      sent a `contour` — a legend may only name what is drawn. */

@@ -105,6 +105,7 @@ describe('VerifyPage — permit arm', () => {
     organization: 'Burchmulla',
     activity_type: 'Chorva',
     signatures_valid: true,
+    signatures: [],
     holder: 'A*** V***',
   };
 
@@ -143,6 +144,70 @@ describe('VerifyPage — permit arm', () => {
     await searchPermit(user, 'A', '123');
 
     expect(await screen.findByTestId('permit-contour')).toBeInTheDocument();
+  });
+
+  /**
+   * The document's own signature LINES (never a signer's name), each with
+   * the calendar date it was signed — decision #215 R5. The UI language
+   * here defaults to `uz_latn`, so the assertions read the `uz_latn` labels.
+   */
+  it('lists the document signature lines with their labels and dates', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: {
+        ...foundPermit,
+        signatures: [
+          {
+            line: 'application_submit',
+            line_label: {
+              ru: 'Заявитель (подпись заявления)',
+              uz_latn: 'Ariza beruvchi (ariza imzosi)',
+              uz_cyrl: 'Аризачи (ариза имзоси)',
+            },
+            signed_on: '2027-04-01',
+            kind: 'simple',
+          },
+          {
+            line: 'permit_head',
+            line_label: {
+              ru: 'Директор лесхоза',
+              uz_latn: 'Xoʻjalik rahbari',
+              uz_cyrl: 'Хўжалик раҳбари',
+            },
+            signed_on: '2027-04-02',
+            kind: 'eri',
+          },
+        ],
+      },
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('Ariza beruvchi (ariza imzosi)')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-01')).toBeInTheDocument();
+    expect(screen.getByText('Xoʻjalik rahbari')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-02')).toBeInTheDocument();
+  });
+
+  /**
+   * An empty `signatures` array must render no caption at all — a heading
+   * over nothing would be the "hiding data" defect direction inverted: it
+   * would claim signature lines exist when none were reported.
+   */
+  it('renders no signatures caption when the API sends an empty list', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: foundPermit,
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText(/амалда/i)).toBeInTheDocument();
+    expect(screen.queryByText('Hujjatdagi imzolar')).not.toBeInTheDocument();
   });
 
   it('renders the miss alert, not a crash, on a found: false response', async () => {

@@ -513,6 +513,21 @@ export const VerifyPage: React.FC = () => {
                       : t('verify.result.signaturesPending')}
                   </span>
                 </div>
+                {result.signatures.length > 0 && (
+                  <>
+                    <span className="text-xs text-[#5A646D] uppercase font-semibold block">
+                      {t('verify.result.signaturesTitle')}
+                    </span>
+                    <ul className="mt-2 space-y-1 text-xs text-[#1A1F24]">
+                      {result.signatures.map((row) => (
+                        <li key={row.line} className="flex justify-between gap-3">
+                          <span>{pickLocalized(row.line_label, uiLanguage) || row.line}</span>
+                          <span className="font-mono text-[#5A646D]">{row.signed_on}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
 
               {/* Map panel — ONLY when the API actually sent a contour.
