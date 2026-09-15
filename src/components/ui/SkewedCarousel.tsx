@@ -6,6 +6,8 @@ export interface SkewedCarouselProps {
 
 export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({ items }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   if (!items || items.length === 0) return null;
 
@@ -45,8 +47,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({ items }) => {
     };
   };
 
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
+
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
