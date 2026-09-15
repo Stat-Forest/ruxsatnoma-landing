@@ -95,7 +95,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
 
   return (
     <div 
-      className="relative w-full max-w-7xl mx-auto py-10 overflow-hidden touch-pan-y" 
+      className="relative w-full mx-auto py-10 touch-pan-y" 
       style={{ perspective: '1000px' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -114,7 +114,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
           return (
             <div
               key={idx}
-              className="absolute top-0 w-[85%] sm:w-[360px] md:w-[400px] left-1/2 -ml-[42.5%] sm:-ml-[180px] md:-ml-[200px]"
+              className="absolute top-0 w-[90%] sm:w-[60%] md:w-[45%] lg:w-[40%] xl:w-[35%] left-1/2 -translate-x-1/2"
               style={{
                 transform,
                 opacity,

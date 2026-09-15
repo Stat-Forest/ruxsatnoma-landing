@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600" fill="none">
+  <defs>
+    <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-soft" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.7"/>
+      <stop offset="50%" stop-color="#00ff88" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="branchGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00ff88" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="rootGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00ff88" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient glow blobs -->
+  <ellipse cx="150" cy="200" rx="70" ry="80" fill="#00ff88" opacity="0.04" filter="url(#glow-soft)"/>
+  <ellipse cx="150" cy="430" rx="50" ry="40" fill="#00e5ff" opacity="0.05" filter="url(#glow-soft)"/>
+
+  <!-- ===== ROOTS ===== -->
+  <!-- Root 1 - far left -->
+  <path d="M138 530 Q110 545 70 570 Q50 580 30 590" stroke="url(#rootGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <path d="M138 530 Q110 545 70 570 Q50 580 30 590" stroke="#00ff88" stroke-width="0.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Root 2 - left -->
+  <path d="M143 535 Q125 552 100 568 Q80 578 60 585" stroke="url(#rootGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <path d="M143 535 Q125 552 100 568 Q80 578 60 585" stroke="#00e5ff" stroke-width="0.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Root 3 - mid-left -->
+  <path d="M148 540 Q140 558 125 572 Q110 582 95 590" stroke="url(#rootGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.75" filter="url(#glow-strong)"/>
+  <path d="M148 540 Q140 558 125 572 Q110 582 95 590" stroke="#00ff88" stroke-width="0.6" stroke-linecap="round" opacity="1"/>
+  <!-- Root 4 - center-left -->
+  <path d="M150 545 Q148 562 142 578 Q138 590 132 598" stroke="url(#rootGrad)" stroke-width="2" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <!-- Root 5 - center-right -->
+  <path d="M152 545 Q155 562 162 578 Q168 590 172 598" stroke="url(#rootGrad)" stroke-width="2" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <!-- Root 6 - mid-right -->
+  <path d="M155 540 Q168 558 185 572 Q200 582 215 590" stroke="url(#rootGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.75" filter="url(#glow-strong)"/>
+  <path d="M155 540 Q168 558 185 572 Q200 582 215 590" stroke="#00e5ff" stroke-width="0.6" stroke-linecap="round" opacity="1"/>
+  <!-- Root 7 - right -->
+  <path d="M160 535 Q180 552 210 568 Q230 578 250 585" stroke="url(#rootGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <!-- Root 8 - far right -->
+  <path d="M163 530 Q195 545 235 565 Q255 575 275 588" stroke="url(#rootGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65" filter="url(#glow-strong)"/>
+  <path d="M163 530 Q195 545 235 565 Q255 575 275 588" stroke="#00ff88" stroke-width="0.5" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Sub-roots branching -->
+  <path d="M100 568 Q88 576 75 582" stroke="#00ff88" stroke-width="1" stroke-linecap="round" opacity="0.5" filter="url(#glow-strong)"/>
+  <path d="M125 572 Q118 580 108 587" stroke="#00e5ff" stroke-width="1" stroke-linecap="round" opacity="0.5" filter="url(#glow-strong)"/>
+  <path d="M185 572 Q195 580 205 585" stroke="#00ff88" stroke-width="1" stroke-linecap="round" opacity="0.5" filter="url(#glow-strong)"/>
+
+  <!-- ===== TRUNK ===== -->
+  <!-- Trunk outer glow -->
+  <path d="M140 520 Q138 460 142 400 Q144 360 148 300 Q150 250 150 200" stroke="#00e5ff" stroke-width="14" stroke-linecap="round" opacity="0.08" filter="url(#glow-soft)"/>
+  <!-- Trunk main -->
+  <path d="M140 520 Q138 460 142 400 Q144 360 148 300 Q150 250 150 200" stroke="url(#trunkGrad)" stroke-width="5" stroke-linecap="round" opacity="0.85" filter="url(#glow-strong)"/>
+  <!-- Trunk right -->
+  <path d="M158 520 Q160 460 158 400 Q156 360 153 300 Q152 250 150 200" stroke="url(#trunkGrad)" stroke-width="3.5" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <!-- Trunk highlight -->
+  <path d="M149 520 Q149 450 150 380 Q150 300 150 200" stroke="#aaffdd" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- ===== BRANCHES ===== -->
+  <!-- Left main branch -->
+  <path d="M147 290 Q125 270 95 255 Q70 242 45 235" stroke="url(#branchGrad)" stroke-width="3" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <path d="M147 290 Q125 270 95 255 Q70 242 45 235" stroke="#00ff88" stroke-width="0.8" stroke-linecap="round" opacity="0.9"/>
+  <!-- Left branch sub 1 -->
+  <path d="M95 255 Q80 240 65 225 Q52 212 42 200" stroke="url(#branchGrad)" stroke-width="2" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <!-- Left branch sub 2 -->
+  <path d="M95 255 Q85 248 75 252 Q62 257 50 260" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+  <!-- Left branch sub 3 -->
+  <path d="M70 242 Q55 232 42 225 Q32 218 22 215" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.6" filter="url(#glow-strong)"/>
+  <!-- Left branch sub 4 -->
+  <path d="M45 235 Q32 228 22 222" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Left upper branch -->
+  <path d="M149 240 Q130 220 105 205 Q82 192 60 185" stroke="url(#branchGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.75" filter="url(#glow-strong)"/>
+  <path d="M105 205 Q90 192 75 180 Q62 170 50 162" stroke="url(#branchGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.65" filter="url(#glow-strong)"/>
+  <path d="M75 180 Q62 168 52 158 Q44 150 38 142" stroke="url(#branchGrad)" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+  <path d="M60 185 Q48 175 38 168 Q28 162 20 158" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Right main branch -->
+  <path d="M153 290 Q175 270 205 255 Q230 242 255 235" stroke="url(#branchGrad)" stroke-width="3" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <path d="M153 290 Q175 270 205 255 Q230 242 255 235" stroke="#00e5ff" stroke-width="0.8" stroke-linecap="round" opacity="0.9"/>
+  <!-- Right branch sub 1 -->
+  <path d="M205 255 Q220 240 235 225 Q248 212 258 200" stroke="url(#branchGrad)" stroke-width="2" stroke-linecap="round" opacity="0.7" filter="url(#glow-strong)"/>
+  <!-- Right branch sub 2 -->
+  <path d="M205 255 Q215 248 225 252 Q238 257 250 260" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+  <!-- Right branch sub 3 -->
+  <path d="M230 242 Q245 232 258 225 Q268 218 278 215" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.6" filter="url(#glow-strong)"/>
+  <!-- Right branch sub 4 -->
+  <path d="M255 235 Q268 228 278 222" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Right upper branch -->
+  <path d="M151 240 Q170 220 195 205 Q218 192 240 185" stroke="url(#branchGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.75" filter="url(#glow-strong)"/>
+  <path d="M195 205 Q210 192 225 180 Q238 170 250 162" stroke="url(#branchGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.65" filter="url(#glow-strong)"/>
+  <path d="M225 180 Q238 168 248 158 Q256 150 262 142" stroke="url(#branchGrad)" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+  <path d="M240 185 Q252 175 262 168 Q272 162 280 158" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Top center branches -->
+  <path d="M150 200 Q148 182 145 165 Q142 148 138 132" stroke="url(#branchGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <path d="M150 200 Q152 182 155 165 Q158 148 162 132" stroke="url(#branchGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.8" filter="url(#glow-strong)"/>
+  <path d="M145 165 Q135 148 122 135 Q112 124 102 115" stroke="url(#branchGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M155 165 Q165 148 178 135 Q188 124 198 115" stroke="url(#branchGrad)" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M138 132 Q130 118 118 108 Q108 100 98 92" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+  <path d="M162 132 Q170 118 182 108 Q192 100 202 92" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+  <!-- Very top -->
+  <path d="M138 132 Q140 115 142 100 Q144 88 145 76" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M162 132 Q160 115 158 100 Q156 88 155 76" stroke="url(#branchGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M150 165 Q150 145 150 125 Q150 108 150 92" stroke="url(#branchGrad)" stroke-width="2" stroke-linecap="round" opacity="0.75" filter="url(#glow-strong)"/>
+  <path d="M150 92 Q150 78 150 65" stroke="url(#branchGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>
+
+  <!-- ===== LEAVES (small ellipses at branch tips) ===== -->
+  <!-- Left side leaves -->
+  <ellipse cx="42" cy="200" rx="6" ry="4" fill="#00ff88" opacity="0.7" filter="url(#glow-strong)" transform="rotate(-20, 42, 200)"/>
+  <ellipse cx="22" cy="215" rx="5" ry="3.5" fill="#00e5ff" opacity="0.6" filter="url(#glow-strong)" transform="rotate(10, 22, 215)"/>
+  <ellipse cx="50" cy="260" rx="5" ry="3" fill="#00ff88" opacity="0.6" filter="url(#glow-strong)"/>
+  <ellipse cx="38" cy="142" rx="6" ry="4" fill="#00e5ff" opacity="0.7" filter="url(#glow-strong)" transform="rotate(-15, 38, 142)"/>
+  <ellipse cx="20" cy="158" rx="5" ry="3" fill="#00ff88" opacity="0.6" filter="url(#glow-strong)"/>
+  <ellipse cx="98" cy="92" rx="6" ry="4" fill="#00ff88" opacity="0.7" filter="url(#glow-strong)" transform="rotate(-25, 98, 92)"/>
+  <ellipse cx="102" cy="115" rx="5" ry="3.5" fill="#00e5ff" opacity="0.65" filter="url(#glow-strong)"/>
+  <ellipse cx="145" cy="76" rx="5" ry="3.5" fill="#00ff88" opacity="0.75" filter="url(#glow-strong)" transform="rotate(-10, 145, 76)"/>
+  <!-- Right side leaves -->
+  <ellipse cx="258" cy="200" rx="6" ry="4" fill="#00ff88" opacity="0.7" filter="url(#glow-strong)" transform="rotate(20, 258, 200)"/>
+  <ellipse cx="278" cy="215" rx="5" ry="3.5" fill="#00e5ff" opacity="0.6" filter="url(#glow-strong)" transform="rotate(-10, 278, 215)"/>
+  <ellipse cx="250" cy="260" rx="5" ry="3" fill="#00ff88" opacity="0.6" filter="url(#glow-strong)"/>
+  <ellipse cx="262" cy="142" rx="6" ry="4" fill="#00e5ff" opacity="0.7" filter="url(#glow-strong)" transform="rotate(15, 262, 142)"/>
+  <ellipse cx="280" cy="158" rx="5" ry="3" fill="#00ff88" opacity="0.6" filter="url(#glow-strong)"/>
+  <ellipse cx="202" cy="92" rx="6" ry="4" fill="#00ff88" opacity="0.7" filter="url(#glow-strong)" transform="rotate(25, 202, 92)"/>
+  <ellipse cx="198" cy="115" rx="5" ry="3.5" fill="#00e5ff" opacity="0.65" filter="url(#glow-strong)"/>
+  <ellipse cx="155" cy="76" rx="5" ry="3.5" fill="#00ff88" opacity="0.75" filter="url(#glow-strong)" transform="rotate(10, 155, 76)"/>
+  <!-- Top tip leaf -->
+  <ellipse cx="150" cy="65" rx="6" ry="8" fill="#00ff88" opacity="0.8" filter="url(#glow-strong)"/>
+
+  <!-- ===== SPARKLE DOTS ===== -->
+  <circle cx="147" cy="320" r="2" fill="#00ff88" opacity="0.9" filter="url(#glow-strong)"/>
+  <circle cx="153" cy="380" r="1.5" fill="#00e5ff" opacity="0.8" filter="url(#glow-strong)"/>
+  <circle cx="145" cy="440" r="1.8" fill="#00ff88" opacity="0.7" filter="url(#glow-strong)"/>
+  <circle cx="95" cy="255" r="2" fill="#00ff88" opacity="0.8" filter="url(#glow-strong)"/>
+  <circle cx="205" cy="255" r="2" fill="#00e5ff" opacity="0.8" filter="url(#glow-strong)"/>
+  <circle cx="105" cy="205" r="1.5" fill="#00ff88" opacity="0.75" filter="url(#glow-strong)"/>
+  <circle cx="195" cy="205" r="1.5" fill="#00e5ff" opacity="0.75" filter="url(#glow-strong)"/>
+  <circle cx="148" cy="200" r="3" fill="#aaffdd" opacity="0.9" filter="url(#glow-strong)"/>
+</svg>

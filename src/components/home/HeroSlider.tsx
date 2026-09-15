@@ -222,7 +222,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
   return (
     <section
-      className="relative overflow-hidden min-h-[100svh] sm:min-h-[620px] lg:min-h-[660px] py-20 sm:py-0 flex flex-col justify-center"
+      className="relative overflow-hidden min-h-[100vh] py-20 sm:py-0 flex flex-col justify-center"
 
 
       // Hover and keyboard focus both pause: a reader must never be moved

@@ -637,7 +637,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       {/* ── 2. SIX DIRECTIONS ───────────────────────────────────────── */}
-      <section ref={activitiesRef} className="relative z-10 space-y-6 overflow-hidden">
+      <section ref={activitiesRef} className="relative z-10 space-y-6 overflow-visible">
+        {/* Left glowing tree */}
+        <img
+          src="/img/bg/tree_glow_nobg.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute -left-20 sm:-left-32 lg:-left-44 top-0 w-40 sm:w-56 lg:w-72 h-auto opacity-40 -z-10"
+          style={{ transform: 'translateY(-20%) scaleX(-1)' }}
+        />
         <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
           <div>
             <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
@@ -693,7 +701,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         )}
 
         {servicesState.status === 'ready' && servicesState.items.length > 0 && (
-          <div data-testid="home-activities" className="mt-8">
+          <div data-testid="home-activities" className="mt-8 relative left-1/2 -translate-x-1/2 w-[90vw]">
             <SkewedCarousel
               items={servicesState.items.map((svc, idx) => (
                 <DirectionCard
