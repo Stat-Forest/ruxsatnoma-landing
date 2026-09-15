@@ -7,6 +7,7 @@ import {
   ArrowUp,
   ShieldCheck,
   CheckCircle2,
+  MessageCircle,
 } from 'lucide-react';
 import logoImg from '../../assets/img/ormonlogo.png';
 import digitalCenterLogo from '../../assets/img/raqamlashtirishlogo.png';
@@ -555,6 +556,21 @@ export const FooterRedesign: React.FC<FooterRedesignProps> = ({
                     <span className="text-xs text-emerald-100/90">{hours}</span>
                   </li>
                 )}
+                
+                {/* Telegram Bot */}
+                <li className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-[#2ED177] border border-white/10">
+                    <MessageCircle className="w-4 h-4" />
+                  </div>
+                  <a
+                    href="https://t.me/Ruxsatnoma_support_bot"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-emerald-100/90 hover:text-white transition-colors"
+                  >
+                    Telegram bot
+                  </a>
+                </li>
 
                 {/* Quick Call-Center Hotline Card */}
                 <li className="pt-2">

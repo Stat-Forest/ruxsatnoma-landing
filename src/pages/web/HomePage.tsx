@@ -20,6 +20,7 @@ import {
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
+import { SkewedCarousel } from '../../components/ui/SkewedCarousel';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { HeroSlider } from '../../components/home/HeroSlider';
 import { LandingBackground } from '../../components/home/LandingBackground';
@@ -692,21 +693,20 @@ export const HomePage: React.FC<HomePageProps> = ({
         )}
 
         {servicesState.status === 'ready' && servicesState.items.length > 0 && (
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            data-testid="home-activities"
-          >
-            {servicesState.items.map((svc, idx) => (
-              <DirectionCard
-                key={svc.id}
-                service={svc}
-                index={idx}
-                language={language}
-                t={t}
-                onNavigate={onNavigate}
-                inView={activitiesInView}
-              />
-            ))}
+          <div data-testid="home-activities" className="mt-8">
+            <SkewedCarousel
+              items={servicesState.items.map((svc, idx) => (
+                <DirectionCard
+                  key={svc.id}
+                  service={svc}
+                  index={idx}
+                  language={language}
+                  t={t}
+                  onNavigate={onNavigate}
+                  inView={true} // Carousel handles its own display
+                />
+              ))}
+            />
           </div>
         )}
       </section>
@@ -1473,7 +1473,7 @@ function DirectionCard({
   return (
     <div
       data-testid="direction-card"
-      className={`group card-lift ${animClass} bg-white/95 backdrop-blur-xs border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_16px_36px_rgba(18,53,34,0.12)] transition-all duration-300`}
+      className={`group card-lift ${animClass} bg-white border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_16px_36px_rgba(18,53,34,0.12)] transition-all duration-300`}
       style={{ animationDelay: delay }}
     >
       <div className="relative h-[185px] overflow-hidden bg-[#EAF3EC]">

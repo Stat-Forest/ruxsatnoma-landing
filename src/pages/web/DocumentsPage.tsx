@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ChevronDown,
   ChevronRight,
+  Clock,
   Download,
   ExternalLink,
   FileText,
@@ -244,7 +245,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigate }) => {
           )}
 
           {state.status === 'ready' && state.items.length > 0 && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
               {state.items.map((item, idx) => (
                 <DocumentRow
                   key={item.id}
@@ -276,58 +277,118 @@ function DocumentRow({
   sourceLabel: string;
   delaySeconds: number;
 }) {
-  // The backend refuses to publish a row with neither, so exactly one of these
-  // two is always there; the file wins when both are.
   const file = item.file ?? null;
   const href = file ? documentFileUrl(item.id) : (item.source_url ?? '');
   const external = !file;
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // Calculate rotation: max 8 degrees
+    // If mouse is on right (x > centerX), rotateY is positive (right side comes closer)
+    // If mouse is on bottom (y > centerY), rotateX is negative (bottom side comes closer)
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!cardRef.current) return;
+    cardRef.current.style.transition = 'transform 0.5s ease-out';
+    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+  };
+
+  const handleMouseEnter = () => {
+    if (!cardRef.current) return;
+    // Fast transition while moving to avoid lag feeling
+    cardRef.current.style.transition = 'transform 0.1s ease-out';
+  };
+
   return (
     <div
-      className="reveal card-lift group relative bg-white border border-[#D5E6DA] hover:border-[#2E7D4F]/50 rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-[0_4px_24px_rgba(18,53,34,0.04)] hover:shadow-[0_16px_36px_rgba(18,53,34,0.1)] transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 overflow-hidden"
-      style={{ animationDelay: `${delaySeconds}s` }}
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      className="group flex flex-col justify-between p-6 sm:p-8 bg-white rounded-3xl border border-slate-200 hover:border-emerald-400 transition-shadow duration-300 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)] relative h-full"
+      style={{ 
+        animationDelay: `${delaySeconds}s`,
+        transformStyle: 'preserve-3d',
+        willChange: 'transform'
+      }}
     >
-      {/* Left indicator accent line on hover */}
-      <div className="absolute left-0 top-5 bottom-5 w-1 rounded-r-full bg-[#2E7D4F] opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-1 group-hover:translate-x-0" />
-
-      {/* Top shimmer on hover */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#2E7D4F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-      <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
-        <div className="thumb-zoom p-3.5 bg-[#F0F7F1] text-[#2E7D4F] rounded-2xl shrink-0 group-hover:bg-[#E3F4E8] transition-colors border border-[#CCE4D3] shadow-2xs">
-          <FileText className="w-6 h-6" />
-        </div>
-        <div className="space-y-2 flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-mono font-bold text-[#1E5C38] bg-[#EAF5ED] border border-[#CCE4D3] px-2.5 py-0.5 rounded-lg shadow-2xs">
+      {/* Subtle radial glow on hover */}
+      <div 
+        className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.06),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+        style={{ transform: 'translateZ(-10px)' }}
+      />
+      
+      <div className="flex flex-col gap-6 relative z-10 transition-transform duration-300 group-hover:translate-z-8" style={{ transform: 'translateZ(20px)' }}>
+        {/* Top Section: Icon & Badges */}
+        <div className="flex justify-between items-start gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+            <FileText className="w-7 h-7" strokeWidth={1.5} />
+          </div>
+          
+          <div className="flex flex-col items-end gap-2">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold text-emerald-700 bg-emerald-50 uppercase tracking-widest border border-emerald-100">
               № {item.doc_number}
             </span>
-            <span className="text-xs font-mono text-[#6A7B70]">{formatAdoptedOn(item.adopted_on)}</span>
+            <span className="text-[12px] font-medium text-slate-500 flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-md">
+              <Clock className="w-3.5 h-3.5 text-slate-400" /> 
+              {formatAdoptedOn(item.adopted_on)}
+            </span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-[#142A1D] group-hover:text-[#23653F] transition-colors leading-snug">
+        </div>
+
+        {/* Title & Summary */}
+        <div className="pt-2" style={{ transform: 'translateZ(30px)' }}>
+          <h3 className="text-[17px] sm:text-lg font-bold text-slate-800 leading-snug group-hover:text-emerald-700 transition-colors duration-300">
             {pickLocalized(item.title, language)}
           </h3>
           {item.summary && (
-            <p className="text-xs sm:text-sm text-[#4E6153] leading-relaxed line-clamp-2">
+            <p className="mt-2.5 text-[13px] text-slate-500 line-clamp-3 leading-relaxed">
               {pickLocalized(item.summary, language)}
             </p>
           )}
         </div>
       </div>
 
-      <a
-        data-testid={`document-open-${item.id}`}
-        href={href}
-        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-[#CCE4D3] bg-[#F0F7F1] hover:bg-[#2E7D4F] hover:text-white px-4 py-2.5 text-xs font-bold text-[#2E7D4F] transition-all duration-200 shadow-2xs group/btn cursor-pointer"
+      {/* Bottom Link Area */}
+      <div 
+        className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between relative z-10 group-hover:border-emerald-100 transition-colors duration-300"
+        style={{ transform: 'translateZ(20px)' }}
       >
-        {external ? (
-          <ExternalLink className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
-        ) : (
-          <Download className="w-4 h-4 transition-transform group-hover/btn:translate-y-0.5" />
-        )}
-        <span>{external ? sourceLabel : downloadLabel}</span>
-      </a>
+        <span className="text-[14px] font-bold text-slate-500 group-hover:text-emerald-600 transition-colors duration-300">
+          {external ? sourceLabel : downloadLabel}
+        </span>
+        <div className="w-10 h-10 rounded-full bg-slate-50 group-hover:bg-emerald-100 flex items-center justify-center transition-colors duration-300">
+          {external ? (
+            <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-300" />
+          ) : (
+            <Download className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-y-0.5 transition-all duration-300" />
+          )}
+        </div>
+      </div>
+      
+      {/* Make entire card clickable */}
+      <a 
+        href={href} 
+        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})} 
+        className="absolute inset-0 z-20 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset rounded-3xl" 
+        aria-label="Open document" 
+        data-testid={`document-open-${item.id}`}
+        style={{ transform: 'translateZ(40px)' }}
+      />
     </div>
   );
 }
