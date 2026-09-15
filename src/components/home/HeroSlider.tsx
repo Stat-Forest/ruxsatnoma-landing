@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, Pause, Play } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 
@@ -146,23 +146,6 @@ const EXTRA_SLIDES: Record<UiLanguage, [SlideCopy, SlideCopy]> = {
   ],
 };
 
-const DOT_LABEL: Record<UiLanguage, (n: number) => string> = {
-  uz_latn: (n) => `${n}-slayd`,
-  uz_cyrl: (n) => `${n}-слайд`,
-  ru: (n) => `Слайд ${n}`,
-  kaa: (n) => `${n}-slayd`,
-  en: (n) => `Slide ${n}`,
-};
-
-/** The pause control's accessible name, in both states. Local for the same
- *  reason `DOT_LABEL` and `EXTRA_SLIDES` are. */
-const PLAYBACK_LABEL: Record<UiLanguage, { pause: string; play: string }> = {
-  uz_latn: { pause: 'Slaydlarni toʻxtatish', play: 'Slaydlarni davom ettirish' },
-  uz_cyrl: { pause: 'Слайдларни тўхтатиш', play: 'Слайдларни давом эттириш' },
-  ru: { pause: 'Остановить слайды', play: 'Продолжить слайды' },
-  kaa: { pause: 'Slaydlardı toqtatıw', play: 'Slaydlardı dawam etiw' },
-  en: { pause: 'Pause the slides', play: 'Resume the slides' },
-};
 
 const SLIDE_DELAY_MS = 5200;
 
@@ -197,7 +180,7 @@ function prefersReducedMotion(): boolean {
  */
 export function HeroSlider({ onNavigate }: HeroSliderProps) {
   const [slide, setSlide] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
   const t = useT();
@@ -236,12 +219,10 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
       : EXTRA_SLIDES[uiLanguage][slide - 1];
 
   const actions = SLIDE_ACTIONS[slide];
-  const dotLabel = DOT_LABEL[uiLanguage];
-  const playbackLabel = PLAYBACK_LABEL[uiLanguage];
 
   return (
     <section
-      className="relative overflow-hidden min-h-[580px] sm:min-h-[620px] lg:min-h-[660px] py-12 sm:py-0 flex flex-col justify-center"
+      className="relative overflow-hidden min-h-[100svh] sm:min-h-[620px] lg:min-h-[660px] py-20 sm:py-0 flex flex-col justify-center"
 
 
       // Hover and keyboard focus both pause: a reader must never be moved
@@ -278,9 +259,10 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
 
 
 
-      {/* Qoramtir gradient faqat chap tomondagi matn orqasida bo'ladi, o'ng tomoni to'liq toza video */}
+      {/* Qoramtir gradient: mobil qurilmalarda to'liq fon qoramtir bo'ladi, desktopda esa faqat chap tomoni */}
+      <div className="absolute inset-0 pointer-events-none bg-black/40 sm:bg-transparent z-0" />
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none hidden sm:block z-0"
         style={{
           background:
             'linear-gradient(to right, rgba(5,18,10,0.88) 0%, rgba(5,18,10,0.68) 32%, rgba(5,18,10,0.2) 46%, rgba(5,18,10,0) 54%)',
@@ -341,43 +323,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
         </div>
       </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-5 sm:bottom-8 flex items-center gap-2.5">
-        {[0, 1, 2].map((i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={dotLabel(i + 1)}
-            onClick={() => setSlide(i)}
-            style={{ height: '44px' }}
-            className="flex items-center px-1"
-          >
-            <span
-              // `.hero-dot`, for the same reason as `.hero-slide` above.
-              className="hero-dot block rounded-full"
-              style={{
-                height: '5px',
-                width: slide === i ? '46px' : '18px',
-                background: slide === i ? '#FFFFFF' : 'rgba(255,255,255,.34)',
-              }}
-            />
-          </button>
-        ))}
 
-        {/* WCAG 2.2.2: a mechanism to pause anything auto-updating for more
-            than five seconds. Hover and focus pause it too, but neither is a
-            "mechanism" a touch or switch user can reach. */}
-        <button
-          type="button"
-          aria-label={paused ? playbackLabel.play : playbackLabel.pause}
-          aria-pressed={paused}
-          onClick={() => setPaused((current) => !current)}
-          className="ml-1 flex h-11 w-11 items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/10"
-        >
-          {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-        </button>
-
-        <span className="text-[11px] font-semibold text-white/55 tracking-wider">{`0${slide + 1} / 03`}</span>
-      </div>
     </section>
   );
 }

@@ -174,7 +174,7 @@ export function HeroContent({
 
       {/* Pill Badge with Pulsing Dot */}
       <div
-        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/45 border border-emerald-500/30 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.25)] hover:border-emerald-400/50 hover:bg-black/55 transition-all duration-300"
+        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.1)] hover:border-white/30 hover:bg-white/20 transition-all duration-300"
         role="status"
         aria-label={badgeText}
       >
@@ -182,7 +182,7 @@ export function HeroContent({
           <span className="live absolute inline-flex h-full w-full rounded-full bg-[#4ADE80] opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4ADE80] shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
         </span>
-        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300 select-none">
+        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white select-none">
           {badgeText}
         </span>
       </div>
@@ -271,7 +271,7 @@ export function HeroContent({
           <a
             href={secondaryCta.href}
             aria-label={secondaryCta.ariaLabel || secondaryLabel}
-            className="group relative inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-6 sm:px-7 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] border border-white/25 hover:border-emerald-400/50 text-white text-sm sm:text-base font-bold backdrop-blur-md shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="group relative inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-6 sm:px-7 rounded-xl bg-white/10 hover:bg-white/20 border border-white/30 hover:border-emerald-400/50 text-white text-sm sm:text-base font-bold backdrop-blur-md shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <span className="relative z-10 flex items-center justify-center transition-transform duration-300 ease-out group-hover:rotate-12 group-hover:scale-110">
               {secondaryCta.icon || <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 transition-colors duration-200 group-hover:text-emerald-300" />}
@@ -283,7 +283,7 @@ export function HeroContent({
             type="button"
             onClick={handleSecondaryClick}
             aria-label={secondaryCta?.ariaLabel || secondaryLabel}
-            className="group relative inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-6 sm:px-7 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] border border-white/25 hover:border-emerald-400/50 text-white text-sm sm:text-base font-bold backdrop-blur-md shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="group relative inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-6 sm:px-7 rounded-xl bg-white/10 hover:bg-white/20 border border-white/30 hover:border-emerald-400/50 text-white text-sm sm:text-base font-bold backdrop-blur-md shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <span className="relative z-10 flex items-center justify-center transition-transform duration-300 ease-out group-hover:rotate-12 group-hover:scale-110">
               {secondaryCta?.icon || <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 transition-colors duration-200 group-hover:text-emerald-300" />}
