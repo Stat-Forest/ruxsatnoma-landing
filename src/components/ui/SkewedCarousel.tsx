@@ -16,19 +16,21 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
   const [touchEnd, setTouchEnd] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  if (!items || items.length === 0) return null;
-
-  const count = items.length;
+  const count = items?.length || 0;
 
   const nextSlide = useCallback(() => {
-    setActiveIndex((prev) => (prev + 1) % count);
+    if (count > 0) {
+      setActiveIndex((prev) => (prev + 1) % count);
+    }
   }, [count]);
 
   useEffect(() => {
-    if (!autoPlay || isPaused) return;
+    if (!autoPlay || isPaused || count === 0) return;
     const timer = setInterval(nextSlide, interval);
     return () => clearInterval(timer);
-  }, [autoPlay, interval, isPaused, nextSlide]);
+  }, [autoPlay, interval, isPaused, nextSlide, count]);
+
+  if (!items || count === 0) return null;
 
   const getTransform = (index: number) => {
     // Shortest distance in a circular array
