@@ -126,7 +126,11 @@ describe('VerifyPage — permit arm', () => {
 
     await searchPermit(user, 'A', '123');
 
-    expect(await screen.findByText(/амалда/i)).toBeInTheDocument();
+    // The badge text follows the UI language (uz_latn here) through
+    // `status_label`, the way the application arm's already did; the
+    // Cyrillic `status` word is the colour key, not the caption.
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.queryByText('амалда')).not.toBeInTheDocument();
     expect(screen.queryByTestId('permit-contour')).not.toBeInTheDocument();
     expect(screen.queryByText('Kontur xaritasi')).not.toBeInTheDocument();
     // The leshoz is still named — as text on the result card, not as a map.
@@ -248,7 +252,30 @@ describe('VerifyPage — permit arm', () => {
 
     await searchPermit(user, 'A', '123');
 
-    expect(await screen.findByText(/амалда/i)).toBeInTheDocument();
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.queryByText('Hujjatdagi imzolar')).not.toBeInTheDocument();
+  });
+
+  /**
+   * `signatures` arrived with #213. The landing has a single `main` and may
+   * deploy before the core does, so a card WITHOUT the field must render the
+   * rest of the card and no caption — `result.signatures.length` threw on
+   * `undefined` and the whole card went with it (final review, I5).
+   */
+  it('renders the card, and no signatures caption, when the API sends no signatures field at all', async () => {
+    const { signatures: _omitted, ...withoutSignatures } = foundPermit;
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: withoutSignatures,
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('Amalda')).toBeInTheDocument();
+    expect(screen.getByText('Burchmulla')).toBeInTheDocument();
+    expect(screen.getByText('A*** V***')).toBeInTheDocument();
     expect(screen.queryByText('Hujjatdagi imzolar')).not.toBeInTheDocument();
   });
 

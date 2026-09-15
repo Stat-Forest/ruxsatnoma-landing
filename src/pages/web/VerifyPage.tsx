@@ -264,6 +264,11 @@ export const VerifyPage: React.FC = () => {
   const appStatusLabel =
     appResult && (pickLocalized(appResult.status_label, uiLanguage) || appResult.status || undefined);
 
+  // `?? []` and not a bare read: the generated type says `signatures` is
+  // required, but a core that predates #213 does not send it, and this page
+  // may be deployed against one (single `main`, no dev/prod split).
+  const signatureLines: CheckCard['signatures'] = result?.signatures ?? [];
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans">
       {/* Page Header */}
@@ -457,7 +462,12 @@ export const VerifyPage: React.FC = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold font-mono">{result.status}</span>
+                    {/* The TEXT follows the UI language the way the application
+                        arm's does; the colour stays keyed on `result.status`,
+                        the backend's own four-word vocabulary. */}
+                    <span className="text-xl font-bold font-mono">
+                      {pickLocalized(result.status_label, uiLanguage) || result.status}
+                    </span>
                     <StatusBadge status={STATUS_BADGE[result.status]} size="sm" />
                   </div>
                   <p className="text-xs mt-0.5 font-medium opacity-90">
@@ -513,7 +523,10 @@ export const VerifyPage: React.FC = () => {
                       : t('verify.result.signaturesPending')}
                   </span>
                 </div>
-                {result.signatures.length > 0 && (
+                {/* `signatures` arrived with #213 and the landing deploys from
+                    a single `main`, ahead of or behind the core: a card without
+                    the field must render the rest of the card, never throw. */}
+                {signatureLines.length > 0 && (
                   <>
                     <span className="text-xs text-[#5A646D] uppercase font-semibold block">
                       {t('verify.result.signaturesTitle')}
@@ -524,7 +537,7 @@ export const VerifyPage: React.FC = () => {
                           same line legitimately repeats with a different
                           `signed_on` — the API gives no per-line id, and
                           `line`+`signed_on` is not unique either (date-only). */}
-                      {result.signatures.map((row, index) => (
+                      {signatureLines.map((row, index) => (
                         <li key={`${row.line}-${index}`} className="flex justify-between gap-3">
                           <span>{pickLocalized(row.line_label, uiLanguage) || row.line}</span>
                           <span className="font-mono text-[#5A646D]">{row.signed_on}</span>
