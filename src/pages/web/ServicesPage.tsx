@@ -780,8 +780,8 @@ function ServiceCard({
     { line: '#1A6B5A', glow: 'rgba(26,107,90,0.35)', badge: 'bg-[#1A6B5A]' },
     { line: '#3B6E2E', glow: 'rgba(59,110,46,0.35)', badge: 'bg-[#3B6E2E]' },
     { line: '#285C6E', glow: 'rgba(40,92,110,0.35)', badge: 'bg-[#285C6E]' },
-    { line: '#4E6E2E', glow: 'rgba(78,110,46,0.35)', badge: 'bg-[#4E6E2E]' },
-    { line: '#6E4E2E', glow: 'rgba(110,78,46,0.35)', badge: 'bg-[#6E4E2E]' },
+    { line: '#207050', glow: 'rgba(32,112,80,0.35)', badge: 'bg-[#207050]' },
+    { line: '#1E5E40', glow: 'rgba(30,94,64,0.35)', badge: 'bg-[#1E5E40]' },
   ];
   const accent = accentPalette[index % accentPalette.length];
 

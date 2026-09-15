@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Menu, X, Send, CirclePlay, MessageCircle } from 'lucide-react';
 import logoImg from '@/assets/img/ormonlogo.png';
 import digitalCenterLogo from '@/assets/img/raqamlashtirishlogo.png';
 import { Button } from '../ui/button';
@@ -461,6 +461,19 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
                   <span className="text-xs text-gray-200">{hours}</span>
                 </li>
               )}
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#0e3b26] flex items-center justify-center shrink-0 text-[#2ED177]">
+                  <MessageCircle className="w-4 h-4" />
+                </div>
+                <a
+                  href="https://t.me/Ruxsatnoma_support_bot"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-gray-200 hover:text-white transition-colors"
+                >
+                  Telegram bot
+                </a>
+              </li>
             </ul>
           </div>
         </div>
