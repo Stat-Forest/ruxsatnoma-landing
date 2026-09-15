@@ -519,8 +519,13 @@ export const VerifyPage: React.FC = () => {
                       {t('verify.result.signaturesTitle')}
                     </span>
                     <ul className="mt-2 space-y-1 text-xs text-[#1A1F24]">
-                      {result.signatures.map((row) => (
-                        <li key={row.line} className="flex justify-between gap-3">
+                      {/* Index, not `row.line`: a returned-and-resubmitted
+                          application signs `application_submit` again, so the
+                          same line legitimately repeats with a different
+                          `signed_on` — the API gives no per-line id, and
+                          `line`+`signed_on` is not unique either (date-only). */}
+                      {result.signatures.map((row, index) => (
+                        <li key={`${row.line}-${index}`} className="flex justify-between gap-3">
                           <span>{pickLocalized(row.line_label, uiLanguage) || row.line}</span>
                           <span className="font-mono text-[#5A646D]">{row.signed_on}</span>
                         </li>

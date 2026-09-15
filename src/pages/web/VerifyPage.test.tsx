@@ -192,6 +192,48 @@ describe('VerifyPage — permit arm', () => {
   });
 
   /**
+   * A returned-and-resubmitted application signs `application_submit` again
+   * (same line, a later `signed_on`) — designed behaviour, not a data bug.
+   * Both rows must render (and React must not warn about a duplicate key,
+   * which is what keying by `row.line` alone would produce).
+   */
+  it('renders both dates when the same signature line repeats', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: {
+        ...foundPermit,
+        signatures: [
+          {
+            line: 'application_submit',
+            line_label: { ru: 'Заявитель (подпись заявления)', uz_latn: 'Ariza beruvchi (ariza imzosi)', uz_cyrl: 'Аризачи (ариза имзоси)' },
+            signed_on: '2027-03-10',
+            kind: 'simple',
+          },
+          {
+            line: 'application_submit',
+            line_label: { ru: 'Заявитель (подпись заявления)', uz_latn: 'Ariza beruvchi (ariza imzosi)', uz_cyrl: 'Аризачи (ариза имзоси)' },
+            signed_on: '2027-04-01',
+            kind: 'simple',
+          },
+        ],
+      },
+      error: undefined,
+    });
+    renderVerify();
+    const user = userEvent.setup();
+
+    await searchPermit(user, 'A', '123');
+
+    expect(await screen.findByText('2027-03-10')).toBeInTheDocument();
+    expect(screen.getByText('2027-04-01')).toBeInTheDocument();
+    const keyWarning = consoleError.mock.calls.some((args) =>
+      args.some((arg) => typeof arg === 'string' && arg.includes('same key')),
+    );
+    expect(keyWarning).toBe(false);
+    consoleError.mockRestore();
+  });
+
+  /**
    * An empty `signatures` array must render no caption at all — a heading
    * over nothing would be the "hiding data" defect direction inverted: it
    * would claim signature lines exist when none were reported.
