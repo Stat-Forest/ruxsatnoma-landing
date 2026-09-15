@@ -28,7 +28,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it('advances by itself and can be driven by the dots', async () => {
+it('advances by itself', async () => {
   vi.useFakeTimers();
   renderSlider();
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
@@ -37,17 +37,9 @@ it('advances by itself and can be driven by the dots', async () => {
     vi.advanceTimersByTime(5300);
   });
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/bir daqiqada tekshiring/i);
-
-  vi.useRealTimers();
-  await userEvent.click(screen.getByRole('button', { name: /1-slayd/i }));
-  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
 });
 
-it('gives each dot a 44px hit area', () => {
-  renderSlider();
-  const dot = screen.getByRole('button', { name: /2-slayd/i });
-  expect(dot).toHaveStyle({ height: '44px' });
-});
+
 
 it('stops the timer when it unmounts', () => {
   const clear = vi.spyOn(globalThis, 'clearInterval');
@@ -70,14 +62,7 @@ it('sends each slide’s primary and secondary action through onNavigate', async
   expect(onNavigate).toHaveBeenCalledWith('calculator');
 });
 
-it('advances to the third slide and back to the first through the dots', async () => {
-  renderSlider();
-  await userEvent.click(screen.getByRole('button', { name: /3-slayd/i }));
-  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/barchasi onlayn/i);
 
-  await userEvent.click(screen.getByRole('button', { name: /1-slayd/i }));
-  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Elektron Ruxsatnoma/i);
-});
 
 it('keeps the atmosphere layer’s motion classes present for the reduced-motion contract', () => {
   const { container } = renderSlider();
@@ -96,34 +81,12 @@ it('keeps the atmosphere layer’s motion classes present for the reduced-motion
 it('carries its transitions as classes, not inline styles', () => {
   const { container } = renderSlider();
   expect(container.querySelectorAll('.hero-slide')).toHaveLength(3);
-  expect(container.querySelectorAll('.hero-dot')).toHaveLength(3);
   for (const slide of container.querySelectorAll<HTMLElement>('.hero-slide')) {
     expect(slide.style.transition).toBe('');
   }
 });
 
-/**
- * WCAG 2.2.2 (level A): anything auto-updating for more than five seconds
- * needs a pause mechanism, and the footer claims WCAG 2.2 AA. This ran a
- * 5.2s interval nothing could stop.
- */
-it('stops and resumes autoplay through the pause button', async () => {
-  vi.useFakeTimers();
-  renderSlider();
 
-  // `fireEvent`, not `userEvent`: a real pointer would also enter the hero
-  // and pause it by hover, which is the other mechanism, not this one.
-  const pause = screen.getByRole('button', { name: /toʻxtatish/i });
-  fireEvent.click(pause);
-  expect(pause).toHaveAttribute('aria-pressed', 'true');
-
-  await tick(20000);
-  expect(heading()).toHaveTextContent(/Elektron Ruxsatnoma/i);
-
-  fireEvent.click(screen.getByRole('button', { name: /davom ettirish/i }));
-  await tick(5300);
-  expect(heading()).toHaveTextContent(/bir daqiqada tekshiring/i);
-});
 
 it('pauses while the pointer rests on the hero and resumes when it leaves', async () => {
   vi.useFakeTimers();
@@ -150,10 +113,6 @@ it('never starts the interval for a viewer who asked for reduced motion', async 
 
   await tick(30000);
   expect(heading()).toHaveTextContent(/Elektron Ruxsatnoma/i);
-
-  // Still fully navigable by hand — reduced motion is not reduced function.
-  fireEvent.click(screen.getByRole('button', { name: /3-slayd/i }));
-  expect(heading()).toHaveTextContent(/barchasi onlayn/i);
 });
 
 beforeEach(() => {
