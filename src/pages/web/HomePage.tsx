@@ -21,6 +21,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/FormControls';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { SkewedCarousel } from '../../components/ui/SkewedCarousel';
+import { Typewriter } from '../../components/ui/Typewriter';
 import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/PriceCalculator';
 import { HeroSlider } from '../../components/home/HeroSlider';
 import { LandingBackground } from '../../components/home/LandingBackground';
@@ -29,6 +30,9 @@ import { SeasonStrip } from '../../components/home/SeasonStrip';
 import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { SERVICE_IMAGES } from '../../assets/img/services';
 import supportBgImage from '../../assets/img/support-bg.jpg';
+import contactBgImage from '../../assets/img/contact-bg.jpg';
+import statsBgImage from '../../assets/img/stats-bg.jpg';
+import servicesPatternImg from '../../assets/img/services-pattern.jpg';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
@@ -572,23 +576,15 @@ export const HomePage: React.FC<HomePageProps> = ({
           under the header, matching the negative-margin overlap the
           quick-check strip below it needs too. `PublicLayout` renders no
           hero of its own — this is the only one on the page. */}
-      <div>
+      <div className="!mb-0 mb-0">
         <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen -mt-10">
           <HeroSlider onNavigate={onNavigate} />
         </div>
 
-        {/* ── 1. QUICK CHECK STRIP ─────────────────────────────────────
-            Overlaps the hero's bottom edge, matching `Main.dc.html`'s own
-            `margin-top: -56px` treatment. The hero and the strip share ONE
-            wrapper on purpose: the page root is `space-y-16`, which under
-            Tailwind v4 puts `margin-bottom: 4rem` on every child but the
-            last — on the hero, that 64px pushed the strip clear of it and
-            the `-mt-14` overlap netted out to an 8px gap (Oybek's
-            screenshot, 2026-09-10). Inside a shared wrapper the gap lands
-            after the strip, where it belongs. */}
+        {/* ── 1. QUICK CHECK STRIP ───────────────────────────────────── */}
         <section
           ref={quickCheckRef}
-          className={`relative z-10 -mt-14 sm:-mt-16 ${quickCheckInView ? 'reveal' : 'opacity-0'}`}
+          className={`relative z-20 -mt-14 sm:-mt-16 !mb-0 mb-0 ${quickCheckInView ? 'reveal' : 'opacity-0'}`}
         >
         <form
           onSubmit={handleQuickSearch}
@@ -637,173 +633,194 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       {/* ── 2. SIX DIRECTIONS ───────────────────────────────────────── */}
-      <section ref={activitiesRef} className="relative z-10 space-y-6 overflow-visible">
-        {/* Left glowing tree */}
-        <img
-          src="/img/bg/tree_glow_nobg.png"
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none select-none absolute -left-20 sm:-left-32 lg:-left-44 top-0 w-40 sm:w-56 lg:w-72 h-auto opacity-40 -z-10"
-          style={{ transform: 'translateY(-20%) scaleX(-1)' }}
-        />
-        <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
-          <div>
-            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
-            <h2 className="text-2xl font-bold text-[#1A1F24] mt-2">{t('home.activities.sectionTitle')}</h2>
-            <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">{t('home.activities.sectionSubtitle')}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            rightIcon={<ChevronRight className="w-4 h-4" />}
-            onClick={() => onNavigate?.('activities')}
-          >
-            {t('home.activities.viewAllButton')}
-          </Button>
+      <section 
+        ref={activitiesRef} 
+        className="relative left-1/2 -translate-x-1/2 w-screen z-10 -mt-8 sm:-mt-10 pt-12 sm:pt-16 !mb-0 mb-0 pb-8 sm:pb-12 overflow-hidden border-t border-[#D6E6DB]/40"
+      >
+        {/* Soft, faint Line-Art Pattern Background Image */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img 
+            src={servicesPatternImg} 
+            alt="Services Line-art Pattern" 
+            className="w-full h-full object-cover object-center opacity-30 blur-[1px] brightness-95"
+          />
+          {/* Light softening veil for optimal text legibility */}
+          <div className="absolute inset-0 bg-[#E6F4EA]/50 backdrop-blur-[0.5px] pointer-events-none" />
+          {/* Gentle edge gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#E6F4EA]/60 via-transparent to-[#E6F4EA]/60" />
         </div>
 
-        {/* The six illustrated cards below come from the same catalog
-            `ServicesPage` reads (`api/services.ts`), each keyed off the
-            activity's `code` to the matching `<Scene>` — never the reverse,
-            so the two pages can never list a different set of services. */}
-        {servicesState.status === 'loading' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities-loading">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-white/95 backdrop-blur-xs border border-[#D6E6DB] rounded-2xl overflow-hidden shadow-xs"
-              >
-                <Skeleton height="h-[178px]" className="rounded-none" />
-                <div className="p-6 space-y-3">
-                  <Skeleton height="h-6" width="w-3/4" />
-                  <Skeleton height="h-4" width="w-full" />
-                  <Skeleton height="h-4" width="w-5/6" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
+            <div>
+              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
+              <h2 className="text-2xl font-bold text-[#1A1F24] mt-2">
+                <Typewriter text={t('home.activities.sectionTitle')} start={activitiesInView} />
+              </h2>
+              <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">{t('home.activities.sectionSubtitle')}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-2 border-[#2E7D4F] text-[#2E7D4F] bg-white/90 hover:bg-[#2E7D4F] hover:text-white font-bold shadow-xs transition-all duration-200"
+              rightIcon={<ChevronRight className="w-4 h-4" />}
+              onClick={() => onNavigate?.('activities')}
+            >
+              {t('home.activities.viewAllButton')}
+            </Button>
+          </div>
+
+          {servicesState.status === 'loading' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="home-activities-loading">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white/95 backdrop-blur-xs border border-[#D6E6DB] rounded-2xl overflow-hidden shadow-xs"
+                >
+                  <Skeleton height="h-[178px]" className="rounded-none" />
+                  <div className="p-6 space-y-3">
+                    <Skeleton height="h-6" width="w-3/4" />
+                    <Skeleton height="h-4" width="w-full" />
+                    <Skeleton height="h-4" width="w-5/6" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* A plain `<p>` here used to say the catalog failed to load with no
-            `role="alert"` — a screen-reader user was never told the section
-            failed, unlike `ServicesPage`'s own catalog error a click away.
-            Same `Alert` component, same posture. The wrapping `data-testid`
-            disambiguates this alert from the price calculator's own — both
-            read `/public/refs/activity-types` and so fail together. */}
-        {servicesState.status === 'error' && (
-          <div data-testid="home-activities-error">
-            <Alert variant="danger">{t('home.activities.failed')}</Alert>
-          </div>
-        )}
-
-        {servicesState.status === 'ready' && servicesState.items.length === 0 && (
-          <p className="text-xs text-[#5A646D]">{t('home.activities.empty')}</p>
-        )}
-
-        {servicesState.status === 'ready' && servicesState.items.length > 0 && (
-          <div data-testid="home-activities" className="mt-8 relative left-1/2 -translate-x-1/2 w-[90vw]">
-            <SkewedCarousel
-              items={servicesState.items.map((svc, idx) => (
-                <DirectionCard
-                  key={svc.id}
-                  service={svc}
-                  index={idx}
-                  language={language}
-                  t={t}
-                  onNavigate={onNavigate}
-                  inView={true} // Carousel handles its own display
-                />
               ))}
-            />
-          </div>
-        )}
+            </div>
+          )}
+
+          {servicesState.status === 'error' && (
+            <div data-testid="home-activities-error">
+              <Alert variant="danger">{t('home.activities.failed')}</Alert>
+            </div>
+          )}
+
+          {servicesState.status === 'ready' && servicesState.items.length === 0 && (
+            <p className="text-xs text-[#5A646D]">{t('home.activities.empty')}</p>
+          )}
+
+          {servicesState.status === 'ready' && servicesState.items.length > 0 && (
+            <div data-testid="home-activities" className="mt-8 relative left-1/2 -translate-x-1/2 w-[90vw]">
+              <SkewedCarousel
+                items={servicesState.items.map((svc, idx) => (
+                  <DirectionCard
+                    key={svc.id}
+                    service={svc}
+                    index={idx}
+                    language={language}
+                    t={t}
+                    onNavigate={onNavigate}
+                    inView={true}
+                  />
+                ))}
+              />
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ── 3. STATISTICS + RATING ──────────────────────────────────── */}
-      <section ref={statsRef} className="relative z-10">
-        <div className={`max-w-xl mb-8 ${statsInView ? 'reveal' : 'opacity-0'}`}>
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-xs font-bold uppercase tracking-wider text-[#23653F]">
-            {sectionText.statsBadge}
-          </span>
-          <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-[#123522] tracking-tight">
-            {sectionText.statsTitle}
-          </h2>
-          <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#5A646D]">
-            {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
-            <b className="text-[#1A1F24]">
-              {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
-            </b>{' '}
-            {t('home.opendata.kAnonymity.after')}
-          </p>
-          {statsState.status === 'error' && (
-            <p className="mt-2 text-sm text-[#B45309]">{t('home.opendata.unavailable')}</p>
-          )}
+      <section 
+        ref={statsRef} 
+        className="relative left-1/2 -translate-x-1/2 w-screen !mt-0 mt-0 mb-12 py-12 sm:py-16 overflow-hidden border-b border-[#D6E6DB]/40"
+      >
+        {/* Full-width Screen Background Image (Clear, Bright, No Dark Overlay) */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img 
+            src={statsBgImage} 
+            alt="Forest Statistics & Digital Analytics" 
+            className="w-full h-full object-cover object-center opacity-100 scale-105 transition-transform duration-1000 hover:scale-100"
+          />
+          {/* Subtle vignette layer only at edges for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B2317]/30 via-transparent to-[#0B2317]/40" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start mb-6 sm:mb-8">
-          {stats.map((st, idx) => {
-            const isLower = idx % 2 === 1; // 1-card va 3-card teparoqda (idx 0, 2), 2-card va 4-card pastroqda (idx 1, 3)
-            return (
-              <div
-                key={st.testId}
-                data-testid={st.testId}
-                className={`group relative card-lift ${
-                  statsInView ? 'reveal' : 'opacity-0'
-                } bg-white/95 backdrop-blur-sm border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl p-5 shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_18px_38px_rgba(18,53,34,0.12)] transition-all duration-300 overflow-hidden ${
-                  isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'
-                }`}
-                style={{ animationDelay: `${idx * 0.12}s` }}
-              >
-                {/* Top subtle highlight gradient bar on hover */}
-                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#2E7D4F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
-                {/* Ambient corner light */}
-                <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-2xl group-hover:bg-[#2E7D4F]/10 transition-colors pointer-events-none" />
+        {/* Content Container aligned with site grid */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className={`max-w-2xl mb-8 ${statsInView ? 'reveal' : 'opacity-0'}`}>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#123522]/80 border border-[#34D399]/40 text-xs font-bold uppercase tracking-wider text-[#6EE7B7] backdrop-blur-md shadow-md">
+              <Trees className="w-3.5 h-3.5 text-[#34D399]" />
+              {sectionText.statsBadge}
+            </span>
+            <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+              {sectionText.statsTitle}
+            </h2>
+            <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-white/95 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+              {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
+              <b className="text-white underline decoration-[#34D399]">
+                {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
+              </b>{' '}
+              {t('home.opendata.kAnonymity.after')}
+            </p>
+            {statsState.status === 'error' && (
+              <p className="mt-2 text-sm text-[#FCD34D] font-bold drop-shadow">{t('home.opendata.unavailable')}</p>
+            )}
+          </div>
 
-                {/* Top row: Icon + Live / Verified badge */}
-                <div className="flex items-center justify-between gap-2 mb-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EEF7F1] to-[#DCF0E2] border border-[#C2E6CD] flex items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-105 transition-transform duration-200">
-                    {st.icon}
-                  </div>
-                  {idx < 2 ? (
-                    <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#23653F] bg-[#E8F5ED] px-2.5 py-0.5 rounded-full border border-[#C6E7D0]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                      {idx === 0 ? 'Reyestr' : 'GIS'}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#767F87] bg-[#F4F6F5] px-2 py-0.5 rounded-full border border-[#E0E5E2]">
-                      Maxfiy
-                    </span>
-                  )}
-                </div>
-
-                {/* Value / Raqam (smaller, sharper modern font) */}
+          {/* Grid of Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
+            {stats.map((st, idx) => {
+              const isLower = idx % 2 === 1;
+              return (
                 <div
-                  className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight ${
-                    st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'
+                  key={st.testId}
+                  data-testid={st.testId}
+                  className={`group relative card-lift ${
+                    statsInView ? 'reveal' : 'opacity-0'
+                  } bg-white/95 backdrop-blur-md border border-white/80 hover:border-white rounded-2xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:shadow-[0_22px_50px_rgba(52,211,153,0.35)] hover:-translate-y-2.5 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden ${
+                    isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'
                   }`}
+                  style={{ animationDelay: `${idx * 0.12}s` }}
                 >
-                  {st.value}
-                </div>
+                  {/* Ambient corner light */}
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-2xl group-hover:bg-[#2E7D4F]/10 transition-colors pointer-events-none" />
 
-                {/* Sarlavha (kichikroq va ixcham) */}
-                <div className="mt-1.5 text-[13px] font-bold text-[#1A1F24] leading-snug">
-                  {st.label}
-                </div>
+                  {/* Top row: Icon + Live / Verified badge */}
+                  <div className="flex items-center justify-between gap-2 mb-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EEF7F1] to-[#DCF0E2] border border-[#C2E6CD] flex items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-105 transition-transform duration-200">
+                      {st.icon}
+                    </div>
+                    {idx < 2 ? (
+                      <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#23653F] bg-[#E8F5ED] px-2.5 py-0.5 rounded-full border border-[#C6E7D0]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                        {idx === 0 ? 'Reyestr' : 'GIS'}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#767F87] bg-[#F4F6F5] px-2 py-0.5 rounded-full border border-[#E0E5E2]">
+                        Maxfiy
+                      </span>
+                    )}
+                  </div>
 
-                {/* Izoh / Note (pastki chegara chizig'i bilan) */}
-                <div className="mt-3 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
-                  <span className="text-[11px] text-[#717C85] leading-relaxed line-clamp-1">
-                    {st.note}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  {/* Value */}
+                  <div
+                    className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight ${
+                      st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'
+                    }`}
+                  >
+                    {st.value}
+                  </div>
 
-        <div className={statsInView ? 'reveal' : 'opacity-0'} style={{ animationDelay: '0.45s' }}>
-          <RatingBand state={ratingState} />
+                  {/* Label */}
+                  <div className="mt-1.5 text-[13px] font-bold text-[#1A1F24] leading-snug">
+                    {st.label}
+                  </div>
+
+                  {/* Note */}
+                  <div className="mt-3 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
+                    <span className="text-[11px] text-[#717C85] leading-relaxed line-clamp-1">
+                      {st.note}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Integrated Rating Band INSIDE the full-bleed section */}
+          <div className={`mt-10 pt-6 border-t border-white/20 ${statsInView ? 'reveal' : 'opacity-0'}`} style={{ animationDelay: '0.45s' }}>
+            <RatingBand state={ratingState} />
+          </div>
         </div>
       </section>
 
@@ -820,90 +837,100 @@ export const HomePage: React.FC<HomePageProps> = ({
       )}
 
       {/* ── 5. HOW IT WORKS — FOUR STEPS ─────────────────────────────── */}
-      <section ref={stepsRef} className="relative z-10">
-        <div className={`max-w-xl mb-5 ${stepsInView ? 'reveal' : 'opacity-0'}`}>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
-            {t('home.steps.sectionBadge')}
-          </span>
-          <h2 className="mt-2 text-xl sm:text-2xl leading-tight font-black text-[#123522] tracking-tight">
-            {t('home.steps.sectionTitle')}
-          </h2>
-          <p className="mt-1 text-xs sm:text-[12.5px] leading-relaxed text-[#5A646D]">
-            {t('home.steps.sectionSubtitle')}
-          </p>
-        </div>
+      <section ref={stepsRef} className="relative z-10 my-12">
+        <div className="relative rounded-3xl overflow-hidden border border-[#2E7D4F]/30 p-6 sm:p-10 shadow-[0_20px_50px_rgba(10,35,22,0.2)] bg-gradient-to-br from-[#0B2617] via-[#123C26] to-[#081F13]">
+          {/* Glowing Ambient Background Orbs */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#34D399]/15 rounded-full blur-3xl" />
+            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#2E7D4F]/25 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.08),transparent_70%)]" />
+          </div>
 
-        <div className="relative">
-          {/* Luminous pipeline connecting line behind cards on desktop */}
-          <div className="hidden lg:block absolute left-8 right-8 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[#2E7D4F]/15 via-[#34D399]/35 to-[#2E7D4F]/15 z-0 pointer-events-none" />
+          <div className="relative z-10">
+            {/* Header */}
+            <div className={`max-w-xl mb-8 ${stepsInView ? 'reveal' : 'opacity-0'}`}>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 text-xs font-bold uppercase tracking-wider text-[#6EE7B7] backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+                {t('home.steps.sectionBadge')}
+              </span>
+              <h2 className="mt-3 text-2xl sm:text-3xl leading-tight font-black text-white tracking-tight drop-shadow-sm">
+                {t('home.steps.sectionTitle')}
+              </h2>
+              <p className="mt-2 text-sm sm:text-[14.5px] leading-relaxed text-[#D1E7DD]">
+                {t('home.steps.sectionSubtitle')}
+              </p>
+            </div>
 
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-4">
-            {[
-              { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: t('home.steps.01.tag'), cosmosClass: 'cosmos-a' },
-              { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: t('home.steps.02.tag'), cosmosClass: 'cosmos-b' },
-              { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: t('home.steps.03.tag'), cosmosClass: 'cosmos-c' },
-              { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: t('home.steps.04.tag'), cosmosClass: 'cosmos-d' },
-            ].map(({ Icon, bg, tag, cosmosClass }, idx) => (
-              <div
-                key={idx}
-                className={`relative ${stepsInView ? 'reveal' : 'opacity-0'}`}
-                style={{ animationDelay: `${idx * 0.12}s` }}
-              >
-                <div
-                  className={`group relative ${cosmosClass} bg-white/95 backdrop-blur-md border border-[#D6E6DB] hover:border-[#2E7D4F] rounded-2xl p-4 sm:p-5 transition-all duration-500 flex flex-col justify-between h-full overflow-hidden hover:[animation-play-state:paused] hover:-translate-y-3 hover:shadow-[0_24px_48px_rgba(18,53,34,0.16),0_0_25px_rgba(74,222,128,0.22)]`}
-                >
-                  {/* Top green accent sheen on hover */}
-                  <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#2E7D4F] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative">
+              {/* Luminous pipeline connecting line behind cards on desktop */}
+              <div className="hidden lg:block absolute left-8 right-8 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[#34D399]/20 via-[#34D399]/60 to-[#34D399]/20 z-0 pointer-events-none" />
 
-                  {/* Soft ambient corner light */}
-                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-xl group-hover:bg-[#2E7D4F]/15 transition-colors pointer-events-none" />
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-2">
+                {[
+                  { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: t('home.steps.01.tag'), cosmosClass: 'cosmos-a' },
+                  { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: t('home.steps.02.tag'), cosmosClass: 'cosmos-b' },
+                  { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: t('home.steps.03.tag'), cosmosClass: 'cosmos-c' },
+                  { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: t('home.steps.04.tag'), cosmosClass: 'cosmos-d' },
+                ].map(({ Icon, bg, tag, cosmosClass }, idx) => (
+                  <div
+                    key={idx}
+                    className={`relative ${stepsInView ? 'reveal' : 'opacity-0'}`}
+                    style={{ animationDelay: `${idx * 0.12}s` }}
+                  >
+                    <div
+                      className={`group relative ${cosmosClass} bg-white/95 backdrop-blur-md border border-white/80 hover:border-white rounded-2xl p-4 sm:p-5 transition-all duration-500 flex flex-col justify-between h-full overflow-hidden hover:[animation-play-state:paused] hover:-translate-y-3 hover:shadow-[0_24px_48px_rgba(0,0,0,0.3),0_0_25px_rgba(74,222,128,0.25)]`}
+                    >
+                      {/* Soft ambient corner light */}
+                      <div className="absolute -top-8 -right-8 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-xl group-hover:bg-[#2E7D4F]/15 transition-colors pointer-events-none" />
 
-                  <div>
-                    {/* Top row: Gradient icon + Watermark Step Number */}
-                    <div className="flex items-center justify-between gap-2.5 mb-3">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_3px_12px_rgba(18,53,34,0.15)] group-hover:scale-110 group-hover:rotate-2 group-hover:shadow-[0_6px_18px_rgba(46,125,79,0.3)] transition-all duration-300"
-                        style={{ background: bg }}
-                      >
-                        <Icon className="w-5 h-5 text-[#A7F3D0]" />
+                      <div>
+                        {/* Top row: Gradient icon + Watermark Step Number */}
+                        <div className="flex items-center justify-between gap-2.5 mb-3">
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_3px_12px_rgba(18,53,34,0.15)] group-hover:scale-110 group-hover:rotate-2 group-hover:shadow-[0_6px_18px_rgba(46,125,79,0.3)] transition-all duration-300"
+                            style={{ background: bg }}
+                          >
+                            <Icon className="w-5 h-5 text-[#A7F3D0]" />
+                          </div>
+                          <span className="font-mono text-2xl font-black text-[#123522]/15 group-hover:text-[#2E7D4F]/30 tracking-tighter transition-colors">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                        </div>
+
+                        {/* Step Sub-label & Title & Desc */}
+                        <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] animate-pulse" />
+                          {`${t('home.steps.stepPrefix')} 0${idx + 1}`}
+                        </div>
+                        <h3 className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
+                          {t(`home.steps.0${idx + 1}.title`)}
+                        </h3>
+                        <p className="mt-1 text-[11.5px] leading-relaxed text-[#5A646D]">
+                          {t(`home.steps.0${idx + 1}.desc`)}
+                        </p>
                       </div>
-                      <span className="font-mono text-2xl font-black text-[#123522]/15 group-hover:text-[#2E7D4F]/30 tracking-tighter transition-colors">
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
+
+                      {/* Bottom Divider & Micro-badge */}
+                      <div className="mt-3.5 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
+                        <span className="text-[9.5px] font-bold text-[#23653F] bg-[#F0F8F3] px-2 py-0.5 rounded-full border border-[#D5EBDC]">
+                          {tag}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-[#8A969F]">
+                          {`${idx + 1} / 4`}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Step Sub-label & Title & Desc */}
-                    <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] animate-pulse" />
-                      {`${t('home.steps.stepPrefix')} 0${idx + 1}`}
-                    </div>
-                    <h3 className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
-                      {t(`home.steps.0${idx + 1}.title`)}
-                    </h3>
-                    <p className="mt-1 text-[11.5px] leading-relaxed text-[#5A646D]">
-                      {t(`home.steps.0${idx + 1}.desc`)}
-                    </p>
+                    {/* Forward pipeline connector arrow to next step (for desktop) */}
+                    {idx < 3 && (
+                      <div className="hidden lg:flex absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full bg-white border border-[#C6E5CF] items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-110 group-hover:border-[#2E7D4F] transition-all pointer-events-none">
+                        <ArrowRight className="w-2.5 h-2.5" />
+                      </div>
+                    )}
                   </div>
-
-                  {/* Bottom Divider & Micro-badge */}
-                  <div className="mt-3.5 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
-                    <span className="text-[9.5px] font-bold text-[#23653F] bg-[#F0F8F3] px-2 py-0.5 rounded-full border border-[#D5EBDC]">
-                      {tag}
-                    </span>
-                    <span className="text-[9.5px] font-semibold text-[#8A969F]">
-                      {`${idx + 1} / 4`}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Forward pipeline connector arrow to next step (for desktop) */}
-                {idx < 3 && (
-                  <div className="hidden lg:flex absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full bg-white border border-[#C6E5CF] items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-110 group-hover:border-[#2E7D4F] transition-all pointer-events-none">
-                    <ArrowRight className="w-2.5 h-2.5" />
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -915,19 +942,31 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section
         ref={calcRef}
         aria-labelledby="calculator-heading"
-        className={`relative z-10 space-y-4 ${calcInView ? 'reveal' : 'opacity-0'}`}
+        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 overflow-hidden ${calcInView ? 'reveal' : 'opacity-0'}`}
+        style={{
+          backgroundImage: `url(${contactBgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
       >
-        <div className="text-center space-y-2 max-w-xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-[#C6E5CF] text-[11px] font-bold uppercase tracking-wider text-[#2E7D4F] shadow-xs">
-            <CalculatorIcon className="w-3 h-3 text-[#2E7D4F]" />
-            {t('tariffs.header.badge')}
-          </span>
-          <h2 id="calculator-heading" className="text-xl sm:text-2xl font-black text-[#123522] tracking-tight">
-            {t('tariffs.header.title')}
-          </h2>
-          <p className="text-xs sm:text-[13px] text-[#5A646D] leading-relaxed">{t('tariffs.header.subtitle')}</p>
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-[#0a2015]/30 pointer-events-none z-0" />
+        <div className="relative max-w-7xl mx-auto px-6 py-10 sm:py-14 space-y-6">
+          <div className="relative z-10 text-center space-y-2 max-w-xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/30 text-[11px] font-bold uppercase tracking-wider text-[#9CE3AE] shadow-xs backdrop-blur-sm">
+              <CalculatorIcon className="w-3 h-3 text-[#9CE3AE]" />
+              {t('tariffs.header.badge')}
+            </span>
+            <h2 id="calculator-heading" className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-md">
+              {t('tariffs.header.title')}
+            </h2>
+            <p className="text-xs sm:text-[13px] text-[#C4D8C9] leading-relaxed">{t('tariffs.header.subtitle')}</p>
+          </div>
+          <div className="relative z-10">
+            <PriceCalculator />
+          </div>
         </div>
-        <PriceCalculator />
       </section>
 
       {/* ── 6. MAP BAND ──────────────────────────────────────────────
@@ -1164,7 +1203,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   key={item.id}
                   to={`/news/${item.id}`}
                   data-testid={`home-news-${item.id}`}
-                  className="block bg-white border-2 border-[#2E7D4F]/60 rounded-2xl overflow-hidden shadow-[0_16px_36px_rgba(18,53,34,0.12)] ring-4 ring-[#2E7D4F]/10 hover:shadow-[0_22px_44px_rgba(18,53,34,0.16)] transition-all duration-300 group"
+                  className={`block bg-white border-2 border-[#2E7D4F]/60 rounded-2xl overflow-hidden shadow-[0_16px_36px_rgba(18,53,34,0.12)] ring-4 ring-[#2E7D4F]/10 hover:shadow-[0_22px_44px_rgba(18,53,34,0.16)] transition-all duration-300 group ${newsInView ? 'reveal' : 'opacity-0'}`}
                 >
                   <div className="h-2 bg-gradient-to-r from-[#1B5E20] via-[#34D399] to-[#2E7D4F]" />
                   <div className="p-6 sm:p-7 flex flex-col justify-between min-h-[220px]">
@@ -1211,7 +1250,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                         isCenter
                           ? 'bg-white border-2 border-[#2E7D4F] shadow-none md:scale-105 z-20'
                           : 'bg-white/95 border border-[#D6E6DB] hover:border-[#7FB98A]'
-                      }`}
+                      } ${newsInView ? 'reveal' : 'opacity-0'}`}
+                      style={{ animationDelay: `${idx * 150}ms` }}
                     >
                       <div className={`h-2 shrink-0 ${isCenter ? 'bg-gradient-to-r from-[#1B5E20] via-[#34D399] to-[#2E7D4F]' : 'bg-[#2E7D4F]'}`} />
                       <div className="p-6 flex flex-col justify-between flex-1">
@@ -1264,7 +1304,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                     return (
                       <div
                         key={`slide-${idx}-${item.id}`}
-                        className="w-full md:w-1/3 shrink-0 px-2.5 sm:px-3 py-3 flex flex-col"
+                        className={`w-full md:w-1/3 shrink-0 px-2.5 sm:px-3 py-3 flex flex-col ${newsInView ? 'reveal' : 'opacity-0'}`}
+                        style={{ animationDelay: `${(idx % 3) * 150}ms` }}
                       >
                         <SafeLink
                           to={`/news/${item.id}`}
@@ -1481,7 +1522,7 @@ function DirectionCard({
   return (
     <div
       data-testid="direction-card"
-      className={`group card-lift ${animClass} bg-white border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_16px_36px_rgba(18,53,34,0.12)] transition-all duration-300`}
+      className={`group card-lift ${animClass} bg-white border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_18px_40px_rgba(18,53,34,0.16)] hover:-translate-y-2.5 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]`}
       style={{ animationDelay: delay }}
     >
       <div className="relative h-[185px] overflow-hidden bg-[#EAF3EC]">

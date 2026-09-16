@@ -111,6 +111,13 @@
     padding: 0;
   }
 
+  @media (pointer: fine) {
+    /* 
+     * Hiding the default cursor is disabled as per user request.
+     * The custom cursor components will just follow the standard cursor. 
+     */
+  }
+
   /* Big Titles (H1, H2, .font-serif) use Merriweather */
   h1, h2, .font-serif, .font-heading {
     font-family: var(--font-family-serif);
