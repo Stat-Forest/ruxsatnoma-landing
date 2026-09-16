@@ -635,7 +635,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ── 2. SIX DIRECTIONS ───────────────────────────────────────── */}
       <section 
         ref={activitiesRef} 
-        className="relative left-1/2 -translate-x-1/2 w-screen z-10 -mt-8 sm:-mt-10 pt-12 sm:pt-16 !mb-0 mb-0 pb-8 sm:pb-12 overflow-hidden border-t border-[#D6E6DB]/40"
+        className="relative left-1/2 -translate-x-1/2 w-screen z-10 -mt-8 sm:-mt-10 pt-12 sm:pt-16 !mb-0 mb-0 pb-16 sm:pb-20 overflow-visible"
       >
         {/* Soft, faint Line-Art Pattern Background Image */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -647,8 +647,15 @@ export const HomePage: React.FC<HomePageProps> = ({
           {/* Light softening veil for optimal text legibility */}
           <div className="absolute inset-0 bg-[#E6F4EA]/50 backdrop-blur-[0.5px] pointer-events-none" />
           {/* Gentle edge gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#E6F4EA]/60 via-transparent to-[#E6F4EA]/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#E6F4EA]/60 via-transparent to-[#E6F4EA]/40" />
+          {/* Top smooth blend from page background */}
+          <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#E6F4EA] to-transparent pointer-events-none z-10" />
+          {/* Seamless Bottom Gradient Blend into Section 3 (Medium Green) */}
+          <div className="absolute bottom-0 inset-x-0 h-20 sm:h-32 bg-gradient-to-b from-transparent to-[#225336] pointer-events-none z-10" />
         </div>
+
+        {/* Smudge blur layer for a completely seamless scattered transition into Section 3 */}
+        <div className="absolute bottom-[-32px] inset-x-0 h-[64px] bg-[#225336] blur-[24px] pointer-events-none z-0" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
@@ -721,17 +728,22 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ── 3. STATISTICS + RATING ──────────────────────────────────── */}
       <section 
         ref={statsRef} 
-        className="relative left-1/2 -translate-x-1/2 w-screen !mt-0 mt-0 mb-12 py-12 sm:py-16 overflow-hidden border-b border-[#D6E6DB]/40"
+        className="relative left-1/2 -translate-x-1/2 w-screen !-mt-[1px] mb-12 py-16 sm:py-20 overflow-hidden"
       >
         {/* Full-width Screen Background Image (Clear, Bright, No Dark Overlay) */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)' }}
+        >
           <img 
             src={statsBgImage} 
             alt="Forest Statistics & Digital Analytics" 
             className="w-full h-full object-cover object-center opacity-100 scale-105 transition-transform duration-1000 hover:scale-100"
           />
-          {/* Subtle vignette layer only at edges for text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0B2317]/30 via-transparent to-[#0B2317]/40" />
+          {/* Main vignette layer for contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B2317]/30 via-transparent to-[#0B2317]/50 pointer-events-none z-0" />
+          {/* Seamless Top Gradient Blend coming from Section 2 (Medium Green) */}
+          <div className="absolute top-0 inset-x-0 h-20 sm:h-32 bg-gradient-to-b from-[#225336] to-transparent pointer-events-none z-10" />
         </div>
 
         {/* Content Container aligned with site grid */}
@@ -831,32 +843,55 @@ export const HomePage: React.FC<HomePageProps> = ({
           activity the backend reports as unconfigured is absent from
           `months` and the strip draws it as UNKNOWN, not as closed. */}
       {seasonsState.status === 'ready' && (
-        <section ref={seasonsRef} className={`relative z-10 ${seasonsInView ? 'reveal' : 'opacity-0'}`}>
-          <SeasonStrip windows={seasonsState.months} />
+        <section 
+          ref={seasonsRef} 
+          className={`relative left-1/2 -translate-x-1/2 w-screen z-10 pt-16 sm:pt-24 pb-16 sm:pb-24 bg-white !mb-0 ${seasonsInView ? 'reveal' : 'opacity-0'}`}
+        >
+          {/* Seamless Top Blend into ambient background */}
+          <div className="absolute top-[-128px] inset-x-0 h-[129px] bg-gradient-to-b from-transparent to-white pointer-events-none z-0" />
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SeasonStrip windows={seasonsState.months} />
+          </div>
         </section>
       )}
 
       {/* ── 5. HOW IT WORKS — FOUR STEPS ─────────────────────────────── */}
-      <section ref={stepsRef} className="relative z-10 my-12">
-        <div className="relative rounded-3xl overflow-hidden border border-[#2E7D4F]/30 p-6 sm:p-10 shadow-[0_20px_50px_rgba(10,35,22,0.2)] bg-gradient-to-br from-[#0B2617] via-[#123C26] to-[#081F13]">
-          {/* Glowing Ambient Background Orbs */}
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#34D399]/15 rounded-full blur-3xl" />
-            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#2E7D4F]/25 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.08),transparent_70%)]" />
-          </div>
+      <section 
+        ref={stepsRef} 
+        className="relative left-1/2 -translate-x-1/2 w-screen z-10 py-16 sm:py-24 overflow-hidden bg-[#08150D] !mb-0 !-mt-[1px]"
+      >
+        {/* Generated Forest Background Image */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="/img/steps_bg_forest.jpg" alt="Forest Background" className="w-full h-full object-cover opacity-90 scale-105 transition-transform duration-1000 hover:scale-100" />
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#081F13]/90 via-[#123C26]/60 to-[#0B2617]/95" />
+        </div>
 
-          <div className="relative z-10">
+        {/* Seamless Boundary Gradient (Top: Whiter, Bottom: Greener) */}
+        <div className="absolute top-0 inset-x-0 h-40 sm:h-56 bg-gradient-to-b from-white via-[#2E7D4F]/40 to-transparent pointer-events-none z-0" />
+
+        {/* Glowing Ambient Background Orbs */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden mix-blend-screen">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#34D399]/15 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#2E7D4F]/25 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.1),transparent_70%)]" />
+        </div>
+
+        {/* Seamless Bottom Blend into Section 6 */}
+        <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-b from-transparent to-[#0a2015] pointer-events-none z-20" />
+
+        <div className="relative z-50 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className={`max-w-xl mb-8 ${stepsInView ? 'reveal' : 'opacity-0'}`}>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 text-xs font-bold uppercase tracking-wider text-[#6EE7B7] backdrop-blur-md">
+            <div className={`max-w-3xl mx-auto mb-10 flex flex-col items-center text-center ${stepsInView ? 'reveal' : 'opacity-0'}`}>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B2617] border border-[#2E7D4F]/60 text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-[#A7F3D0] shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
                 <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
                 {t('home.steps.sectionBadge')}
               </span>
-              <h2 className="mt-3 text-2xl sm:text-3xl leading-tight font-black text-white tracking-tight drop-shadow-sm">
+              <h2 className="mt-4 text-3xl sm:text-4xl leading-tight font-black text-white tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] [text-shadow:0_4px_32px_rgba(0,0,0,0.7)]">
                 {t('home.steps.sectionTitle')}
               </h2>
-              <p className="mt-2 text-sm sm:text-[14.5px] leading-relaxed text-[#D1E7DD]">
+              <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#D1E7DD] font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] [text-shadow:0_2px_16px_rgba(0,0,0,0.6)]">
                 {t('home.steps.sectionSubtitle')}
               </p>
             </div>
@@ -932,7 +967,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
           </div>
-        </div>
       </section>
 
       {/* ── 5b. PRICE CALCULATOR ───────────────────────────────────── */}
@@ -942,7 +976,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section
         ref={calcRef}
         aria-labelledby="calculator-heading"
-        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 overflow-hidden ${calcInView ? 'reveal' : 'opacity-0'}`}
+        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 overflow-hidden !-mt-[1px] ${calcInView ? 'reveal' : 'opacity-0'}`}
         style={{
           backgroundImage: `url(${contactBgImage})`,
           backgroundSize: 'cover',
@@ -951,7 +985,10 @@ export const HomePage: React.FC<HomePageProps> = ({
         }}
       >
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-[#0a2015]/30 pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-[#0a2015]/40 pointer-events-none z-0" />
+        {/* Top & Bottom seamless gradient shadow overlays */}
+        <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a2015] via-[#0a2015]/70 to-transparent pointer-events-none z-10" />
+        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-b from-transparent via-[#0a2015]/70 to-[#0a2015] pointer-events-none z-10" />
         <div className="relative max-w-7xl mx-auto px-6 py-10 sm:py-14 space-y-6">
           <div className="relative z-10 text-center space-y-2 max-w-xl mx-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/30 text-[11px] font-bold uppercase tracking-wider text-[#9CE3AE] shadow-xs backdrop-blur-sm">

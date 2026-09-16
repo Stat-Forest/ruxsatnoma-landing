@@ -176,42 +176,38 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
   const currentMonth = new Date().getMonth() + 1;
 
   return (
-    <div className="relative bg-white/95 backdrop-blur-md border border-[#D6E6DB] rounded-2xl p-4 sm:p-6 shadow-[0_8px_28px_rgba(18,53,34,0.05)] overflow-hidden transition-all duration-300">
-      {/* ── Top Ambient Accent & Glow ── */}
-      <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#2E7D4F]/50 to-transparent" />
-      <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#2E7D4F]/5 rounded-full blur-2xl pointer-events-none" />
-
+    <div className="relative bg-transparent transition-all duration-300">
       {/* ── Header Section ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="max-w-lg">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
+      <div className="flex flex-col items-center text-center gap-5 mb-10">
+        <div className="max-w-2xl flex flex-col items-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#23653F]">
             {text.badge}
           </span>
-          <h2 className="mt-1.5 text-lg sm:text-xl font-black text-[#123522] tracking-tight">
+          <h2 className="mt-4 text-3xl sm:text-4xl lg:text-[42px] leading-tight font-black text-[#123522] tracking-tight">
             {text.title}
           </h2>
-          <p className="mt-1 text-[11.5px] sm:text-xs leading-relaxed text-[#5A646D]">{text.subtitle}</p>
+          <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#5A646D]">{text.subtitle}</p>
         </div>
 
-        {/* Compact Dynamic Current Month Card */}
-        <div className="flex items-center gap-2.5 bg-gradient-to-br from-[#F0F8F3] to-[#E3F3E8] border border-[#C6E6CF] px-3 py-1.5 rounded-xl shadow-xs shrink-0 self-start sm:self-auto">
-          <div className="w-8 h-8 rounded-lg bg-white flex flex-col items-center justify-center shadow-xs border border-[#D1EBD8]">
-            <span className="text-[7.5px] font-black text-[#2E7D4F] uppercase leading-none">
+        {/* Dynamic Current Month Card */}
+        <div className="flex items-center gap-3 bg-gradient-to-br from-[#F0F8F3] to-[#E3F3E8] border border-[#C6E6CF] px-4 py-2 rounded-xl shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-white flex flex-col items-center justify-center shadow-xs border border-[#D1EBD8]">
+            <span className="text-[9px] font-black text-[#2E7D4F] uppercase leading-none">
               {months.short[currentMonth - 1]}
             </span>
-            <span className="text-xs font-black text-[#123522] leading-none mt-0.5">
+            <span className="text-sm font-black text-[#123522] leading-none mt-0.5">
               {new Date().getDate()}
             </span>
           </div>
-          <div>
-            <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#23653F]">
-              <span className="relative flex h-1.5 w-1.5">
+          <div className="text-left">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#16A34A]" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]" />
               </span>
               {text.currentMonthLabel}
             </div>
-            <div data-testid="season-current-month" className="text-sm sm:text-base font-black text-[#123522] tracking-tight leading-tight">
+            <div data-testid="season-current-month" className="text-base sm:text-lg font-black text-[#123522] tracking-tight leading-tight">
               {months.full[currentMonth - 1]}
             </div>
           </div>
