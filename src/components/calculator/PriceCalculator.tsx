@@ -192,25 +192,25 @@ function CalculatorSum({
 function CalculatorIntro({ heading, description }: { heading: string; description: string }) {
   const t = useT();
   return (
-    <div className="p-5 sm:p-6 lg:p-7 bg-gradient-to-br from-[#EAF5ED]/95 via-[#F4FAF5]/85 to-[#E5F3E9]/90 border-b md:border-b-0 md:border-r border-[#DDEAE0] flex flex-col justify-between relative overflow-hidden">
+    <div className="p-5 sm:p-6 lg:p-7 bg-white/10 backdrop-blur-sm border-b md:border-b-0 md:border-r border-white/20 flex flex-col justify-between relative overflow-hidden">
       {/* Ambient decorative orb */}
-      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-[#4ADE80]/12 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-[#4ADE80]/20 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 border border-[#CEE5D3] shadow-xs">
-          <Calculator className="w-3.5 h-3.5 text-[#23653F]" />
-          <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#23653F]">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/30 shadow-xs">
+          <Calculator className="w-3.5 h-3.5 text-[#9CE3AE]" />
+          <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#9CE3AE]">
             {t('tariffs.calculator.badge')}
           </span>
         </div>
-        <h2 className="mt-3 text-lg sm:text-xl leading-snug font-black text-[#123522] tracking-tight">
+        <h2 className="mt-3 text-lg sm:text-xl leading-snug font-black text-white tracking-tight">
           {heading}
         </h2>
-        <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-[#5A646D]">{description}</p>
+        <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-[#C4D8C9]">{description}</p>
         <ul className="mt-4 flex flex-col gap-2">
           {INTRO_BULLET_KEYS.map((key) => (
-            <li key={key} className="flex items-center gap-2 text-xs text-[#1A1F24] font-medium">
-              <span className="w-4 h-4 rounded-full bg-[#E2F2E7] text-[#2E7D4F] flex items-center justify-center shrink-0">
+            <li key={key} className="flex items-center gap-2 text-xs text-white/90 font-medium">
+              <span className="w-4 h-4 rounded-full bg-[#2E7D4F]/60 text-[#9CE3AE] flex items-center justify-center shrink-0">
                 <Check className="w-2.5 h-2.5 stroke-[2.5]" />
               </span>
               <span>{t(key)}</span>
@@ -219,8 +219,8 @@ function CalculatorIntro({ heading, description }: { heading: string; descriptio
         </ul>
       </div>
 
-      <div className="relative z-10 pt-4 mt-4 border-t border-[#D6E6DA] flex items-center gap-1.5 text-[11px] text-[#63796A] font-medium">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] shrink-0" />
+      <div className="relative z-10 pt-4 mt-4 border-t border-white/20 flex items-center gap-1.5 text-[11px] text-[#9CE3AE] font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] shrink-0" />
         <span>VMQ 689 normativ mezonlari</span>
       </div>
     </div>
@@ -268,13 +268,13 @@ export const PriceCalculator: React.FC = () => {
 
   return (
     <div id={CALCULATOR_ANCHOR} className="max-w-4xl mx-auto font-sans scroll-mt-24">
-      <div className="relative border border-[#D6E6DB] rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.2fr] bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgba(18,53,34,0.06)] hover:shadow-[0_14px_40px_rgba(18,53,34,0.09)] transition-all duration-300">
+      <div className="relative border border-white/20 rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.2fr] bg-white/10 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)] transition-all duration-300">
         {/* Top glowing laser line */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-[#2E7D4F] to-[#123522] z-10" />
 
         <CalculatorIntro heading={heading} description={description} />
 
-        <div className="p-5 sm:p-6 lg:p-7 bg-white/95 space-y-4">
+        <div className="p-5 sm:p-6 lg:p-7 bg-transparent space-y-4 min-h-[420px] flex flex-col justify-between transition-all duration-300">
           {refs.status === 'loading' && (
             <div className="space-y-4" data-testid="calculator-loading">
               <Skeleton height="h-9" />
@@ -408,7 +408,7 @@ function CalculatorForm({
   return (
     <>
       <div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A646D] mb-2 flex items-center justify-between">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-[#9CE3AE] mb-2 flex items-center justify-between">
           <span>{t('tariffs.calculator.activityLabel')}</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -567,12 +567,12 @@ function CalculatorForm({
       )}
 
       {/* Bottom Action Row with Trust Seal & Elevated CTA Button */}
-      <div className="pt-2 border-t border-[#E8EFE9] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="pt-2 border-t border-white/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-[#5A646D]">
           <div className="w-6 h-6 rounded-full bg-[#EAF5EE] text-[#2E7D4F] flex items-center justify-center shrink-0">
             <ShieldCheck className="w-3.5 h-3.5" />
           </div>
-          <span className="text-[11.5px] font-medium text-[#4B5660]">
+          <span className="text-[11.5px] font-medium text-white/80">
             {t('tariffs.calculator.secure')}
           </span>
         </div>

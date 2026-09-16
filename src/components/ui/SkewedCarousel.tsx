@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface SkewedCarouselProps {
   items: React.ReactNode[];
@@ -21,6 +22,12 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
   const nextSlide = useCallback(() => {
     if (count > 0) {
       setActiveIndex((prev) => (prev + 1) % count);
+    }
+  }, [count]);
+
+  const prevSlide = useCallback(() => {
+    if (count > 0) {
+      setActiveIndex((prev) => (prev - 1 + count) % count);
     }
   }, [count]);
 
@@ -84,9 +91,9 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
     const isRightSwipe = distance < -40;
 
     if (isLeftSwipe) {
-      setActiveIndex((prev) => (prev + 1) % count);
+      nextSlide();
     } else if (isRightSwipe) {
-      setActiveIndex((prev) => (prev - 1 + count) % count);
+      prevSlide();
     }
     
     setTouchStart(0);
@@ -95,7 +102,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
 
   return (
     <div 
-      className="relative w-full mx-auto py-10 touch-pan-y" 
+      className="relative w-full mx-auto pt-2 pb-4 touch-pan-y flex flex-col items-center" 
       style={{ perspective: '1000px' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -104,7 +111,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
       onMouseLeave={() => setIsPaused(false)}
     >
       <div 
-        className="relative flex items-center justify-center min-h-[480px] sm:min-h-[520px] w-full"
+        className="relative flex items-center justify-center min-h-[400px] sm:min-h-[440px] w-full"
         style={{ transformStyle: 'preserve-3d' }}
       >
         {items.map((item, idx) => {
@@ -136,13 +143,48 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
                 {/* Floor Reflection Gradient */}
                 {isCenter && (
                   <div 
-                    className="absolute -bottom-12 left-0 right-0 h-16 bg-gradient-to-t from-transparent to-black/10 blur-xl rounded-[100%] scale-x-75 pointer-events-none -z-10"
+                    className="absolute -bottom-10 left-0 right-0 h-14 bg-gradient-to-t from-transparent to-black/10 blur-xl rounded-[100%] scale-x-75 pointer-events-none -z-10"
                   />
                 )}
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Navigation Controls */}
+      <div className="flex items-center justify-center gap-4 mt-2 sm:mt-3 relative z-20">
+        <button
+          onClick={prevSlide}
+          aria-label="Previous slide"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-[#D6E6DB] text-[#2E7D4F] shadow-sm hover:shadow-md hover:bg-[#F0F7F1] hover:text-[#1B5E20] hover:scale-105 active:scale-95 transition-all duration-300"
+        >
+          <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+        </button>
+        
+        {/* Pagination Dots */}
+        <div className="flex items-center gap-2 px-3">
+          {items.map((_, idx) => (
+            <button
+              key={`dot-${idx}`}
+              onClick={() => setActiveIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`transition-all duration-300 rounded-full ${
+                idx === activeIndex 
+                  ? 'w-6 h-2 bg-[#2E7D4F]' 
+                  : 'w-2 h-2 bg-[#D6E6DB] hover:bg-[#A6BEAF]'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={nextSlide}
+          aria-label="Next slide"
+          className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-[#D6E6DB] text-[#2E7D4F] shadow-sm hover:shadow-md hover:bg-[#F0F7F1] hover:text-[#1B5E20] hover:scale-105 active:scale-95 transition-all duration-300"
+        >
+          <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+        </button>
       </div>
     </div>
   );
