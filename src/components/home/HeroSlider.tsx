@@ -297,7 +297,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
               <button
                 type="button"
                 onClick={() => onNavigate?.(actions.primary)}
-                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-[0_14px_34px_rgba(46,125,79,.5)] transition-colors"
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-[0_14px_34px_rgba(46,125,79,.5)] transition-colors cursor-pointer"
               >
                 <span>{copy.ctaPrimary}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -305,7 +305,7 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
               <button
                 type="button"
                 onClick={() => onNavigate?.(actions.secondary)}
-                className="inline-flex items-center h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors"
+                className="inline-flex items-center h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors cursor-pointer"
               >
                 {copy.ctaSecondary}
               </button>

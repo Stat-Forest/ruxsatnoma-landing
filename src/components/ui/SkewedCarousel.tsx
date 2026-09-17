@@ -112,7 +112,6 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
     >
       <div 
         className="relative flex items-center justify-center min-h-[400px] sm:min-h-[440px] w-full"
-        style={{ transformStyle: 'preserve-3d' }}
       >
         {items.map((item, idx) => {
           const { transform, opacity, zIndex, filter, transition, cursor } = getTransform(idx);
@@ -137,7 +136,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
               <div 
                 className={`relative w-full h-full transition-all duration-300 ${isCenter ? '' : 'pointer-events-none'}`}
               >
-                <div className={`relative z-10 w-full bg-transparent ${isCenter ? 'shadow-[0_20px_40px_rgba(18,53,34,0.15)] rounded-2xl' : ''}`}>
+                <div className="relative z-10 w-full bg-transparent">
                   {item}
                 </div>
                 {/* Floor Reflection Gradient */}
