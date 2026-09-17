@@ -7,6 +7,7 @@ import {
 } from './placeholders';
 import { WaveDivider } from './WaveDividers';
 import { MapPin, ArrowRight, Layers } from 'lucide-react';
+import mapPreview from '../../assets/img/map_preview.jpg';
 
 export interface NewHomePageProps {
   /**
@@ -132,15 +133,21 @@ export const NewHomePage: React.FC<NewHomePageProps> = ({
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-[#0B2E22] relative min-h-[300px] flex items-center justify-center p-8 border-t lg:border-t-0 lg:border-l border-white/10">
-              <div className="w-full h-full rounded-2xl border border-dashed border-[#2ECC71]/40 flex flex-col items-center justify-center text-center p-6 bg-white/5">
-                <div className="w-12 h-12 rounded-full bg-[#2ECC71]/20 flex items-center justify-center mb-3">
-                  <MapPin className="w-6 h-6 text-[#2ECC71] animate-bounce" />
+            <div className="lg:col-span-6 relative min-h-[300px] border-t lg:border-t-0 lg:border-l border-white/10 overflow-hidden group">
+              <img 
+                src={mapPreview} 
+                alt="O'rmon fondi GIS xaritasi" 
+                className="absolute inset-0 w-full h-full object-cover object-center opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+              />
+              {/* Overlay qatlam - xarita chetlari dizaynga singib ketishi uchun */}
+              <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-[#174635] via-transparent to-[#0F3D2E]/80 pointer-events-none" />
+              
+              {/* Markaziy marker animatsiyasi */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                <div className="absolute w-16 h-16 rounded-full bg-[#2ECC71]/20 animate-ping" />
+                <div className="relative w-12 h-12 rounded-full bg-[#0F3D2E]/80 border border-[#2ECC71] flex items-center justify-center backdrop-blur-sm shadow-xl shadow-[#2ECC71]/20">
+                  <MapPin className="w-5 h-5 text-[#2ECC71]" />
                 </div>
-                <h3 className="text-sm font-bold text-white mb-1">GIS Kontur Xaritasi Maydoni</h3>
-                <p className="text-xs text-[#A7F3D0] max-w-xs">
-                  MapLibre GL asosidagi vektorli oʻrmon konturlari va hududlar vizualizatsiyasi
-                </p>
               </div>
             </div>
           </div>

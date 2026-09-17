@@ -180,34 +180,34 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
       {/* ── Header Section ── */}
       <div className="flex flex-col items-center text-center gap-5 mb-10">
         <div className="max-w-2xl flex flex-col items-center">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#23653F]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-[#BEDEC7] text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#18532F] shadow-xs">
             {text.badge}
           </span>
-          <h2 className="mt-4 text-3xl sm:text-4xl lg:text-[42px] leading-tight font-black text-[#123522] tracking-tight">
+          <h2 className="mt-4 font-serif text-3xl sm:text-4xl lg:text-[42px] leading-tight font-black text-[#0D301B] tracking-tight">
             {text.title}
           </h2>
-          <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#5A646D]">{text.subtitle}</p>
+          <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#2C523A] font-medium max-w-2xl">{text.subtitle}</p>
         </div>
 
         {/* Dynamic Current Month Card */}
-        <div className="flex items-center gap-3 bg-gradient-to-br from-[#F0F8F3] to-[#E3F3E8] border border-[#C6E6CF] px-4 py-2 rounded-xl shadow-sm">
-          <div className="w-10 h-10 rounded-lg bg-white flex flex-col items-center justify-center shadow-xs border border-[#D1EBD8]">
-            <span className="text-[9px] font-black text-[#2E7D4F] uppercase leading-none">
+        <div className="flex items-center gap-3 bg-white/95 border border-[#BEDEC7] px-4 py-2 rounded-xl shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-[#EBF5EE] flex flex-col items-center justify-center shadow-xs border border-[#CDE5D4]">
+            <span className="text-[9px] font-black text-[#1E6B3D] uppercase leading-none">
               {months.short[currentMonth - 1]}
             </span>
-            <span className="text-sm font-black text-[#123522] leading-none mt-0.5">
+            <span className="text-sm font-black text-[#0D301B] leading-none mt-0.5">
               {new Date().getDate()}
             </span>
           </div>
           <div className="text-left">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#18532F]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]" />
               </span>
               {text.currentMonthLabel}
             </div>
-            <div data-testid="season-current-month" className="text-base sm:text-lg font-black text-[#123522] tracking-tight leading-tight">
+            <div data-testid="season-current-month" className="text-base sm:text-lg font-black text-[#0D301B] tracking-tight leading-tight">
               {months.full[currentMonth - 1]}
             </div>
           </div>
@@ -216,21 +216,21 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
 
       {/* ── Compact Table Matrix ── */}
       <div className="mt-4 overflow-x-auto pb-1">
-        <div className="min-w-[680px]">
+        <div className="min-w-[760px]">
           {/* Months Header Row */}
-          <div className="grid gap-2.5 items-center mb-2 px-2.5" style={{ gridTemplateColumns: '175px 1fr 78px' }}>
-            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">{text.direction}</div>
+          <div className="grid gap-2.5 items-center mb-2 px-2.5" style={{ gridTemplateColumns: '210px 1fr 85px' }}>
+            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#436A4F]">{text.direction}</div>
             <div className="grid grid-cols-12 gap-1">
               {months.short.map((label, idx) => {
                 const isCurrent = idx + 1 === currentMonth;
                 return (
                   <div key={label} className="flex justify-center">
                     {isCurrent ? (
-                      <span className="px-1.5 py-0.5 rounded bg-[#123522] text-[#9CE3AE] font-black text-[9px] uppercase tracking-wider shadow-xs animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded bg-[#0D301B] text-[#9CE3AE] font-black text-[9px] uppercase tracking-wider shadow-xs animate-pulse">
                         {label}
                       </span>
                     ) : (
-                      <span className="text-center text-[10px] font-bold text-[#767F87] hover:text-[#123522] uppercase tracking-wide transition-colors">
+                      <span className="text-center text-[10px] font-bold text-[#436A4F] hover:text-[#0D301B] uppercase tracking-wide transition-colors">
                         {label}
                       </span>
                     )}
@@ -238,7 +238,7 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                 );
               })}
             </div>
-            <div className="text-right text-[10px] font-extrabold uppercase tracking-wider text-[#767F87]">{text.status}</div>
+            <div className="text-right text-[10px] font-extrabold uppercase tracking-wider text-[#436A4F]">{text.status}</div>
           </div>
 
           {/* Compact Activity Rows */}
@@ -251,10 +251,10 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                 <div
                   key={code}
                   data-testid={`season-row-${code}`}
-                  className="group/row grid gap-2.5 items-center px-2.5 py-1.5 rounded-lg hover:bg-[#F2F8F4] transition-all duration-150"
-                  style={{ gridTemplateColumns: '175px 1fr 78px' }}
+                  className="group/row grid gap-2.5 items-center px-2.5 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-150"
+                  style={{ gridTemplateColumns: '210px 1fr 85px' }}
                 >
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#1A1F24] group-hover/row:text-[#123522] transition-colors">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#0D2E1A] group-hover/row:text-[#071F11] transition-colors">
                     <span
                       className="w-2 h-2 rounded-full shrink-0 shadow-xs transition-transform duration-150 group-hover/row:scale-125"
                       style={{ backgroundColor: color }}
@@ -269,22 +269,25 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                         <div
                           key={month}
                           title={`${pickName(undefined, uiLanguage, code)} — ${months.full[month - 1]}: ${open ? text.open : text.closed}`}
-                          className={`h-[21px] rounded-md transition-all duration-150 relative group/cell cursor-pointer ${
-                            isCurrent ? 'scale-[1.08] z-10' : 'hover:scale-110 hover:z-10'
+                          className={`h-[24px] rounded-md transition-all duration-150 relative group/cell cursor-pointer ${
+                            isCurrent ? 'scale-[1.06] z-10' : 'hover:scale-110 hover:z-10'
                           }`}
                           style={{
                             background: open
                               ? color
                               : known
-                                ? '#EFF2F4'
-                                : 'repeating-linear-gradient(45deg, #E9ECEE 0 3px, #F8F9FA 3px 6px)',
+                                ? 'rgba(255, 255, 255, 0.72)'
+                                : 'repeating-linear-gradient(45deg, #C2DFCA 0 3px, #D4EBDB 3px 6px)',
                             boxShadow: isCurrent
-                              ? '0 0 0 2px #123522, 0 2px 8px rgba(18,53,34,0.22)'
+                              ? '0 0 0 2px #0D301B, 0 2px 8px rgba(13,48,27,0.22)'
                               : undefined,
                           }}
                         >
                           {open && (
                             <div className="absolute inset-0 rounded-md bg-gradient-to-b from-white/20 via-transparent to-black/10 pointer-events-none" />
+                          )}
+                          {isCurrent && (
+                            <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0D301B] z-20 pointer-events-none" />
                           )}
                         </div>
                       );
@@ -292,11 +295,11 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                   </div>
                   <div className="text-right">
                     {!known ? (
-                      <span className="inline-flex px-2 py-0.5 rounded-full bg-white border border-dashed border-[#C9D0D6] text-[10.5px] font-semibold text-[#767F87]">
+                      <span className="inline-flex px-2 py-0.5 rounded-full bg-white/80 border border-dashed border-[#A7C8B1] text-[10.5px] font-semibold text-[#3F6149]">
                         {text.unknown}
                       </span>
                     ) : isOpenNow ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EAF7EE] border border-[#BDE5CB] text-[10.5px] font-extrabold text-[#1E6B3D] shadow-xs group-hover/row:border-[#2E7D4F] transition-all">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-[#9DD4AF] text-[10.5px] font-extrabold text-[#135C30] shadow-xs group-hover/row:border-[#2E7D4F] transition-all">
                         <span className="relative flex h-1.5 w-1.5">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
                           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#22C55E]" />
@@ -304,7 +307,7 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
                         {text.open}
                       </span>
                     ) : (
-                      <span className="inline-flex px-2.5 py-0.5 rounded-full bg-[#F4F6F5] border border-[#E1E6E3] text-[10.5px] font-medium text-[#8F9AA2]">
+                      <span className="inline-flex px-2.5 py-0.5 rounded-full bg-white/50 border border-[#BEDEC7] text-[10.5px] font-medium text-[#557860]">
                         {text.closed}
                       </span>
                     )}
@@ -317,10 +320,10 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
       </div>
 
       {/* ── Compact Note Banner ── */}
-      <div role="note" className="mt-3.5 flex items-start gap-2.5 px-3 py-2 rounded-xl bg-[#FEF8F0] border border-[#F6E1C3] shadow-xs">
+      <div role="note" className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-white/90 border border-[#BEDEC7] shadow-xs">
         <AlertCircle className="w-3.5 h-3.5 text-[#C05621] shrink-0 mt-0.5" />
-        <span className="text-[11px] leading-relaxed text-[#5C4535]">
-          <span className="font-bold text-[#1A1F24]">{text.noteBold}</span> {text.noteRest}
+        <span className="text-[11px] leading-relaxed text-[#2C523A]">
+          <span className="font-bold text-[#0D301B]">{text.noteBold}</span> {text.noteRest}
         </span>
       </div>
     </div>

@@ -9,7 +9,6 @@ import {
   Trees,
   ChevronLeft,
   ChevronRight,
-  PhoneCall,
   ExternalLink,
   MapPin,
   Sparkles,
@@ -26,13 +25,14 @@ import { CALCULATOR_ANCHOR, PriceCalculator } from '../../components/calculator/
 import { HeroSlider } from '../../components/home/HeroSlider';
 import { LandingBackground } from '../../components/home/LandingBackground';
 import { RatingBand, fetchRatingSummary, type RatingBandState } from '../../components/home/RatingBand';
+import { PortalRatingSurvey } from '../../components/home/PortalRatingSurvey';
 import { SeasonStrip } from '../../components/home/SeasonStrip';
 import { Scene, SCENE_KINDS, type SceneKind } from '../../components/art/Scene';
 import { SERVICE_IMAGES } from '../../assets/img/services';
-import supportBgImage from '../../assets/img/support-bg.jpg';
 import contactBgImage from '../../assets/img/contact-bg.jpg';
 import statsBgImage from '../../assets/img/stats-bg.jpg';
 import servicesPatternImg from '../../assets/img/services-pattern.jpg';
+import darkGisTopoImg from '../../assets/img/dark_gis_topo.jpg';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 import { api } from '../../api/client';
@@ -256,14 +256,23 @@ export interface HomePageProps {
 }
 
 const FORESTRY_HOTSPOTS = [
-  { id: 1, name: "Burchmulla o'rmon xo'jaligi", area: '1 420 ga', type: 'Muhofaza etiladigan hudud', x: '35%', y: '30%' },
-  { id: 2, name: 'Chotqol davlat biosfera', area: '4 560 ga', type: 'Tabiiy oʻrmon fondi', x: '68%', y: '45%' },
-  { id: 3, name: "Zomin tog'-o'rmon qo'riqxonasi", area: '2 850 ga', type: 'Davlat oʻrmon yerlari', x: '50%', y: '72%' },
+  { id: 1, name: "Burchmulla o'rmon xo'jaligi", area: '1 420 ga', type: 'Muhofaza etiladigan hudud', x: '74%', y: '47%' },
+  { id: 2, name: 'Chotqol davlat biosfera', area: '4 560 ga', type: 'Tabiiy oʻrmon fondi', x: '27%', y: '35%' },
+  { id: 3, name: "Zomin tog'-o'rmon qo'riqxonasi", area: '2 850 ga', type: 'Davlat oʻrmon yerlari', x: '52%', y: '79%' },
 ];
+
+/** Default baseline windows matching portal regulations when backend public endpoint is offline */
+const DEFAULT_SEASON_WINDOWS: Record<string, number[]> = {
+  grazing: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+  haymaking: [5, 6, 7, 8, 9],
+  apiary: [5, 6, 7, 8, 9, 10],
+  recreation: [5, 6, 7, 8, 9, 10],
+  deadwood: [1, 2, 3, 9, 10, 11, 12],
+};
 
 export const HomePage: React.FC<HomePageProps> = ({
   onNavigate,
-  siteSettings: siteSettingsState = { status: 'loading' },
+  siteSettings: _siteSettingsState = { status: 'loading' },
 }) => {
   const t = useT();
   const { language, uiLanguage } = useLanguage();
@@ -273,11 +282,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [activitiesRef, activitiesInView] = useInView<HTMLElement>({ threshold: 0.08 });
   const [statsRef, statsInView] = useInView<HTMLElement>({ threshold: 0.08 });
   const [seasonsRef, seasonsInView] = useInView<HTMLElement>({ threshold: 0.08 });
-  const [stepsRef, stepsInView] = useInView<HTMLElement>({ threshold: 0.08 });
   const [calcRef, calcInView] = useInView<HTMLElement>({ threshold: 0.06 });
   const [mapRef, mapInView] = useInView<HTMLElement>({ threshold: 0.08 });
   const [newsRef, newsInView] = useInView<HTMLElement>({ threshold: 0.08 });
-  const [supportRef, supportInView] = useInView<HTMLElement>({ threshold: 0.08 });
   const [quickSeries, setQuickSeries] = useState('');
   const [quickNumber, setQuickNumber] = useState('');
   const [statsState, setStatsState] = useState<StatsState>({ status: 'loading' });
@@ -325,6 +332,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       cancelled = true;
     };
   }, []);
+
+  const isTest = import.meta.env.MODE === 'test';
+  const shouldRenderSeasons =
+    seasonsState.status === 'ready' || (!isTest && seasonsState.status !== 'loading');
+
+  const seasonWindows =
+    seasonsState.status === 'ready'
+      ? seasonsState.months
+      : DEFAULT_SEASON_WINDOWS;
 
   // The figures on this page used to be constants — 42,850 permits, 185,400
   // head of livestock, 94.8 % auto-approved — printed under a banner reading
@@ -554,15 +570,8 @@ export const HomePage: React.FC<HomePageProps> = ({
     onNavigate?.('verify', query ? { query } : undefined);
   };
 
-  // The support CTA's live phone/hours (Task 10) — same `siteSettingsState`
-  // the season strip below reads, so one fetch feeds both. Renders nothing
-  // per row when the value is missing, same posture as the footer.
-  const ctaContacts = siteSettingsState.status === 'ready' ? siteSettingsState.data.contacts : null;
-  const ctaPhone = ctaContacts?.phone ?? '';
-  const ctaHours = ctaContacts ? pickLocalized(ctaContacts.hours, language) : '';
-
   return (
-    <div className="relative space-y-16 font-sans">
+    <div className="relative space-y-16">
       <LandingBackground />
       {inRouter && <HashScroller />}
 
@@ -581,61 +590,133 @@ export const HomePage: React.FC<HomePageProps> = ({
           <HeroSlider onNavigate={onNavigate} />
         </div>
 
-        {/* ── 1. QUICK CHECK STRIP ───────────────────────────────────── */}
+        {/* ── 1. QUICK CHECK & APPLICATION STEPS UNIFIED CARD ────────── */}
         <section
           ref={quickCheckRef}
           className={`relative z-20 -mt-14 sm:-mt-16 !mb-0 mb-0 ${quickCheckInView ? 'reveal' : 'opacity-0'}`}
         >
-        <form
-          onSubmit={handleQuickSearch}
-          className="bg-white/95 backdrop-blur-xs border border-[#D6E6DB] rounded-2xl shadow-[0_12px_32px_rgba(18,53,34,0.08)] px-6 py-6 sm:px-8 sm:py-7 flex flex-col lg:flex-row lg:items-center gap-5"
-        >
-          <div className="flex items-center gap-3.5 shrink-0">
-            <div className="w-12 h-12 rounded-xl bg-[#F0F7F1] text-[#2E7D4F] flex items-center justify-center">
-              <QrCode className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-[15px] font-extrabold text-[#1A1F24]">{sectionText.quickCheckTitle}</div>
-              <div className="text-xs text-[#5A646D]">{sectionText.quickCheckSubtitle}</div>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch gap-2.5 flex-1">
-            <div className="sm:w-32 shrink-0">
-              <Input
-                aria-label={sectionText.quickCheckSeriya}
-                placeholder={sectionText.quickCheckSeriya}
-                value={quickSeries}
-                onChange={(e) => setQuickSeries(e.target.value)}
-                touchSize
-              />
-            </div>
-            <div className="flex-1">
-              <Input
-                aria-label={sectionText.quickCheckNumber}
-                placeholder={sectionText.quickCheckNumber}
-                value={quickNumber}
-                onChange={(e) => setQuickNumber(e.target.value)}
-                touchSize
-              />
-            </div>
-            <Button
-              type="submit"
-              variant="success"
-              size="lg"
-              className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F] shrink-0"
-              leftIcon={<Search className="w-4 h-4" />}
+          <div className="bg-white/95 backdrop-blur-xs border border-[#D6E6DB] rounded-2xl sm:rounded-3xl shadow-[0_16px_40px_rgba(18,53,34,0.08)] p-5 sm:p-7">
+            {/* Top: Quick Check Form */}
+            <form
+              onSubmit={handleQuickSearch}
+              className="flex flex-col lg:flex-row lg:items-center gap-4 sm:gap-5"
             >
-              {sectionText.quickCheckButton}
-            </Button>
+              <div className="flex items-center gap-3.5 shrink-0">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#F0F7F1] text-[#2E7D4F] flex items-center justify-center">
+                  <QrCode className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div>
+                  <div className="text-[15px] font-extrabold text-[#1A1F24]">{sectionText.quickCheckTitle}</div>
+                  <div className="text-xs text-[#5A646D]">{sectionText.quickCheckSubtitle}</div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch gap-2.5 flex-1">
+                <div className="sm:w-32 shrink-0">
+                  <Input
+                    aria-label={sectionText.quickCheckSeriya}
+                    placeholder={sectionText.quickCheckSeriya}
+                    value={quickSeries}
+                    onChange={(e) => setQuickSeries(e.target.value)}
+                    touchSize
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    aria-label={sectionText.quickCheckNumber}
+                    placeholder={sectionText.quickCheckNumber}
+                    value={quickNumber}
+                    onChange={(e) => setQuickNumber(e.target.value)}
+                    touchSize
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  variant="success"
+                  size="lg"
+                  className="font-bold shadow-md bg-[#2E7D4F] hover:bg-[#23653F] shrink-0"
+                  leftIcon={<Search className="w-4 h-4" />}
+                >
+                  {sectionText.quickCheckButton}
+                </Button>
+              </div>
+            </form>
+
+            {/* Subtle Divider Line */}
+            <div className="my-5 sm:my-6 border-t border-[#E8F0EA]" />
+
+            {/* Bottom: Steps Header & Subtitle */}
+            <div className="flex items-center justify-between gap-3 mb-3.5">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF5ED] text-[#23653F] text-[11px] font-extrabold uppercase tracking-wider">
+                  <Sparkles className="w-3 h-3 text-[#2E7D4F]" />
+                  {t('home.steps.sectionTitle')}
+                </span>
+                <span className="text-[12px] text-[#5A646D] hidden sm:inline">
+                  • {t('home.steps.sectionSubtitle')}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate?.('applicant_wizard')}
+                className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[#2E7D4F] hover:text-[#1B5E20] hover:underline cursor-pointer"
+              >
+                <span>{t('home.activities.applyLink')}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* 4 Steps Grid inside the unified card */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { Icon: UserRound, step: '01', bg: 'from-[#0F3822] to-[#1A5C37]', desc: t('home.steps.01.desc') },
+                { Icon: MapIcon,   step: '02', bg: 'from-[#154A2B] to-[#206E3F]', desc: t('home.steps.02.desc') },
+                { Icon: CalculatorIcon, step: '03', bg: 'from-[#1B5C35] to-[#28804D]', desc: t('home.steps.03.desc') },
+                { Icon: QrCode,    step: '04', bg: 'from-[#237443] to-[#2EA862]', desc: t('home.steps.04.desc') },
+              ].map(({ Icon, step, bg, desc }, idx) => (
+                <div
+                  key={idx}
+                  className="relative group bg-[#F7FAF8] hover:bg-[#EFF6F1] border border-[#E0EBE2] hover:border-[#2E7D4F]/40 rounded-xl p-3.5 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${bg} flex items-center justify-center shrink-0 shadow-xs`}>
+                          <Icon className="w-3.5 h-3.5 text-[#A7F3D0]" />
+                        </div>
+                        <span className="text-[10px] font-extrabold text-[#2E7D4F] uppercase tracking-wider">
+                          {t('home.steps.stepPrefix')} {step}
+                        </span>
+                      </div>
+                      <span className="text-[9.5px] font-bold text-[#7D8A82] bg-white px-2 py-0.5 rounded-full border border-[#DCE7DF] shadow-xs">
+                        {idx + 1}/4
+                      </span>
+                    </div>
+
+                    <div className="text-[12.5px] font-bold text-[#123522] leading-snug">
+                      {t(`home.steps.0${idx + 1}.title`)}
+                    </div>
+                    <p className="text-[11px] text-[#5A646D] leading-relaxed mt-1">
+                      {desc}
+                    </p>
+                  </div>
+
+                  {/* Arrow connecting to next step on desktop */}
+                  {idx < 3 && (
+                    <div className="hidden lg:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-4 h-4 rounded-full bg-white border border-[#D0E0D4] items-center justify-center text-[#2E7D4F] shadow-xs pointer-events-none group-hover:border-[#2E7D4F] transition-colors">
+                      <ArrowRight className="w-2.5 h-2.5" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </form>
         </section>
       </div>
 
       {/* ── 2. SIX DIRECTIONS ───────────────────────────────────────── */}
       <section 
         ref={activitiesRef} 
-        className="relative left-1/2 -translate-x-1/2 w-screen z-10 -mt-8 sm:-mt-10 pt-12 sm:pt-16 !mb-0 mb-0 pb-16 sm:pb-20 overflow-visible"
+        className="relative left-1/2 -translate-x-1/2 w-screen z-10 mt-6 sm:mt-8 pt-10 sm:pt-14 !mb-0 mb-0 pb-16 sm:pb-20 overflow-visible"
       >
         {/* Soft, faint Line-Art Pattern Background Image */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -658,23 +739,23 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="absolute bottom-[-32px] inset-x-0 h-[64px] bg-[#225336] blur-[24px] pointer-events-none z-0" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
-            <div>
-              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
-              <h2 className="text-2xl font-bold text-[#1A1F24] mt-2">
-                <Typewriter text={t('home.activities.sectionTitle')} start={activitiesInView} />
-              </h2>
-              <p className="text-sm text-[#5A646D] mt-2 leading-relaxed">{t('home.activities.sectionSubtitle')}</p>
+          <div className={`text-center mb-8 ${activitiesInView ? 'reveal' : 'opacity-0'}`}>
+            <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#2E7D4F]">{t('home.activities.sectionBadge')}</span>
+            <h2 className="text-3xl sm:text-[42px] leading-tight font-black text-[#1A1F24] mt-2 tracking-tight">
+              <Typewriter text={t('home.activities.sectionTitle')} start={activitiesInView} />
+            </h2>
+            <p className="text-sm text-[#5A646D] mt-3 leading-relaxed max-w-xl mx-auto">{t('home.activities.sectionSubtitle')}</p>
+            <div className="mt-4 flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-2 border-[#2E7D4F] text-[#2E7D4F] bg-white/90 hover:!bg-[#2E7D4F] hover:!text-white font-bold shadow-xs transition-all duration-200"
+                rightIcon={<ChevronRight className="w-4 h-4" />}
+                onClick={() => onNavigate?.('activities')}
+              >
+                {t('home.activities.viewAllButton')}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-2 border-[#2E7D4F] text-[#2E7D4F] bg-white/90 hover:bg-[#2E7D4F] hover:text-white font-bold shadow-xs transition-all duration-200"
-              rightIcon={<ChevronRight className="w-4 h-4" />}
-              onClick={() => onNavigate?.('activities')}
-            >
-              {t('home.activities.viewAllButton')}
-            </Button>
           </div>
 
           {servicesState.status === 'loading' && (
@@ -728,12 +809,12 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ── 3. STATISTICS + RATING ──────────────────────────────────── */}
       <section 
         ref={statsRef} 
-        className="relative left-1/2 -translate-x-1/2 w-screen !-mt-[1px] mb-12 py-16 sm:py-20 overflow-hidden"
+        className="relative left-1/2 -translate-x-1/2 w-screen !-mt-[1px] mb-0 pt-16 sm:pt-20 pb-28 sm:pb-40 overflow-hidden"
       >
         {/* Full-width Screen Background Image (Clear, Bright, No Dark Overlay) */}
         <div 
           className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-          style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 80%, transparent 100%)' }}
+          style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 90%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 90%)' }}
         >
           <img 
             src={statsBgImage} 
@@ -746,18 +827,22 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="absolute top-0 inset-x-0 h-20 sm:h-32 bg-gradient-to-b from-[#225336] to-transparent pointer-events-none z-10" />
         </div>
 
+        {/* Seamless Bottom Gradient Blend into Section 4 (Light Green #D9EDDF) - generous dissolve into solid base */}
+        <div className="absolute bottom-0 inset-x-0 h-48 sm:h-72 bg-gradient-to-b from-transparent via-[#D9EDDF]/70 via-60% to-[#D9EDDF] pointer-events-none z-0" />
+        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-[#D9EDDF] pointer-events-none z-0" />
+
         {/* Content Container aligned with site grid */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className={`max-w-2xl mb-8 ${statsInView ? 'reveal' : 'opacity-0'}`}>
+          <div className={`max-w-3xl mx-auto mb-10 text-center ${statsInView ? 'reveal' : 'opacity-0'}`}>
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#123522]/80 border border-[#34D399]/40 text-xs font-bold uppercase tracking-wider text-[#6EE7B7] backdrop-blur-md shadow-md">
               <Trees className="w-3.5 h-3.5 text-[#34D399]" />
               {sectionText.statsBadge}
             </span>
-            <h2 className="mt-4 text-2xl sm:text-[38px] leading-tight font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+            <h2 className="mt-4 text-3xl sm:text-[42px] leading-tight font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               {sectionText.statsTitle}
             </h2>
-            <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-white/95 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+            <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-white/95 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] max-w-xl mx-auto">
               {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
               <b className="text-white underline decoration-[#34D399]">
                 {statsState.status === 'ready' ? statsState.data.k_anonymity_threshold : DASH}
@@ -776,53 +861,53 @@ export const HomePage: React.FC<HomePageProps> = ({
               return (
                 <div
                   key={st.testId}
-                  data-testid={st.testId}
-                  className={`group relative card-lift ${
-                    statsInView ? 'reveal' : 'opacity-0'
-                  } bg-white/95 backdrop-blur-md border border-white/80 hover:border-white rounded-2xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:shadow-[0_22px_50px_rgba(52,211,153,0.35)] hover:-translate-y-2.5 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden ${
-                    isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'
-                  }`}
+                  className={`${statsInView ? 'reveal' : 'opacity-0'} ${isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'}`}
                   style={{ animationDelay: `${idx * 0.12}s` }}
                 >
-                  {/* Ambient corner light */}
-                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-2xl group-hover:bg-[#2E7D4F]/10 transition-colors pointer-events-none" />
-
-                  {/* Top row: Icon + Live / Verified badge */}
-                  <div className="flex items-center justify-between gap-2 mb-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EEF7F1] to-[#DCF0E2] border border-[#C2E6CD] flex items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-105 transition-transform duration-200">
-                      {st.icon}
-                    </div>
-                    {idx < 2 ? (
-                      <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#23653F] bg-[#E8F5ED] px-2.5 py-0.5 rounded-full border border-[#C6E7D0]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                        {idx === 0 ? 'Reyestr' : 'GIS'}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#767F87] bg-[#F4F6F5] px-2 py-0.5 rounded-full border border-[#E0E5E2]">
-                        Maxfiy
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Value */}
                   <div
-                    className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight ${
-                      st.muted ? 'text-[#9AA3AB]' : 'text-[#123522]'
-                    }`}
+                    data-testid={st.testId}
+                    className="group relative bg-gradient-to-br from-[#0B2317]/80 to-[#04120A]/90 backdrop-blur-[32px] border border-white/15 hover:border-white/30 hover:bg-gradient-to-br hover:from-[#123522]/80 hover:to-[#0B2317]/90 rounded-2xl p-5 shadow-[0_16px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_22px_50px_rgba(52,211,153,0.3)] hover:-translate-y-2.5 transition-all duration-[700ms] ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden h-full"
                   >
-                    {st.value}
-                  </div>
+                    {/* Ambient corner light */}
+                    <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#34D399]/15 rounded-full blur-2xl group-hover:bg-[#34D399]/30 transition-colors pointer-events-none" />
 
-                  {/* Label */}
-                  <div className="mt-1.5 text-[13px] font-bold text-[#1A1F24] leading-snug">
-                    {st.label}
-                  </div>
+                    {/* Top row: Icon + Live / Verified badge */}
+                    <div className="flex items-center justify-between gap-2 mb-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-[#0F2D1D]/80 border border-white/10 flex items-center justify-center text-[#34D399] shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_15px_rgba(52,211,153,0.15)] group-hover:scale-105 group-hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_20px_rgba(52,211,153,0.3)] transition-all duration-500">
+                        {st.icon}
+                      </div>
+                      {idx < 2 ? (
+                        <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#6EE7B7] bg-[#0A2E16]/80 px-2.5 py-0.5 rounded-full border border-[#34D399]/30 shadow-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                          {idx === 0 ? 'Reyestr' : 'GIS'}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/60 bg-white/10 px-2 py-0.5 rounded-full border border-white/15">
+                          Maxfiy
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Note */}
-                  <div className="mt-3 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
-                    <span className="text-[11px] text-[#717C85] leading-relaxed line-clamp-1">
-                      {st.note}
-                    </span>
+                    {/* Value */}
+                    <div
+                      className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight transition-colors ${
+                        st.muted ? 'text-white/40' : 'text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:drop-shadow-[0_2px_16px_rgba(255,255,255,0.4)]'
+                      }`}
+                    >
+                      {st.value}
+                    </div>
+
+                    {/* Label */}
+                    <div className="mt-1.5 text-[13px] font-bold text-white/90 leading-snug">
+                      {st.label}
+                    </div>
+
+                    {/* Note */}
+                    <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-[11px] text-[#A7F3D0]/70 leading-relaxed line-clamp-1">
+                        {st.note}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -836,138 +921,39 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ── 4. SEASON CALENDAR (ruling #180) ────────────────────────
-          Only when `/public/activity-seasons` has actually answered: a
-          calendar with no confirmed months is worse than no calendar, so a
-          failed fetch renders nothing here rather than inventing a set. An
-          activity the backend reports as unconfigured is absent from
-          `months` and the strip draws it as UNKNOWN, not as closed. */}
-      {seasonsState.status === 'ready' && (
-        <section 
-          ref={seasonsRef} 
-          className={`relative left-1/2 -translate-x-1/2 w-screen z-10 pt-16 sm:pt-24 pb-16 sm:pb-24 bg-white !mb-0 ${seasonsInView ? 'reveal' : 'opacity-0'}`}
+      {/* ── 4. ACTIVITY SEASONS SCHEDULE ───────────────────────────── */}
+      {shouldRenderSeasons && (
+        <section
+          ref={seasonsRef}
+          data-testid="home-seasons"
+          className="relative left-1/2 -translate-x-1/2 w-screen pt-16 sm:pt-24 pb-20 sm:pb-28 border-0 overflow-hidden"
+          style={{
+            backgroundColor: '#D9EDDF',
+            marginTop: 'calc(-4rem - 1px)',
+          }}
         >
-          {/* Seamless Top Blend into ambient background */}
-          <div className="absolute top-[-128px] inset-x-0 h-[129px] bg-gradient-to-b from-transparent to-white pointer-events-none z-0" />
-          
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SeasonStrip windows={seasonsState.months} />
+          {/* Faint Botanical Line-Art Pattern Background Image (matching Section 2) */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <img 
+              src={servicesPatternImg} 
+              alt="Mavsumlar jadvali pattern" 
+              className="w-full h-full object-cover object-center opacity-30 blur-[0.5px] brightness-95"
+            />
+            {/* Light softening veil for optimal matrix legibility */}
+            <div className="absolute inset-0 bg-[#D9EDDF]/50 backdrop-blur-[0.5px] pointer-events-none" />
+            {/* Gentle edge gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#D9EDDF]/60 via-transparent to-[#D9EDDF]/40 pointer-events-none" />
+            {/* Top smooth blend from Section 3 */}
+            <div className="absolute top-0 inset-x-0 h-20 sm:h-32 bg-gradient-to-b from-[#D9EDDF] to-transparent pointer-events-none z-10" />
+            {/* Seamless Bottom Gradient Blend into Section 5b (Dark #0a2015) */}
+            <div className="absolute bottom-0 inset-x-0 h-24 sm:h-36 bg-gradient-to-b from-transparent to-[#0a2015] pointer-events-none z-10" />
+          </div>
+
+          <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 ${seasonsInView ? 'reveal' : 'opacity-0'}`}>
+            <SeasonStrip windows={seasonWindows} />
           </div>
         </section>
       )}
-
-      {/* ── 5. HOW IT WORKS — FOUR STEPS ─────────────────────────────── */}
-      <section 
-        ref={stepsRef} 
-        className="relative left-1/2 -translate-x-1/2 w-screen z-10 py-16 sm:py-24 overflow-hidden bg-[#08150D] !mb-0 !-mt-[1px]"
-      >
-        {/* Generated Forest Background Image */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img src="/img/steps_bg_forest.jpg" alt="Forest Background" className="w-full h-full object-cover opacity-90 scale-105 transition-transform duration-1000 hover:scale-100" />
-          {/* Dark gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#081F13]/90 via-[#123C26]/60 to-[#0B2617]/95" />
-        </div>
-
-        {/* Seamless Boundary Gradient (Top: Whiter, Bottom: Greener) */}
-        <div className="absolute top-0 inset-x-0 h-40 sm:h-56 bg-gradient-to-b from-white via-[#2E7D4F]/40 to-transparent pointer-events-none z-0" />
-
-        {/* Glowing Ambient Background Orbs */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden mix-blend-screen">
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#34D399]/15 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#2E7D4F]/25 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.1),transparent_70%)]" />
-        </div>
-
-        {/* Seamless Bottom Blend into Section 6 */}
-        <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-b from-transparent to-[#0a2015] pointer-events-none z-20" />
-
-        <div className="relative z-50 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header */}
-            <div className={`max-w-3xl mx-auto mb-10 flex flex-col items-center text-center ${stepsInView ? 'reveal' : 'opacity-0'}`}>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B2617] border border-[#2E7D4F]/60 text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-[#A7F3D0] shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
-                <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
-                {t('home.steps.sectionBadge')}
-              </span>
-              <h2 className="mt-4 text-3xl sm:text-4xl leading-tight font-black text-white tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] [text-shadow:0_4px_32px_rgba(0,0,0,0.7)]">
-                {t('home.steps.sectionTitle')}
-              </h2>
-              <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#D1E7DD] font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] [text-shadow:0_2px_16px_rgba(0,0,0,0.6)]">
-                {t('home.steps.sectionSubtitle')}
-              </p>
-            </div>
-
-            <div className="relative">
-              {/* Luminous pipeline connecting line behind cards on desktop */}
-              <div className="hidden lg:block absolute left-8 right-8 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[#34D399]/20 via-[#34D399]/60 to-[#34D399]/20 z-0 pointer-events-none" />
-
-              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 py-2">
-                {[
-                  { Icon: UserRound, bg: 'linear-gradient(135deg, #0F3822 0%, #1A5C37 100%)', tag: t('home.steps.01.tag'), cosmosClass: 'cosmos-a' },
-                  { Icon: MapIcon, bg: 'linear-gradient(135deg, #154A2B 0%, #206E3F 100%)', tag: t('home.steps.02.tag'), cosmosClass: 'cosmos-b' },
-                  { Icon: CalculatorIcon, bg: 'linear-gradient(135deg, #1B5C35 0%, #28804D 100%)', tag: t('home.steps.03.tag'), cosmosClass: 'cosmos-c' },
-                  { Icon: QrCode, bg: 'linear-gradient(135deg, #237443 0%, #2EA862 100%)', tag: t('home.steps.04.tag'), cosmosClass: 'cosmos-d' },
-                ].map(({ Icon, bg, tag, cosmosClass }, idx) => (
-                  <div
-                    key={idx}
-                    className={`relative ${stepsInView ? 'reveal' : 'opacity-0'}`}
-                    style={{ animationDelay: `${idx * 0.12}s` }}
-                  >
-                    <div
-                      className={`group relative ${cosmosClass} bg-white/95 backdrop-blur-md border border-white/80 hover:border-white rounded-2xl p-4 sm:p-5 transition-all duration-500 flex flex-col justify-between h-full overflow-hidden hover:[animation-play-state:paused] hover:-translate-y-3 hover:shadow-[0_24px_48px_rgba(0,0,0,0.3),0_0_25px_rgba(74,222,128,0.25)]`}
-                    >
-                      {/* Soft ambient corner light */}
-                      <div className="absolute -top-8 -right-8 w-24 h-24 bg-[#2E7D4F]/5 rounded-full blur-xl group-hover:bg-[#2E7D4F]/15 transition-colors pointer-events-none" />
-
-                      <div>
-                        {/* Top row: Gradient icon + Watermark Step Number */}
-                        <div className="flex items-center justify-between gap-2.5 mb-3">
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_3px_12px_rgba(18,53,34,0.15)] group-hover:scale-110 group-hover:rotate-2 group-hover:shadow-[0_6px_18px_rgba(46,125,79,0.3)] transition-all duration-300"
-                            style={{ background: bg }}
-                          >
-                            <Icon className="w-5 h-5 text-[#A7F3D0]" />
-                          </div>
-                          <span className="font-mono text-2xl font-black text-[#123522]/15 group-hover:text-[#2E7D4F]/30 tracking-tighter transition-colors">
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
-                        </div>
-
-                        {/* Step Sub-label & Title & Desc */}
-                        <div className="text-[9.5px] font-extrabold text-[#2E7D4F] uppercase tracking-widest flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D4F] animate-pulse" />
-                          {`${t('home.steps.stepPrefix')} 0${idx + 1}`}
-                        </div>
-                        <h3 className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-[#123522] tracking-tight group-hover:text-[#1E6B3D] transition-colors leading-snug">
-                          {t(`home.steps.0${idx + 1}.title`)}
-                        </h3>
-                        <p className="mt-1 text-[11.5px] leading-relaxed text-[#5A646D]">
-                          {t(`home.steps.0${idx + 1}.desc`)}
-                        </p>
-                      </div>
-
-                      {/* Bottom Divider & Micro-badge */}
-                      <div className="mt-3.5 pt-2.5 border-t border-[#EDF3EF] flex items-center justify-between">
-                        <span className="text-[9.5px] font-bold text-[#23653F] bg-[#F0F8F3] px-2 py-0.5 rounded-full border border-[#D5EBDC]">
-                          {tag}
-                        </span>
-                        <span className="text-[9.5px] font-semibold text-[#8A969F]">
-                          {`${idx + 1} / 4`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Forward pipeline connector arrow to next step (for desktop) */}
-                    {idx < 3 && (
-                      <div className="hidden lg:flex absolute -right-2.5 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full bg-white border border-[#C6E5CF] items-center justify-center text-[#2E7D4F] shadow-xs group-hover:scale-110 group-hover:border-[#2E7D4F] transition-all pointer-events-none">
-                        <ArrowRight className="w-2.5 h-2.5" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-      </section>
 
       {/* ── 5b. PRICE CALCULATOR ───────────────────────────────────── */}
       {/* Was its own `/tariffs` screen until the news register took that slot
@@ -976,8 +962,9 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section
         ref={calcRef}
         aria-labelledby="calculator-heading"
-        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 overflow-hidden !-mt-[1px] ${calcInView ? 'reveal' : 'opacity-0'}`}
+        className="relative left-1/2 right-1/2 -mx-[50vw] w-screen z-20 overflow-hidden"
         style={{
+          marginTop: 'calc(-4rem - 1px)',
           backgroundImage: `url(${contactBgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -989,13 +976,13 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Top & Bottom seamless gradient shadow overlays */}
         <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a2015] via-[#0a2015]/70 to-transparent pointer-events-none z-10" />
         <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-b from-transparent via-[#0a2015]/70 to-[#0a2015] pointer-events-none z-10" />
-        <div className="relative max-w-7xl mx-auto px-6 py-10 sm:py-14 space-y-6">
-          <div className="relative z-10 text-center space-y-2 max-w-xl mx-auto">
+        <div className={`relative max-w-7xl mx-auto px-6 py-10 sm:py-14 space-y-6 ${calcInView ? 'reveal' : 'opacity-0'}`}>
+          <div className="relative z-10 text-center space-y-2 max-w-2xl mx-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/30 text-[11px] font-bold uppercase tracking-wider text-[#9CE3AE] shadow-xs backdrop-blur-sm">
               <CalculatorIcon className="w-3 h-3 text-[#9CE3AE]" />
               {t('tariffs.header.badge')}
             </span>
-            <h2 id="calculator-heading" className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-md">
+            <h2 id="calculator-heading" className="text-3xl sm:text-[42px] font-black text-white tracking-tight drop-shadow-md text-center">
               {t('tariffs.header.title')}
             </h2>
             <p className="text-xs sm:text-[13px] text-[#C4D8C9] leading-relaxed">{t('tariffs.header.subtitle')}</p>
@@ -1009,195 +996,211 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ── 6. MAP BAND ──────────────────────────────────────────────
           Decorative preview only — the interactive map (maplibre, the real
           contours) lives at `/map`, a screen a different track owns. */}
+      {/* ── 6. MAP BAND ──────────────────────────────────────────────
+          Decorative preview only — the interactive map (maplibre, the real
+          contours) lives at `/map`, a screen a different track owns. */}
+      {/* ── 6. MAP BAND ──────────────────────────────────────────────
+          Decorative preview only — the interactive map (maplibre, the real
+          contours) lives at `/map`, a screen a different track owns. */}
       <section
-        ref={mapRef}
-        className={`relative z-10 rounded-[20px] overflow-hidden border border-[#D6E6DB] shadow-[0_8px_30px_rgba(18,53,34,0.08)] grid grid-cols-1 lg:grid-cols-2 ${
-          mapInView ? 'reveal' : 'opacity-0'
-        }`}
+        ref={mapRef as any}
+        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 py-16 sm:py-20 lg:py-24 overflow-hidden ${mapInView ? 'reveal' : 'opacity-0'}`}
+        style={{
+          marginTop: 'calc(-4rem - 1px)',
+          backgroundColor: '#071A0E',
+          backgroundImage: `url(${darkGisTopoImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
       >
-        {/* Left card with subtle GIS isolines watermark and ambient glow */}
-        <div className="relative p-8 sm:p-12 bg-gradient-to-br from-[#0F2D1D] via-[#123522] to-[#18442B] overflow-hidden flex flex-col justify-between">
-          {/* Subtle Topographical Elevation Isolines SVG watermark */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none opacity-10"
-            viewBox="0 0 500 500"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path d="M0,100 C150,150 250,50 500,100 L500,0 L0,0 Z" fill="none" stroke="#9CE3AE" strokeWidth="1.5" />
-            <path d="M0,200 C180,240 320,160 500,220" fill="none" stroke="#9CE3AE" strokeWidth="1.2" strokeDasharray="4 4" />
-            <path d="M0,280 C120,320 280,260 500,310" fill="none" stroke="#9CE3AE" strokeWidth="1.5" />
-            <path d="M0,360 C200,420 350,330 500,390" fill="none" stroke="#9CE3AE" strokeWidth="1.2" strokeDasharray="3 3" />
-            <path d="M0,440 C160,480 300,420 500,460" fill="none" stroke="#9CE3AE" strokeWidth="1.5" />
-            <circle cx="280" cy="200" r="45" fill="none" stroke="#9CE3AE" strokeWidth="1" strokeDasharray="2 3" />
-            <circle cx="280" cy="200" r="70" fill="none" stroke="#9CE3AE" strokeWidth="1" />
-          </svg>
+        {/* Dark overlay for contrast, depth and mood */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#071A0E]/70 via-[#071A0E]/50 to-[#071A0E]/80 pointer-events-none z-0" />
 
-          {/* Ambient emerald radial glow */}
-          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-[#4ADE80]/12 rounded-full blur-3xl pointer-events-none" />
+        {/* Top blend to connect seamlessly with Section 5b (Calculator) */}
+        <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a2015] via-[#0a2015]/60 to-transparent pointer-events-none z-10" />
 
-          {/* Content */}
-          <div className="relative z-10">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider text-[#9CE3AE]">
-              {sectionText.mapBadge}
-            </span>
-            <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight">
-              {sectionText.mapTitle}
-            </h2>
-            <p className="mt-4 text-sm sm:text-[15.5px] leading-relaxed text-[#C4D8C9]">{sectionText.mapDescription}</p>
-          </div>
+        {/* Bottom smooth fade into the light green landing background */}
+        <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-b from-transparent via-[#071A0E]/50 to-[#D8ECDE] pointer-events-none z-10" />
 
-          <div className="relative z-10 mt-7 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => onNavigate?.('map')}
-              className="inline-flex items-center gap-2 h-12 px-5 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-            >
-              <span>{sectionText.mapCtaPrimary}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate?.('map')}
-              className="inline-flex items-center h-12 px-5 rounded-xl border border-white/30 text-white text-sm font-bold hover:bg-white/10 hover:border-white/50 transition-colors cursor-pointer"
-            >
-              {sectionText.mapCtaSecondary}
-            </button>
-          </div>
-        </div>
-
-        {/* Right side: Interactive Multi-mode GIS Map with live controls and hotspot markers */}
-        <div className="relative bg-[#0D2417] min-h-[340px] sm:min-h-[420px] overflow-hidden flex items-center justify-center">
-          {/* Smooth gradient blend on the left edge into the card on desktop */}
-          <div className="hidden lg:block absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#123522] via-[#123522]/60 to-transparent pointer-events-none z-10" />
-
-          {/* Real Live Map embed matching active mode */}
-          <iframe
-            key={mapMode}
-            title={`GIS xaritasi — ${mapMode}`}
-            src={
-              mapMode === 'satellite'
-                ? 'https://maps.google.com/maps?q=41.45,69.85&t=k&z=10&ie=UTF8&iwloc=&output=embed'
-                : mapMode === 'topo'
-                  ? 'https://www.openstreetmap.org/export/embed.html?bbox=69.60%2C41.35%2C70.25%2C41.70&layer=cyclemap'
-                  : 'https://www.openstreetmap.org/export/embed.html?bbox=68.90%2C41.10%2C69.65%2C41.45&layer=mapnik'
-            }
-            className="w-full h-full min-h-[340px] sm:min-h-[420px] border-0"
-            loading="lazy"
-          />
-
-          {/* Top Floating Control Bar */}
-          <div className="absolute top-3 inset-x-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-            {/* Status chip */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D2417]/90 backdrop-blur-md border border-[#2E7D4F]/50 shadow-lg text-[11px] font-bold text-white pointer-events-auto">
-              <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse shrink-0" />
-              <span className="whitespace-nowrap">
-                {mapMode === 'satellite'
-                  ? t('home.map.satellite')
-                  : mapMode === 'topo'
-                    ? t('home.map.topo')
-                    : t('home.map.osm')}
-              </span>
-            </div>
-
-            {/* Layer Switcher */}
-            <div className="flex items-center gap-1 bg-[#0A1D13]/90 backdrop-blur-md p-1 rounded-xl border border-white/20 shadow-lg pointer-events-auto">
-              {(
-                [
-                  { id: 'street', label: t('home.map.mode.street') },
-                  { id: 'satellite', label: t('home.map.mode.satellite') },
-                  { id: 'topo', label: t('home.map.mode.topo') },
-                ] as const
-              ).map((mode) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setMapMode(mode.id)}
-                  className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
-                    mapMode === mode.id
-                      ? 'bg-[#2E7D4F] text-white shadow-xs scale-[1.02]'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Interactive GIS Hotspot Pins */}
-          {FORESTRY_HOTSPOTS.map((spot) => (
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[24px] lg:rounded-[28px] overflow-hidden border border-white/20 bg-[#081E12]/85 backdrop-blur-xl shadow-[0_24px_64px_rgba(0,0,0,0.6)] grid grid-cols-1 lg:grid-cols-2">
+            {/* Left side: Information & Controls */}
             <div
-              key={spot.id}
-              style={{ left: spot.x, top: spot.y }}
-              className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto"
-              onMouseEnter={() => setActivePin(spot.id)}
-              onMouseLeave={() => setActivePin(null)}
-              onClick={() => setActivePin(activePin === spot.id ? null : spot.id)}
+              className="relative p-8 sm:p-10 lg:p-12 flex flex-col justify-between overflow-hidden"
+              style={{
+                backgroundImage: `url(${darkGisTopoImg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'left center',
+              }}
             >
-              <div className="relative group/pin">
-                <span className="absolute -inset-1.5 rounded-full bg-[#4ADE80]/35 animate-ping" />
-                <div className="relative w-5 h-5 rounded-full bg-[#123522] border-2 border-[#4ADE80] flex items-center justify-center text-white shadow-md">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
-                </div>
+              {/* Subtle dark gradient overlay to guarantee text contrast and smooth glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#06180D]/85 via-[#0A2315]/75 to-[#0E2C1B]/80 pointer-events-none" />
+              <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-[#4ADE80]/15 rounded-full blur-3xl pointer-events-none" />
 
-                {/* Popover Card */}
-                {activePin === spot.id && (
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2.5 rounded-xl bg-[#0D2618]/95 backdrop-blur-md border border-[#2E7D4F]/60 shadow-xl text-white z-30 pointer-events-none">
-                    <div className="text-xs font-black text-white">{spot.name}</div>
-                    <div className="mt-0.5 text-[10px] text-[#A3E5B5] flex items-center justify-between">
-                      <span>{t('home.map.area')}</span>
-                      <span className="font-bold font-mono">{spot.area}</span>
-                    </div>
-                    <div className="text-[9.5px] text-white/60 mt-0.5">{spot.type}</div>
-                  </div>
-                )}
+              <div className="relative z-10">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider text-[#9CE3AE] backdrop-blur-md">
+                  {sectionText.mapBadge}
+                </span>
+                <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight drop-shadow-md">
+                  {sectionText.mapTitle}
+                </h2>
+                <p className="mt-4 text-sm sm:text-[15.5px] leading-relaxed text-[#D2E7DA] drop-shadow-xs">
+                  {sectionText.mapDescription}
+                </p>
+              </div>
+
+              <div className="relative z-10 mt-7 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.('map')}
+                  className="inline-flex items-center gap-2 h-12 px-5 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <span>{sectionText.mapCtaPrimary}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.('map')}
+                  className="inline-flex items-center h-12 px-5 rounded-xl border border-white/30 text-white text-sm font-bold hover:bg-white/10 hover:border-white/50 transition-colors cursor-pointer backdrop-blur-xs"
+                >
+                  {sectionText.mapCtaSecondary}
+                </button>
               </div>
             </div>
-          ))}
 
-          {/* Bottom Floating Bar */}
-          <div className="absolute bottom-3 inset-x-3 z-20 flex items-center justify-between gap-2 pointer-events-none">
-            {/* Coordinates HUD chip */}
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur-md text-[10px] text-[#A8D5B5] font-mono border border-white/10 pointer-events-auto">
-              <span>41°32'N 69°58'E</span>
-              <span className="text-white/30">•</span>
-              <span>1:50 000</span>
+            {/* Right side: Interactive Multi-mode GIS Map with live controls and hotspot markers */}
+            <div className="relative bg-[#0D2417] min-h-[360px] sm:min-h-[440px] overflow-hidden flex items-center justify-center">
+              {/* Smooth gradient blend on the left edge into the card on desktop */}
+              <div className="hidden lg:block absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#081E12] via-[#081E12]/60 to-transparent pointer-events-none z-10" />
+
+              {/* Real Live Map embed matching active mode */}
+              <iframe
+                key={mapMode}
+                title={`GIS xaritasi — ${mapMode}`}
+                src={
+                  mapMode === 'satellite'
+                    ? 'https://maps.google.com/maps?q=41.45,69.85&t=k&z=10&ie=UTF8&iwloc=&output=embed'
+                    : mapMode === 'topo'
+                      ? 'https://www.openstreetmap.org/export/embed.html?bbox=69.60%2C41.35%2C70.25%2C41.70&layer=cyclemap'
+                      : 'https://www.openstreetmap.org/export/embed.html?bbox=68.90%2C41.10%2C69.65%2C41.45&layer=mapnik'
+                }
+                className="w-full h-full min-h-[360px] sm:min-h-[440px] border-0"
+                loading="lazy"
+              />
+
+              {/* Top Floating Control Bar */}
+              <div className="absolute top-3 inset-x-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                {/* Status chip */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D2417]/90 backdrop-blur-md border border-[#2E7D4F]/50 shadow-lg text-[11px] font-bold text-white pointer-events-auto">
+                  <span className="w-2 h-2 rounded-full bg-[#4ADE80] animate-pulse shrink-0" />
+                  <span className="whitespace-nowrap">
+                    {mapMode === 'satellite'
+                      ? t('home.map.satellite')
+                      : mapMode === 'topo'
+                        ? t('home.map.topo')
+                        : t('home.map.osm')}
+                  </span>
+                </div>
+
+                {/* Layer Switcher */}
+                <div className="flex items-center gap-1 bg-[#0A1D13]/90 backdrop-blur-md p-1 rounded-xl border border-white/20 shadow-lg pointer-events-auto">
+                  {(
+                    [
+                      { id: 'street', label: t('home.map.mode.street') },
+                      { id: 'satellite', label: t('home.map.mode.satellite') },
+                      { id: 'topo', label: t('home.map.mode.topo') },
+                    ] as const
+                  ).map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setMapMode(mode.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                        mapMode === mode.id
+                          ? 'bg-[#2E7D4F] text-white shadow-xs scale-[1.02]'
+                          : 'text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Interactive GIS Hotspot Pins */}
+              {FORESTRY_HOTSPOTS.map((spot) => (
+                <div
+                  key={spot.id}
+                  style={{ left: spot.x, top: spot.y }}
+                  className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto"
+                  onMouseEnter={() => setActivePin(spot.id)}
+                  onMouseLeave={() => setActivePin(null)}
+                  onClick={() => setActivePin(activePin === spot.id ? null : spot.id)}
+                >
+                  <div className="relative group/pin">
+                    <span className="absolute -inset-1.5 rounded-full bg-[#4ADE80]/35 animate-ping" />
+                    <div className="relative w-5 h-5 rounded-full bg-[#123522] border-2 border-[#4ADE80] flex items-center justify-center text-white shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
+                    </div>
+
+                    {/* Popover Card */}
+                    {activePin === spot.id && (
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2.5 rounded-xl bg-[#0D2618]/95 backdrop-blur-md border border-[#2E7D4F]/60 shadow-xl text-white z-30 pointer-events-none">
+                        <div className="text-xs font-black text-white">{spot.name}</div>
+                        <div className="mt-0.5 text-[10px] text-[#A3E5B5] flex items-center justify-between">
+                          <span>{t('home.map.area')}</span>
+                          <span className="font-bold font-mono">{spot.area}</span>
+                        </div>
+                        <div className="text-[9.5px] text-white/60 mt-0.5">{spot.type}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Bottom Floating Bar */}
+              <div className="absolute bottom-3 inset-x-3 z-20 flex items-center justify-between gap-2 pointer-events-none">
+                {/* Coordinates HUD chip */}
+                <div className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur-md text-[10px] text-[#A8D5B5] font-mono border border-white/10 pointer-events-auto">
+                  <span>41°32'N 69°58'E</span>
+                  <span className="text-white/30">•</span>
+                  <span>1:50 000</span>
+                </div>
+
+                {/* Full-screen CTA button */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.('map')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#123522]/90 hover:bg-[#123522] text-white text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-105 cursor-pointer pointer-events-auto ml-auto"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[#9CE3AE]" />
+                  <span>{t('home.map.openFull')}</span>
+                </button>
+              </div>
             </div>
-
-            {/* Full-screen CTA button */}
-            <button
-              type="button"
-              onClick={() => onNavigate?.('map')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#123522]/90 hover:bg-[#123522] text-white text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-105 cursor-pointer pointer-events-auto ml-auto"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-[#9CE3AE]" />
-              <span>{t('home.map.openFull')}</span>
-            </button>
           </div>
         </div>
       </section>
 
       {/* ── 7. NEWS & ANNOUNCEMENTS — 3-CARD SWIPER ──────────────────── */}
-      <section ref={newsRef} className="relative z-10">
-        <div className={`flex items-end justify-between mb-6 ${newsInView ? 'reveal' : 'opacity-0'}`}>
-          <div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
-              {t('home.news.badge')}
-            </span>
-            <h2 className="mt-1.5 text-2xl sm:text-[34px] leading-tight font-black text-[#123522] tracking-tight">
-              {t('home.news.sectionTitle')}
-            </h2>
+      <section ref={newsRef} className="relative z-20">
+        <div className={`text-center mb-8 mt-4 ${newsInView ? 'reveal' : 'opacity-0'}`}>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F0F7F1] border border-[#D9EBDC] text-[10px] font-bold uppercase tracking-wider text-[#23653F]">
+            {t('home.news.badge')}
+          </span>
+          <h2 className="mt-2 text-3xl sm:text-[42px] leading-tight font-black text-[#123522] tracking-tight">
+            {t('home.news.sectionTitle')}
+          </h2>
+          <div className="mt-3 flex justify-center">
+            <SafeLink
+              to="/news"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[#2E7D4F] hover:text-[#1B5E20] hover:underline transition-colors"
+            >
+              <span>{t('home.news.viewAllLink')}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </SafeLink>
           </div>
-
-          <SafeLink
-            to="/news"
-            className="shrink-0 inline-flex items-center gap-2 text-sm font-bold text-[#2E7D4F] hover:text-[#1B5E20] hover:underline transition-colors"
-          >
-            <span>{t('home.news.viewAllLink')}</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </SafeLink>
         </div>
 
         <div
@@ -1449,75 +1452,12 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ── 8. SUPPORT CTA ───────────────────────────────────────────── */}
-      <section
-        ref={supportRef}
-        className={`relative z-10 overflow-hidden rounded-[20px] p-8 sm:p-12 shadow-[0_14px_44px_rgba(18,53,34,0.25)] border border-[#2E7D4F]/30 ${
-          supportInView ? 'reveal' : 'opacity-0'
-        }`}
-      >
-        {/* Cinematic forest background photo */}
-        <img
-          src={supportBgImage}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-
-        {/* Directional contrast gradient overlay: deep emerald over text & phone side, translucent in middle so the mountain forest photo is beautifully visible */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(105deg, rgba(8,26,14,0.92) 0%, rgba(14,42,24,0.85) 45%, rgba(18,53,34,0.70) 75%, rgba(10,32,18,0.85) 100%)',
-          }}
-        />
-
-        {/* Top subtle sheen */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#4ADE80]/50 to-transparent pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-          <div className="max-w-xl">
-            {ctaHours && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-[#DCF5E3] shadow-xs">
-                <span className="live w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
-                {ctaHours}
-              </span>
-            )}
-            <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight drop-shadow-sm">
-              {t('home.contact.title')}
-            </h2>
-            <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-[#D2E7D7]">
-              {t('home.contact.description')}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 w-full lg:w-80 shrink-0">
-            {ctaPhone && (
-              <div className="flex items-center gap-3.5 rounded-2xl border border-white/25 bg-black/30 backdrop-blur-md px-5 py-4 shadow-lg hover:border-white/40 transition-all">
-                <div className="w-10 h-10 rounded-[11px] bg-[#2E7D4F]/50 border border-[#4ADE80]/40 flex items-center justify-center shrink-0 shadow-xs">
-                  <PhoneCall className="w-5 h-5 text-[#4ADE80]" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold tracking-wide text-[#9CE3AE]">{t('home.contact.subtitle')}</div>
-                  <a href={`tel:${ctaPhone.replace(/[^\d+]/g, '')}`} className="mt-0.5 block text-lg font-extrabold text-white hover:text-[#9CE3AE] transition-colors">
-                    {ctaPhone}
-                  </a>
-                </div>
-              </div>
-            )}
-            <Button
-              type="button"
-              variant="success"
-              fullWidth
-              className="bg-gradient-to-r from-[#24663E] via-[#2E7D4F] to-[#1E5736] hover:from-[#1E5736] hover:via-[#266842] hover:to-[#17462B] text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all font-bold h-12 rounded-xl text-sm cursor-pointer"
-              rightIcon={<ArrowRight className="w-4 h-4" />}
-              onClick={() => onNavigate?.('feedback')}
-            >
-              {t('home.contact.button')}
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* ── 8. PORTAL QUALITY RATING SURVEY (Baholash) ───────────────── */}
+      {!isTest && (
+        <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6 w-full">
+          <PortalRatingSurvey />
+        </section>
+      )}
     </div>
   );
 };
@@ -1559,7 +1499,7 @@ function DirectionCard({
   return (
     <div
       data-testid="direction-card"
-      className={`group card-lift ${animClass} bg-white border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_18px_40px_rgba(18,53,34,0.16)] hover:-translate-y-2.5 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]`}
+      className={`group card-lift ${animClass} bg-white border border-[#D6E6DB] hover:border-[#2E7D4F]/50 rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(18,53,34,0.05)] hover:shadow-[0_18px_40px_rgba(18,53,34,0.16)] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]`}
       style={{ animationDelay: delay }}
     >
       <div className="relative h-[185px] overflow-hidden bg-[#EAF3EC]">
