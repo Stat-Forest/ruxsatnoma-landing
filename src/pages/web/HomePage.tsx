@@ -840,7 +840,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               {sectionText.statsBadge}
             </span>
             <h2 className="mt-4 text-3xl sm:text-[42px] leading-tight font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-              {sectionText.statsTitle}
+              <Typewriter text={sectionText.statsTitle} start={statsInView} />
             </h2>
             <p className="mt-3 text-sm sm:text-[15.5px] leading-relaxed text-white/95 font-medium drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] max-w-xl mx-auto">
               {sectionText.statsIntro} {t('home.opendata.kAnonymity.before')}{' '}
@@ -856,62 +856,9 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           {/* Grid of Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
-            {stats.map((st, idx) => {
-              const isLower = idx % 2 === 1;
-              return (
-                <div
-                  key={st.testId}
-                  className={`${statsInView ? 'reveal' : 'opacity-0'} ${isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'}`}
-                  style={{ animationDelay: `${idx * 0.12}s` }}
-                >
-                  <div
-                    data-testid={st.testId}
-                    className="group relative bg-gradient-to-br from-[#0B2317]/80 to-[#04120A]/90 backdrop-blur-[32px] border border-white/15 hover:border-white/30 hover:bg-gradient-to-br hover:from-[#123522]/80 hover:to-[#0B2317]/90 rounded-2xl p-5 shadow-[0_16px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_22px_50px_rgba(52,211,153,0.3)] hover:-translate-y-2.5 transition-all duration-[700ms] ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden h-full"
-                  >
-                    {/* Ambient corner light */}
-                    <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#34D399]/15 rounded-full blur-2xl group-hover:bg-[#34D399]/30 transition-colors pointer-events-none" />
-
-                    {/* Top row: Icon + Live / Verified badge */}
-                    <div className="flex items-center justify-between gap-2 mb-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-[#0F2D1D]/80 border border-white/10 flex items-center justify-center text-[#34D399] shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_15px_rgba(52,211,153,0.15)] group-hover:scale-105 group-hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_20px_rgba(52,211,153,0.3)] transition-all duration-500">
-                        {st.icon}
-                      </div>
-                      {idx < 2 ? (
-                        <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#6EE7B7] bg-[#0A2E16]/80 px-2.5 py-0.5 rounded-full border border-[#34D399]/30 shadow-xs">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                          {idx === 0 ? 'Reyestr' : 'GIS'}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/60 bg-white/10 px-2 py-0.5 rounded-full border border-white/15">
-                          Maxfiy
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Value */}
-                    <div
-                      className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight transition-colors ${
-                        st.muted ? 'text-white/40' : 'text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:drop-shadow-[0_2px_16px_rgba(255,255,255,0.4)]'
-                      }`}
-                    >
-                      {st.value}
-                    </div>
-
-                    {/* Label */}
-                    <div className="mt-1.5 text-[13px] font-bold text-white/90 leading-snug">
-                      {st.label}
-                    </div>
-
-                    {/* Note */}
-                    <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
-                      <span className="text-[11px] text-[#A7F3D0]/70 leading-relaxed line-clamp-1">
-                        {st.note}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {stats.map((st, idx) => (
+              <StatCardItem key={st.testId} st={st} idx={idx} />
+            ))}
           </div>
 
           {/* Integrated Rating Band INSIDE the full-bleed section */}
@@ -950,7 +897,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 ${seasonsInView ? 'reveal' : 'opacity-0'}`}>
-            <SeasonStrip windows={seasonWindows} />
+            <SeasonStrip windows={seasonWindows} inView={seasonsInView} />
           </div>
         </section>
       )}
@@ -983,7 +930,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               {t('tariffs.header.badge')}
             </span>
             <h2 id="calculator-heading" className="text-3xl sm:text-[42px] font-black text-white tracking-tight drop-shadow-md text-center">
-              {t('tariffs.header.title')}
+              <Typewriter text={t('tariffs.header.title')} start={calcInView} />
             </h2>
             <p className="text-xs sm:text-[13px] text-[#C4D8C9] leading-relaxed">{t('tariffs.header.subtitle')}</p>
           </div>
@@ -996,15 +943,9 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ── 6. MAP BAND ──────────────────────────────────────────────
           Decorative preview only — the interactive map (maplibre, the real
           contours) lives at `/map`, a screen a different track owns. */}
-      {/* ── 6. MAP BAND ──────────────────────────────────────────────
-          Decorative preview only — the interactive map (maplibre, the real
-          contours) lives at `/map`, a screen a different track owns. */}
-      {/* ── 6. MAP BAND ──────────────────────────────────────────────
-          Decorative preview only — the interactive map (maplibre, the real
-          contours) lives at `/map`, a screen a different track owns. */}
       <section
         ref={mapRef as any}
-        className={`relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 py-16 sm:py-20 lg:py-24 overflow-hidden ${mapInView ? 'reveal' : 'opacity-0'}`}
+        className="relative left-1/2 right-1/2 -mx-[50vw] w-screen z-10 py-16 sm:py-20 lg:py-24 overflow-hidden"
         style={{
           marginTop: 'calc(-4rem - 1px)',
           backgroundColor: '#071A0E',
@@ -1024,7 +965,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-b from-transparent via-[#071A0E]/50 to-[#D8ECDE] pointer-events-none z-10" />
 
         <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-[24px] lg:rounded-[28px] overflow-hidden border border-white/20 bg-[#081E12]/85 backdrop-blur-xl shadow-[0_24px_64px_rgba(0,0,0,0.6)] grid grid-cols-1 lg:grid-cols-2">
+          <div className={`rounded-[24px] lg:rounded-[28px] overflow-hidden border border-white/20 bg-[#081E12]/85 backdrop-blur-xl shadow-[0_24px_64px_rgba(0,0,0,0.6)] grid grid-cols-1 lg:grid-cols-2 ${mapInView ? 'reveal' : 'opacity-0'}`}>
             {/* Left side: Information & Controls */}
             <div
               className="relative p-8 sm:p-10 lg:p-12 flex flex-col justify-between overflow-hidden"
@@ -1043,7 +984,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   {sectionText.mapBadge}
                 </span>
                 <h2 className="mt-4 text-2xl sm:text-[32px] leading-tight font-black text-white tracking-tight drop-shadow-md">
-                  {sectionText.mapTitle}
+                  <Typewriter text={sectionText.mapTitle} start={mapInView} />
                 </h2>
                 <p className="mt-4 text-sm sm:text-[15.5px] leading-relaxed text-[#D2E7DA] drop-shadow-xs">
                   {sectionText.mapDescription}
@@ -1190,7 +1131,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {t('home.news.badge')}
           </span>
           <h2 className="mt-2 text-3xl sm:text-[42px] leading-tight font-black text-[#123522] tracking-tight">
-            {t('home.news.sectionTitle')}
+            <Typewriter text={t('home.news.sectionTitle')} start={newsInView} />
           </h2>
           <div className="mt-3 flex justify-center">
             <SafeLink
@@ -1461,6 +1402,77 @@ export const HomePage: React.FC<HomePageProps> = ({
     </div>
   );
 };
+
+interface StatCardItemData {
+  testId: string;
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  note: string;
+  muted: boolean;
+}
+
+function StatCardItem({ st, idx }: { st: StatCardItemData; idx: number }) {
+  const [cardRef, cardInView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const isLower = idx % 2 === 1;
+
+  return (
+    <div
+      ref={cardRef}
+      className={`${cardInView ? 'reveal' : 'opacity-0'} ${isLower ? 'sm:mt-8 lg:mt-10' : 'sm:mt-0'}`}
+      style={{
+        animationDelay: `${idx * 0.18}s`,
+        animationFillMode: 'both',
+      }}
+    >
+      <div
+        data-testid={st.testId}
+        className="group relative bg-gradient-to-br from-[#0B2317]/80 to-[#04120A]/90 backdrop-blur-[32px] border border-white/15 hover:border-white/30 hover:bg-gradient-to-br hover:from-[#123522]/80 hover:to-[#0B2317]/90 rounded-2xl p-5 shadow-[0_16px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_22px_50px_rgba(52,211,153,0.3)] hover:-translate-y-2.5 transition-all duration-[700ms] ease-[cubic-bezier(0.25,1,0.5,1)] overflow-hidden h-full"
+      >
+        {/* Ambient corner light */}
+        <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#34D399]/15 rounded-full blur-2xl group-hover:bg-[#34D399]/30 transition-colors pointer-events-none" />
+
+        {/* Top row: Icon + Live / Verified badge */}
+        <div className="flex items-center justify-between gap-2 mb-3.5">
+          <div className="w-10 h-10 rounded-xl bg-[#0F2D1D]/80 border border-white/10 flex items-center justify-center text-[#34D399] shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_15px_rgba(52,211,153,0.15)] group-hover:scale-105 group-hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.1),0_0_20px_rgba(52,211,153,0.3)] transition-all duration-500">
+            {st.icon}
+          </div>
+          {idx < 2 ? (
+            <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-[#6EE7B7] bg-[#0A2E16]/80 px-2.5 py-0.5 rounded-full border border-[#34D399]/30 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+              {idx === 0 ? 'Reyestr' : 'GIS'}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/60 bg-white/10 px-2 py-0.5 rounded-full border border-white/15">
+              Maxfiy
+            </span>
+          )}
+        </div>
+
+        {/* Value */}
+        <div
+          className={`font-sans text-2xl sm:text-[25px] font-black tracking-tight leading-tight transition-colors ${
+            st.muted ? 'text-white/40' : 'text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:drop-shadow-[0_2px_16px_rgba(255,255,255,0.4)]'
+          }`}
+        >
+          {st.value}
+        </div>
+
+        {/* Label */}
+        <div className="mt-1.5 text-[13px] font-bold text-white/90 leading-snug">
+          {st.label}
+        </div>
+
+        {/* Note */}
+        <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
+          <span className="text-[11px] text-[#A7F3D0]/70 leading-relaxed line-clamp-1">
+            {st.note}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * One of the six illustrated direction cards (Task 9). Ported from

@@ -2,6 +2,7 @@ import { AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
 import { pickName } from '../../lib/localized';
+import { Typewriter } from '../ui/Typewriter';
 
 export interface SeasonStripProps {
   /** Activity code → the month numbers (1-12) its season is open in. Comes
@@ -9,6 +10,7 @@ export interface SeasonStripProps {
    *  (Task 2, ruling R3) — the page owns the fetch, this component stays
    *  testable with fixed months. */
   windows: Record<string, number[]>;
+  inView?: boolean;
 }
 
 const ROWS: { code: string; color: string }[] = [
@@ -169,7 +171,7 @@ const MONTHS: Record<UiLanguage, { short: string[]; full: string[] }> = {
  * citizen an activity is shut when nobody has said so. An empty array is
  * still closed; only an absent key is unknown.
  */
-export function SeasonStrip({ windows }: SeasonStripProps) {
+export function SeasonStrip({ windows, inView = true }: SeasonStripProps) {
   const { uiLanguage } = useLanguage();
   const text = TEXT[uiLanguage];
   const months = MONTHS[uiLanguage];
@@ -184,7 +186,7 @@ export function SeasonStrip({ windows }: SeasonStripProps) {
             {text.badge}
           </span>
           <h2 className="mt-4 font-serif text-3xl sm:text-4xl lg:text-[42px] leading-tight font-black text-[#0D301B] tracking-tight">
-            {text.title}
+            <Typewriter text={text.title} start={inView} />
           </h2>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#2C523A] font-medium max-w-2xl">{text.subtitle}</p>
         </div>
