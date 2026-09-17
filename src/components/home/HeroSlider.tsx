@@ -209,20 +209,20 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
   const copy: SlideCopy =
     slide === 0
       ? {
-          badge: t('hero.badge'),
-          title: t('hero.title'),
-          titleAccent: t('hero.titleAccent'),
-          subtitle: t('hero.subtitle'),
-          ctaPrimary: t('hero.cta.apply'),
-          ctaSecondary: t('hero.cta.calculator'),
-        }
+        badge: t('hero.badge'),
+        title: t('hero.title'),
+        titleAccent: t('hero.titleAccent'),
+        subtitle: t('hero.subtitle'),
+        ctaPrimary: t('hero.cta.apply'),
+        ctaSecondary: t('hero.cta.calculator'),
+      }
       : EXTRA_SLIDES[uiLanguage][slide - 1];
 
   const actions = SLIDE_ACTIONS[slide];
 
   return (
     <section
-      className="relative overflow-hidden min-h-[100vh] py-20 sm:py-0 flex flex-col justify-center"
+      className="relative overflow-hidden min-h-[84vh] py-20 sm:py-0 flex flex-col justify-center"
 
 
       // Hover and keyboard focus both pause: a reader must never be moved
