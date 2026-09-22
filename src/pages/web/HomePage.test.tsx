@@ -393,7 +393,7 @@ it('sends the map band to the map page', async () => {
       </I18nProvider>
     </MemoryRouter>,
   );
-  await userEvent.click(screen.getByRole('button', { name: /Xaritani ochish/i }));
+  await userEvent.click(screen.getByRole('button', { name: /Xarita/i }));
   expect(onNavigate).toHaveBeenCalledWith('map');
 });
 
