@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
-  Calculator,
-  Check,
   CheckCircle2,
   Info,
   Loader2,
@@ -81,12 +79,6 @@ function fieldConfigFor(code: string | undefined): ActivityFieldConfig {
   if (!code) return DEFAULT_FIELD_CONFIG;
   return ACTIVITY_FIELDS[code] ?? DEFAULT_FIELD_CONFIG;
 }
-
-const INTRO_BULLET_KEYS = [
-  'tariffs.calculator.bullet.norms',
-  'tariffs.calculator.bullet.anonymous',
-  'tariffs.calculator.bullet.finalSum',
-];
 
 function addMonthsIso(base: Date, months: number): string {
   const d = new Date(base);
@@ -185,48 +177,6 @@ function CalculatorSum({
   );
 }
 
-/** The left, always-static info panel from the approved prototype
- *  (`design-canvas/Services.dc.html`'s calculator section) — no data
- *  dependency, so it renders identically whether the refs below are still
- *  loading, failed, or ready. */
-function CalculatorIntro({ heading, description }: { heading: string; description: string }) {
-  const t = useT();
-  return (
-    <div className="p-5 sm:p-6 lg:p-7 bg-white/10 backdrop-blur-sm border-b md:border-b-0 md:border-r border-white/20 flex flex-col justify-between relative overflow-hidden">
-      {/* Ambient decorative orb */}
-      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-[#4ADE80]/20 rounded-full blur-2xl pointer-events-none" />
-
-      <div className="relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/30 shadow-xs">
-          <Calculator className="w-3.5 h-3.5 text-[#9CE3AE]" />
-          <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#9CE3AE]">
-            {t('tariffs.calculator.badge')}
-          </span>
-        </div>
-        <h2 className="mt-3 text-lg sm:text-xl leading-snug font-black text-white tracking-tight">
-          {heading}
-        </h2>
-        <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-[#C4D8C9]">{description}</p>
-        <ul className="mt-4 flex flex-col gap-2">
-          {INTRO_BULLET_KEYS.map((key) => (
-            <li key={key} className="flex items-center gap-2 text-xs text-white/90 font-medium">
-              <span className="w-4 h-4 rounded-full bg-[#2E7D4F]/60 text-[#9CE3AE] flex items-center justify-center shrink-0">
-                <Check className="w-2.5 h-2.5 stroke-[2.5]" />
-              </span>
-              <span>{t(key)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="relative z-10 pt-4 mt-4 border-t border-white/20 flex items-center gap-1.5 text-[11px] text-[#9CE3AE] font-medium">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] shrink-0" />
-        <span>VMQ 689 normativ mezonlari</span>
-      </div>
-    </div>
-  );
-}
-
 export const PriceCalculator: React.FC = () => {
   const t = useT();
   const [refs, setRefs] = useState<RefsState>({ status: 'loading' });
@@ -262,17 +212,14 @@ export const PriceCalculator: React.FC = () => {
     };
   }, []);
 
-  const heading = t('tariffs.calculator.heading');
-  const description = t('tariffs.calculator.description');
+
   const resultLabel = t('tariffs.calculator.resultLabel');
 
   return (
     <div id={CALCULATOR_ANCHOR} className="max-w-4xl mx-auto font-sans scroll-mt-24">
-      <div className="relative border border-white/20 rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.2fr] bg-white/10 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)] transition-all duration-300">
+      <div className="relative border border-white/15 rounded-2xl overflow-hidden bg-[#0A1F13]/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_14px_40px_rgba(52,211,153,0.15)] transition-all duration-300">
         {/* Top glowing laser line */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-[#2E7D4F] to-[#123522] z-10" />
-
-        <CalculatorIntro heading={heading} description={description} />
 
         <div className="p-5 sm:p-6 lg:p-7 bg-transparent space-y-4 min-h-[420px] flex flex-col justify-between transition-all duration-300">
           {refs.status === 'loading' && (
@@ -422,8 +369,8 @@ function CalculatorForm({
                 onClick={() => setActivityId(a.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   selected
-                    ? 'bg-gradient-to-r from-[#123522] to-[#1E4E33] text-white shadow-sm shadow-[#123522]/30 scale-[1.02] ring-1 ring-[#2E7D4F]/40'
-                    : 'bg-[#F8FAF9] hover:bg-white text-[#4A5568] hover:text-[#123522] border border-[#E2E8F0] hover:border-[#86C495] shadow-xs hover:scale-[1.01]'
+                    ? 'bg-gradient-to-r from-[#2E7D4F] to-[#1E4E33] text-white shadow-sm shadow-[#123522]/50 scale-[1.02] ring-1 ring-[#34D399]/50'
+                    : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 hover:border-[#86C495]/50 shadow-xs hover:scale-[1.01]'
                 }`}
               >
                 {pickName(a.name, language, a.code)}
@@ -441,13 +388,19 @@ function CalculatorForm({
             safeLivestock.map((lt) => {
               const inputId = `head-${lt.code}`;
               return (
-                <FormField key={lt.id} htmlFor={inputId} label={`${pickName(lt.name, language, lt.code)}, ${t('tariffs.calculator.headCountSuffix')}`}>
+                <FormField 
+                  key={lt.id} 
+                  htmlFor={inputId} 
+                  label={`${pickName(lt.name, language, lt.code)}, ${t('tariffs.calculator.headCountSuffix')}`}
+                  className="!gap-1 [&>label]:!text-[10.5px] [&>label]:!text-[#C4D8C9] [&>label]:tracking-tight [&>label]:lowercase [&>label]:first-letter:uppercase"
+                >
                   <Input
                     id={inputId}
                     type="number"
                     min={0}
                     placeholder="0"
                     value={headCounts[lt.code] ?? ''}
+                    className="!h-[34px] !text-xs !bg-white/5 !border-white/10 !text-white hover:!border-white/20 focus:!border-[#34D399] focus:!ring-[#34D399]/20"
                     onFocus={(e) => e.target.select()}
                     onChange={(e) => {
                       const raw = e.target.value;
@@ -470,6 +423,7 @@ function CalculatorForm({
             <FormField
               htmlFor="calculator-quantity"
               label={t(fieldConfig.labelKey ?? DEFAULT_FIELD_CONFIG.labelKey!)}
+              className="!gap-1 [&>label]:!text-[10.5px] [&>label]:!text-[#C4D8C9] [&>label]:tracking-tight [&>label]:lowercase [&>label]:first-letter:uppercase"
             >
               <Input
                 id="calculator-quantity"
@@ -477,6 +431,7 @@ function CalculatorForm({
                 min={0}
                 placeholder="1"
                 value={quantity}
+                className="!h-[34px] !text-xs !bg-white/5 !border-white/10 !text-white hover:!border-white/20 focus:!border-[#34D399] focus:!ring-[#34D399]/20"
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => {
                   const raw = e.target.value;
@@ -492,10 +447,15 @@ function CalculatorForm({
             </FormField>
           )}
 
-          <FormField htmlFor="calculator-duration" label={t('tariffs.calculator.durationLabel')}>
+          <FormField 
+            htmlFor="calculator-duration" 
+            label={t('tariffs.calculator.durationLabel')}
+            className="!gap-1 [&>label]:!text-[10.5px] [&>label]:!text-[#C4D8C9] [&>label]:tracking-tight [&>label]:lowercase [&>label]:first-letter:uppercase"
+          >
             <Select
               id="calculator-duration"
               value={durationMonths.toString()}
+              className="!h-[34px] !text-xs !bg-[#071A0E] !border-white/10 !text-white hover:!border-white/20 focus:!border-[#34D399] focus:!ring-[#34D399]/20 [&>option]:bg-[#071A0E] [&>option]:text-white"
               onChange={(e) => setDurationMonths(Number(e.target.value))}
               options={[
                 { value: '3', label: t('tariffs.calculator.duration.months3') },
@@ -511,8 +471,8 @@ function CalculatorForm({
           (decision #63: an unverified claim from a visitor with no session
           cannot be honoured), not merely "not yet wired". */}
       {!isPriceless && (
-        <label className="flex items-center gap-2 text-[11px] font-medium text-[#7E8B95] bg-[#F8FAF8] px-3 py-2 rounded-lg border border-[#E3ECE5] cursor-not-allowed select-none">
-          <input type="checkbox" disabled className="w-3.5 h-3.5 accent-[#2E7D4F] rounded opacity-60" />
+        <label className="flex items-center gap-2 text-[11px] font-medium text-[#C4D8C9] bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 cursor-not-allowed select-none">
+          <input type="checkbox" disabled className="w-3.5 h-3.5 accent-[#34D399] rounded opacity-60" />
           <span>{t('tariffs.calculator.privilegeNote')}</span>
         </label>
       )}
