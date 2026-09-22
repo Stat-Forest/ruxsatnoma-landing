@@ -608,7 +608,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       )}
 
       {/* ── 8. PORTAL QUALITY RATING SURVEY (Baholash) ───────────────── */}
-      {!isTest && (
+      {true && (
         <section className="relative z-10 left-1/2 -translate-x-1/2 w-screen -mt-px bg-[#F5FBFC] pt-6 pb-8 sm:pb-12">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div 

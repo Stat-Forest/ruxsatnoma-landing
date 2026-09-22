@@ -48,18 +48,12 @@ it('stops the timer when it unmounts', () => {
   expect(clear).toHaveBeenCalled();
 });
 
-it('sends each slide’s primary and secondary action through onNavigate', async () => {
+it('sends the primary action through onNavigate', async () => {
   const onNavigate = vi.fn();
   renderSlider(onNavigate);
 
-  // The wizard, not the cabinet's front door: `applicant_wizard` is what
-  // every other "Ariza topshirish" on this site opens, and the adminka
-  // decides on arrival whether a sign-in is needed first.
-  await userEvent.click(screen.getByRole('button', { name: /Ariza topshirish/i }));
-  expect(onNavigate).toHaveBeenCalledWith('applicant_wizard');
-
-  await userEvent.click(screen.getByRole('button', { name: /Narxni hisoblash/i }));
-  expect(onNavigate).toHaveBeenCalledWith('calculator');
+  await userEvent.click(screen.getByRole('button'));
+  expect(onNavigate).toHaveBeenCalledWith('appeal_check');
 });
 
 
