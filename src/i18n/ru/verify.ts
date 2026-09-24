@@ -5,10 +5,9 @@ export const verify = {
   'verify.header.subtitle':
     'Введите серию и номер разрешения или воспользуйтесь сканированием QR-кода.',
 
-  'verify.form.seriesLabel': 'Серия',
-  'verify.form.seriesPlaceholder': 'Например: А',
-  'verify.form.numberLabel': 'Номер',
-  'verify.form.numberPlaceholder': 'Например: 000123',
+  'verify.form.permitNoLabel': 'Серия и номер',
+  'verify.form.permitNoPlaceholder': 'Например: А 000123',
+  'verify.form.permitNoInvalid': 'Введите серию и номер в виде «А 000123»',
   'verify.form.submit': 'Проверить',
 
   'verify.qrInfo.before': 'При сканировании камерой телефона',
