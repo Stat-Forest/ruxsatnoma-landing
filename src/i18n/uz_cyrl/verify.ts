@@ -5,10 +5,9 @@ export const verify = {
   'verify.header.subtitle':
     'Рухсатнома серияси ва рақамини киритинг ёки QR-код сканеридан фойдаланинг.',
 
-  'verify.form.seriesLabel': 'Серия',
-  'verify.form.seriesPlaceholder': 'Масалан: А',
-  'verify.form.numberLabel': 'Рақам',
-  'verify.form.numberPlaceholder': 'Масалан: 000123',
+  'verify.form.permitNoLabel': 'Серия ва рақам',
+  'verify.form.permitNoPlaceholder': 'Масалан: А 000123',
+  'verify.form.permitNoInvalid': 'Серия ва рақамни «А 000123» кўринишида киритинг',
   'verify.form.submit': 'Текшириш',
 
   'verify.qrInfo.before': 'Рухсатнома қоғозидаги',

@@ -13,6 +13,7 @@ import {
   Loader2,
   Hash,
   Phone,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input, FormField } from '../../components/ui/FormControls';
@@ -25,6 +26,7 @@ import type { components } from '../../api/schema';
 import { useT, useLanguage } from '../../i18n/useT';
 import { pickLocalized } from '../../lib/localized';
 import { DASH } from '../../lib/format';
+import { parsePermitNo } from '../../lib/permitNumber';
 import type { MapGeometry } from '../../components/map/types';
 import { checkApplication } from '../../api/applications';
 import type { ApplicationCheckResult } from '../../api/applications';
@@ -81,38 +83,32 @@ function applicationStatusVariant(status: string | null): StatusType {
   return 'info';
 }
 
-/** Splits a loose permit-number string (the home page's single quick-search
- * box, e.g. "А № 000123" or "A-123") into `series`+`number` — the two halves
- * `GET /public/permits/check` actually takes (`permits/service.py`'s
- * `_permit_number`: `f"{series} № {number:06d}"`). Best-effort only: a
- * string with no digits cannot name a permit, so the caller falls back to a
- * plain "not found" instead of guessing further. */
-function splitPermitNumber(raw: string): { series: string; number: string } | null {
-  const match = raw.trim().match(/^(.*?)\D*(\d+)\D*$/);
-  if (!match) return null;
-  const series = match[1].replace(/[№#]/g, '').trim();
-  const number = match[2];
-  if (!series || !number) return null;
-  return { series, number };
-}
-
-type Query = { qr: string } | { series: string; number: string };
+type Query = { qr: string } | { series: string; number: number };
 
 /** Reads the page's own contract out of the URL, in priority order: `?qr=`
  * (a scanned QR — A7's whole reason to exist), then `?series=&number=` (a
- * bookmarkable manual lookup), then the home page's free-text `?q=`. */
+ * bookmarkable manual lookup), then the home page's free-text `?q=`. Both of
+ * the typed ones go through `parsePermitNo`, so a Latin «A» in a hand-made
+ * link finds the permit its Cyrillic twin names; a string that is not a whole
+ * permit number (no series, no digits) names no permit and asks nothing. */
 function queryFromParams(params: URLSearchParams): Query | null {
   const qr = params.get('qr');
   if (qr) return { qr };
   const series = params.get('series');
   const number = params.get('number');
-  if (series && number) return { series, number };
-  const q = params.get('q');
-  if (q) {
-    const split = splitPermitNumber(q);
-    if (split) return split;
-  }
+  const typed = series && number ? `${series} ${number}` : params.get('q');
+  const parsed = typed ? parsePermitNo(typed) : null;
+  if (parsed?.series && parsed.number) return { series: parsed.series, number: parsed.number };
   return null;
+}
+
+/** What the one box starts with: the number the URL already names, typed the
+ *  way it is printed, so a bookmarked lookup shows what it looked up. */
+function initialPermitNo(params: URLSearchParams): string {
+  const series = params.get('series');
+  const number = params.get('number');
+  if (series && number) return `${series} ${number}`;
+  return params.get('q') ?? '';
 }
 
 type Status = 'idle' | 'loading' | 'found' | 'miss' | 'error';
@@ -144,8 +140,8 @@ export const VerifyPage: React.FC = () => {
   };
 
   // ── Permit arm (existing) ────────────────────────────────────────────────
-  const [seriesInput, setSeriesInput] = useState(searchParams.get('series') ?? '');
-  const [numberInput, setNumberInput] = useState(searchParams.get('number') ?? '');
+  const [permitNoInput, setPermitNoInput] = useState(() => initialPermitNo(searchParams));
+  const [permitNoInvalid, setPermitNoInvalid] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [result, setResult] = useState<CheckCardWithContour | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -165,7 +161,7 @@ export const VerifyPage: React.FC = () => {
     async function run(q: Query) {
       try {
         const { data, error } = await api.GET('/api/v1/public/permits/check', {
-          params: { query: 'qr' in q ? { qr: q.qr } : { series: q.series, number: Number(q.number) } },
+          params: { query: 'qr' in q ? { qr: q.qr } : { series: q.series, number: q.number } },
         });
         if (cancelled) return;
         if (error) {
@@ -201,12 +197,15 @@ export const VerifyPage: React.FC = () => {
 
   const handleManualSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const next = new URLSearchParams();
-    if (seriesInput.trim() && numberInput.trim()) {
-      next.set('series', seriesInput.trim());
-      next.set('number', numberInput.trim());
+    // Both halves or nothing: the check names ONE permit, and a box that
+    // cannot be read is said so here rather than answered «not found».
+    const parsed = parsePermitNo(permitNoInput);
+    if (!parsed?.series || !parsed.number) {
+      setPermitNoInvalid(true);
+      return;
     }
-    setSearchParams(next);
+    setPermitNoInvalid(false);
+    setSearchParams(new URLSearchParams({ series: parsed.series, number: String(parsed.number) }));
   };
 
   // ── Application arm (new) ────────────────────────────────────────────────
@@ -330,34 +329,38 @@ export const VerifyPage: React.FC = () => {
       <div className="reveal bg-white border border-[#E4E7EA] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
         {arm === 'permit' ? (
           <>
-            <form onSubmit={handleManualSearch} className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="w-full sm:w-1/3">
-                <FormField label={t('verify.form.seriesLabel')} htmlFor="verify-series">
-                  <Input
-                    id="verify-series"
-                    placeholder={t('verify.form.seriesPlaceholder')}
-                    value={seriesInput}
-                    onChange={(e) => setSeriesInput(e.target.value)}
-                    leftIcon={<Search className="w-4 h-4" />}
-                    touchSize
-                  />
-                </FormField>
+            <form onSubmit={handleManualSearch} className="space-y-1.5">
+              <div className="flex flex-col sm:flex-row gap-3 items-end">
+                <div className="w-full sm:flex-1">
+                  <FormField label={t('verify.form.permitNoLabel')} htmlFor="verify-permit-no">
+                    <Input
+                      id="verify-permit-no"
+                      placeholder={t('verify.form.permitNoPlaceholder')}
+                      value={permitNoInput}
+                      onChange={(e) => {
+                        setPermitNoInput(e.target.value);
+                        setPermitNoInvalid(false);
+                      }}
+                      maxLength={32}
+                      error={permitNoInvalid}
+                      leftIcon={<Search className="w-4 h-4" />}
+                      touchSize
+                    />
+                  </FormField>
+                </div>
+                <Button type="submit" variant="primary" size="lg" className="whitespace-nowrap">
+                  {t('verify.form.submit')}
+                </Button>
               </div>
-              <div className="w-full sm:w-1/3">
-                <FormField label={t('verify.form.numberLabel')} htmlFor="verify-number">
-                  <Input
-                    id="verify-number"
-                    placeholder={t('verify.form.numberPlaceholder')}
-                    value={numberInput}
-                    onChange={(e) => setNumberInput(e.target.value)}
-                    inputMode="numeric"
-                    touchSize
-                  />
-                </FormField>
-              </div>
-              <Button type="submit" variant="primary" size="lg" className="whitespace-nowrap">
-                {t('verify.form.submit')}
-              </Button>
+              {/* Below the row, not inside the field: the row aligns on its
+                  bottom edge, and a message under the box would drag the
+                  button down with it. */}
+              {permitNoInvalid && (
+                <p className="text-xs text-[#B91C1C] flex items-center gap-1" role="alert">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t('verify.form.permitNoInvalid')}</span>
+                </p>
+              )}
             </form>
 
             <div className="flex items-center gap-2 text-xs text-[#767F87] bg-[#F8F9FA] p-3 rounded-lg border border-[#E4E7EA]">

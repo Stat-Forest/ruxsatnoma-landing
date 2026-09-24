@@ -44,8 +44,7 @@ beforeEach(() => {
 });
 
 async function searchPermit(user: ReturnType<typeof userEvent.setup>, series: string, number: string) {
-  await user.type(screen.getByLabelText(/seriya/i), series);
-  await user.type(screen.getByLabelText(/raqam/i), number);
+  await user.type(screen.getByLabelText(/seriya va raqam/i), `${series} ${number}`);
   await user.click(screen.getByRole('button', { name: /tekshirish/i }));
 }
 
@@ -431,4 +430,45 @@ it('translates the application tab, which used to be Uzbek in every language', a
 
   expect(screen.getByLabelText(/номер заявки/i)).toBeInTheDocument();
   expect(screen.getByText(/Конфиденциальность:/)).toBeInTheDocument();
+});
+
+describe('VerifyPage — one box for the permit number', () => {
+  const miss = { data: { found: false }, error: undefined };
+
+  it('reads «a 123» typed on a Latin keyboard as the Cyrillic series and the number', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValue(miss);
+    renderVerify();
+    const user = userEvent.setup();
+
+    expect(screen.queryByLabelText(/^raqam$/i)).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText(/seriya va raqam/i), 'a 123');
+    await user.click(screen.getByRole('button', { name: /tekshirish/i }));
+
+    await screen.findByText(/ruxsatnoma topilmadi/i);
+    expect(api.GET).toHaveBeenCalledWith('/api/v1/public/permits/check', {
+      params: { query: { series: '\u0410', number: 123 } },
+    });
+  });
+
+  it('refuses a number with no series on the spot instead of answering «not found»', async () => {
+    renderVerify();
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/seriya va raqam/i), '000123');
+    await user.click(screen.getByRole('button', { name: /tekshirish/i }));
+
+    expect(await screen.findByText(/«А 000123» koʻrinishida kiriting/)).toBeInTheDocument();
+    expect(api.GET).not.toHaveBeenCalled();
+  });
+
+  it('a bookmarked ?series=&number= link fills the box and runs the check', async () => {
+    (api.GET as ReturnType<typeof vi.fn>).mockResolvedValue(miss);
+    renderVerify(['/check?series=A&number=000123']);
+
+    expect(screen.getByLabelText(/seriya va raqam/i)).toHaveValue('A 000123');
+    await screen.findByText(/ruxsatnoma topilmadi/i);
+    expect(api.GET).toHaveBeenCalledWith('/api/v1/public/permits/check', {
+      params: { query: { series: '\u0410', number: 123 } },
+    });
+  });
 });
