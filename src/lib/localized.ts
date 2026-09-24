@@ -48,7 +48,10 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Scientific research',
   },
 
-  // Livestock Types
+  // Livestock Types. The young ones name the suckling exclusion (VMQ 278: no fee
+  // for young fed on their mother's milk); their uz_latn/uz_cyrl/en repeat the
+  // backend's wording from its migration 0065 verbatim, because
+  // `findKnownTranslation` also matches a row by its API name.
   cattle_adult: {
     uz_latn: 'Qoramol (katta)',
     uz_cyrl: 'Қорамол (катта)',
@@ -57,11 +60,11 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Cattle, adult',
   },
   cattle_young: {
-    uz_latn: 'Qoramol (2 yoshgacha)',
-    uz_cyrl: 'Қорамол (2 ёшгача)',
-    ru: 'Крупный рогатый скот (до 2 лет)',
-    kaa: 'Qaramal (2 jasqa shekem)',
-    en: 'Cattle, under 2 years',
+    uz_latn: 'Qoramol (2 yoshgacha, ona suti bilan oziqlanadigan buzoqlardan tashqari)',
+    uz_cyrl: 'Қорамол (2 ёшгача, она сути билан озиқланадиган бузоқлардан ташқари)',
+    ru: 'Крупный рогатый скот (до 2 лет, кроме телят на материнском молоке)',
+    kaa: 'Qaramal (2 jasqa shekem, ana súti menen azıqlanatuǵınlarınan basqa)',
+    en: 'Cattle, under 2 years (excluding suckling calves)',
   },
   horse_adult: {
     uz_latn: 'Ot (katta)',
@@ -71,11 +74,11 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Horse, adult',
   },
   horse_young: {
-    uz_latn: 'Ot (2 yoshgacha)',
-    uz_cyrl: 'От (2 ёшгача)',
-    ru: 'Лошади (до 2 лет)',
-    kaa: 'At (2 jasqa shekem)',
-    en: 'Horse, under 2 years',
+    uz_latn: 'Ot (2 yoshgacha, ona suti bilan oziqlanadigan toylardan tashqari)',
+    uz_cyrl: 'От (2 ёшгача, она сути билан озиқланадиган тойлардан ташқари)',
+    ru: 'Лошади (до 2 лет, кроме жеребят на материнском молоке)',
+    kaa: 'At (2 jasqa shekem, ana súti menen azıqlanatuǵınlarınan basqa)',
+    en: 'Horse, under 2 years (excluding suckling foals)',
   },
   camel_adult: {
     uz_latn: 'Tuya (katta)',
@@ -85,11 +88,11 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Camel, adult',
   },
   camel_young: {
-    uz_latn: 'Tuya (2 yoshgacha)',
-    uz_cyrl: 'Туя (2 ёшгача)',
-    ru: 'Верблюды (до 2 лет)',
-    kaa: 'Túye (2 jasqa shekem)',
-    en: 'Camel, under 2 years',
+    uz_latn: 'Tuya (2 yoshgacha, ona suti bilan oziqlanadigan boʻtaloqlardan tashqari)',
+    uz_cyrl: 'Туя (2 ёшгача, она сути билан озиқланадиган бўталоқлардан ташқари)',
+    ru: 'Верблюды (до 2 лет, кроме верблюжат на материнском молоке)',
+    kaa: 'Túye (2 jasqa shekem, ana súti menen azıqlanatuǵınlarınan basqa)',
+    en: 'Camel, under 2 years (excluding suckling calves)',
   },
   donkey_adult: {
     uz_latn: 'Eshak (katta)',
@@ -99,11 +102,11 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Donkey, adult',
   },
   donkey_young: {
-    uz_latn: 'Eshak (2 yoshgacha)',
-    uz_cyrl: 'Эшак (2 ёшгача)',
-    ru: 'Ослы (до 2 лет)',
-    kaa: 'Eshek (2 jasqa shekem)',
-    en: 'Donkey, under 2 years',
+    uz_latn: 'Eshak (2 yoshgacha, ona suti bilan oziqlanadigan xoʻtiklardan tashqari)',
+    uz_cyrl: 'Эшак (2 ёшгача, она сути билан озиқланадиган хўтиклардан ташқари)',
+    ru: 'Ослы (до 2 лет, кроме ослят на материнском молоке)',
+    kaa: 'Eshek (2 jasqa shekem, ana súti menen azıqlanatuǵınlarınan basqa)',
+    en: 'Donkey, under 2 years (excluding suckling foals)',
   },
   sheep_goat_6m: {
     uz_latn: 'Qoʻy va echki (6 oydan katta)',
@@ -113,11 +116,11 @@ export const REF_TRANSLATIONS: Record<string, Record<string, string>> = {
     en: 'Sheep and goats, 6 months and older',
   },
   lamb_kid_under_6m: {
-    uz_latn: 'Qoʻzi va uloq (6 oygacha)',
-    uz_cyrl: 'Қўзи ва улоқ (6 ойгача)',
-    ru: 'Ягнята и козлята (до 6 месяцев)',
-    kaa: 'Qozı hám ılaq (6 ayǵa shekem)',
-    en: 'Lambs and kids, under 6 months',
+    uz_latn: 'Qoʻzi va uloq (6 oygacha, ona suti bilan oziqlanadiganlaridan tashqari)',
+    uz_cyrl: 'Қўзи ва улоқ (6 ойгача, она сути билан озиқланадиганларидан ташқари)',
+    ru: 'Ягнята и козлята (до 6 месяцев, кроме питающихся материнским молоком)',
+    kaa: 'Qozı hám ılaq (6 ayǵa shekem, ana súti menen azıqlanatuǵınlarınan basqa)',
+    en: 'Lambs and kids, under 6 months (excluding suckling ones)',
   },
 
   // GIS Layers
