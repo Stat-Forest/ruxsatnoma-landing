@@ -17,6 +17,7 @@ import {
   QrCode,
 } from 'lucide-react';
 import { useT } from '../../i18n/useT';
+import { PERMIT_NUMBER_INPUT_MAX_LENGTH } from '../../api/limits';
 
 interface GisMonitoringSectionProps {
   onNavigate?: (page: string, params?: any) => void;
@@ -451,6 +452,7 @@ export const GisMonitoringSection: React.FC<GisMonitoringSectionProps> = ({ onNa
                           value={permitQuery}
                           onChange={(e) => setPermitQuery(e.target.value.toUpperCase())}
                           placeholder="Masalan: AB 000123"
+                          maxLength={PERMIT_NUMBER_INPUT_MAX_LENGTH}
                           className="w-full h-10 px-3.5 rounded-xl border border-[#D6E6DB] bg-white text-sm font-medium text-[#123522] focus:border-[#2E7D4F] focus:ring-1 focus:ring-[#2E7D4F] uppercase outline-hidden"
                         />
                       </div>
