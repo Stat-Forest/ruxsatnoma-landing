@@ -240,8 +240,7 @@ export const GisMonitoringSection: React.FC<GisMonitoringSectionProps> = ({ onNa
 
   // Check Mode Form State
   const [checkType, setCheckType] = useState<'permit' | 'application'>('permit');
-  const [series, setSeries] = useState('');
-  const [docNumber, setDocNumber] = useState('');
+  const [permitQuery, setPermitQuery] = useState('');
   const [appId, setAppId] = useState('');
   const [checkResult, setCheckResult] = useState<{
     found: boolean;
@@ -289,9 +288,7 @@ export const GisMonitoringSection: React.FC<GisMonitoringSectionProps> = ({ onNa
     e.preventDefault();
 
     if (checkType === 'permit') {
-      const trimmedSeries = series.trim().toUpperCase() || 'AB';
-      const trimmedNum = docNumber.trim() || '000123';
-      const fullQuery = `${trimmedSeries} ${trimmedNum}`.trim();
+      const fullQuery = permitQuery.trim().toUpperCase() || 'AB 000123';
 
       // Trigger test/parent router integration
       if (onNavigate) {
@@ -343,8 +340,7 @@ export const GisMonitoringSection: React.FC<GisMonitoringSectionProps> = ({ onNa
   };
 
   const handleClearCheck = () => {
-    setSeries('');
-    setDocNumber('');
+    setPermitQuery('');
     setAppId('');
     setCheckResult(null);
     setAppliedContour(null);
@@ -445,30 +441,17 @@ export const GisMonitoringSection: React.FC<GisMonitoringSectionProps> = ({ onNa
 
                 <form onSubmit={handleCheck} className="space-y-3">
                   {checkType === 'permit' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <div className="sm:col-span-1">
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <div>
                         <label className="block text-[11px] font-bold text-[#5A646D] uppercase mb-1">
-                          Seriya
+                          Seriya va hujjat raqami
                         </label>
                         <input
                           type="text"
-                          value={series}
-                          onChange={(e) => setSeries(e.target.value.toUpperCase())}
-                          placeholder="Seriya"
-                          maxLength={6}
-                          className="w-full h-10 px-3 rounded-xl border border-[#D6E6DB] bg-white text-sm font-semibold text-[#123522] focus:border-[#2E7D4F] focus:ring-1 focus:ring-[#2E7D4F] uppercase tracking-wider outline-hidden"
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-[11px] font-bold text-[#5A646D] uppercase mb-1">
-                          Hujjat raqami
-                        </label>
-                        <input
-                          type="text"
-                          value={docNumber}
-                          onChange={(e) => setDocNumber(e.target.value)}
-                          placeholder="Raqam — masalan: 000123"
-                          className="w-full h-10 px-3.5 rounded-xl border border-[#D6E6DB] bg-white text-sm font-medium text-[#123522] focus:border-[#2E7D4F] focus:ring-1 focus:ring-[#2E7D4F] outline-hidden"
+                          value={permitQuery}
+                          onChange={(e) => setPermitQuery(e.target.value.toUpperCase())}
+                          placeholder="Masalan: AB 000123"
+                          className="w-full h-10 px-3.5 rounded-xl border border-[#D6E6DB] bg-white text-sm font-medium text-[#123522] focus:border-[#2E7D4F] focus:ring-1 focus:ring-[#2E7D4F] uppercase outline-hidden"
                         />
                       </div>
                     </div>
