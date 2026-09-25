@@ -5,10 +5,9 @@ export const verify = {
   'verify.header.subtitle':
     'Enter permit series and number or scan with a QR code reader.',
 
-  'verify.form.seriesLabel': 'Series',
-  'verify.form.seriesPlaceholder': 'Example: A',
-  'verify.form.numberLabel': 'Number',
-  'verify.form.numberPlaceholder': 'Example: 000123',
+  'verify.form.permitNoLabel': 'Series and number',
+  'verify.form.permitNoPlaceholder': 'Example: А 000123',
+  'verify.form.permitNoInvalid': 'Enter the series and number as «А 000123»',
   'verify.form.submit': 'Verify',
 
   'verify.qrInfo.before': 'When scanning the',

@@ -5,10 +5,9 @@ export const verify = {
   'verify.header.subtitle':
     'Ruxsatnama seriyası hám nomerin kiritiń yamasa QR-kod skanerinen paydalanıń.',
 
-  'verify.form.seriesLabel': 'Seriya',
-  'verify.form.seriesPlaceholder': 'Mısalı: А',
-  'verify.form.numberLabel': 'Nomer',
-  'verify.form.numberPlaceholder': 'Mısalı: 000123',
+  'verify.form.permitNoLabel': 'Seriya hám nomer',
+  'verify.form.permitNoPlaceholder': 'Mısalı: А 000123',
+  'verify.form.permitNoInvalid': 'Seriya hám nomerdi «А 000123» túrinde kiritiń',
   'verify.form.submit': 'Tekseriw',
 
   'verify.qrInfo.before': 'Ruxsatnama qaǵazındaǵı',

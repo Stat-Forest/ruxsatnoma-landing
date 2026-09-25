@@ -5,10 +5,9 @@ export const verify = {
   'verify.header.subtitle':
     'Ruxsatnoma seriyasi va raqamini kiriting yoki QR-kod skaneridan foydalaning.',
 
-  'verify.form.seriesLabel': 'Seriya',
-  'verify.form.seriesPlaceholder': 'Masalan: А',
-  'verify.form.numberLabel': 'Raqam',
-  'verify.form.numberPlaceholder': 'Masalan: 000123',
+  'verify.form.permitNoLabel': 'Seriya va raqam',
+  'verify.form.permitNoPlaceholder': 'Masalan: А 000123',
+  'verify.form.permitNoInvalid': 'Seriya va raqamni «А 000123» koʻrinishida kiriting',
   'verify.form.submit': 'Tekshirish',
 
   'verify.qrInfo.before': 'Ruxsatnoma qogʻozidagi',

@@ -77,3 +77,32 @@ describe('pickName 5-language localization', () => {
     }
   });
 });
+
+describe('young livestock labels', () => {
+  // VMQ 278 charges nothing for young fed on their mother's milk, and the grazing
+  // blank's head total excludes them — the picker has to say so in every language.
+  const SUCKLING_PHRASE: Record<string, string> = {
+    uz_latn: 'ona suti',
+    uz_cyrl: 'она сути',
+    ru: 'материнск',
+    kaa: 'ana súti',
+    en: 'suckling',
+  };
+
+  it.each(['cattle_young', 'horse_young', 'camel_young', 'donkey_young', 'lamb_kid_under_6m'])(
+    '%s says suckling young are not counted',
+    (code) => {
+      for (const [lang, phrase] of Object.entries(SUCKLING_PHRASE)) {
+        expect(REF_TRANSLATIONS[code][lang], `${code}/${lang}`).toContain(phrase);
+      }
+    },
+  );
+
+  it('keeps the note off the adult rows', () => {
+    for (const code of ['cattle_adult', 'horse_adult', 'camel_adult', 'donkey_adult', 'sheep_goat_6m']) {
+      for (const [lang, phrase] of Object.entries(SUCKLING_PHRASE)) {
+        expect(REF_TRANSLATIONS[code][lang], `${code}/${lang}`).not.toContain(phrase);
+      }
+    }
+  });
+});
