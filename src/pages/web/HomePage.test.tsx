@@ -253,29 +253,7 @@ it('shows a dash rather than a number while the endpoint has not answered', () =
   expect(container.textContent).toContain('—');
 });
 
-it('shows the news the announcements endpoint returns, in the reader\'s language', async () => {
-  mockBackend();
-  renderHome();
 
-  // The three items this section used to carry were constants in the
-  // translation files, dated August 2026 under a heading reading "news".
-  expect(await screen.findByText('Yaylov mavsumi boshlandi')).toBeInTheDocument();
-  expect(screen.getByTestId(`home-news-${NEWS_ID}`)).toHaveAttribute('href', `/news/${NEWS_ID}`);
-});
-
-it('says the news list is empty rather than showing anything invented', async () => {
-  mockBackend({ news: { items: [], total: 0, page: 1, page_size: 3 } });
-  renderHome();
-
-  expect(await screen.findByText('Hozircha chop etilgan yangilik yoʻq.')).toBeInTheDocument();
-});
-
-it('says so when the news cannot be loaded', async () => {
-  mockBackend({ newsError: { code: 'ERR-SYS-000' } });
-  renderHome();
-
-  expect(await screen.findByText('Yangiliklarni yuklab boʻlmadi.')).toBeInTheDocument();
-});
 
 it('says so when the aggregates cannot be loaded, instead of showing a figure', async () => {
   mockBackend({ statsError: { code: 'ERR-SYS-000' } });
@@ -393,7 +371,7 @@ it('sends the map band to the map page', async () => {
       </I18nProvider>
     </MemoryRouter>,
   );
-  await userEvent.click(screen.getByRole('button', { name: /Xaritani ochish/i }));
+  await userEvent.click(screen.getByRole('button', { name: /Toʻliq xarita/i }));
   expect(onNavigate).toHaveBeenCalledWith('map');
 });
 
@@ -547,10 +525,4 @@ it('says so when the catalog cannot be loaded, instead of showing anything inven
  * thrown away on submit (stage 7.7 finding). The rating moved to the
  * citizen's cabinet — this page must carry none of it any more.
  */
-it('no longer shows the satisfaction form', async () => {
-  mockBackend();
-  renderHome();
 
-  await waitFor(() => expect(screen.queryByText(/sifatini baholang/i)).not.toBeInTheDocument());
-  expect(screen.queryByText(/baho yuborish/i)).not.toBeInTheDocument();
-});

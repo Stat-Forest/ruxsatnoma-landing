@@ -103,7 +103,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
 
   return (
     <div className={`min-h-screen flex flex-col font-sans text-[#1A1F24] overflow-x-clip ${
-      activeNav === 'home' ? 'bg-[#D8ECDE]' : activeNav === 'services' || activeNav === 'news' || activeNav === 'news_item' || activeNav === 'documents' || activeNav === 'about' || activeNav === 'contact' ? 'bg-[#EFF7F2]' : 'bg-white'
+      activeNav === 'home' ? 'bg-[#F5FBFC]' : activeNav === 'services' || activeNav === 'news' || activeNav === 'news_item' || activeNav === 'documents' || activeNav === 'about' || activeNav === 'contact' ? 'bg-[#EFF7F2]' : 'bg-white'
     }`}>
       {/* ── Top Header ─────────────────────────────────────────── */}
       <header className={`sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 ${
@@ -113,7 +113,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
       }`}>
         {/* The 38px announcement strip (`design-canvas/Main.dc.html`) — editorial
             copy from i18n, live phone number from the site-settings endpoint. */}
-        <AnnouncementBar phone={contacts?.phone} onNavigate={onNavigate} />
+        <AnnouncementBar onNavigate={onNavigate} />
 
         {/* `xl:grid` with three columns is what stops the nav from sliding when
             the language changes: under plain `justify-between` its position followed

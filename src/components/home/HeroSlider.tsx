@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Phone } from 'lucide-react';
 import { useLanguage, useT } from '../../i18n/useT';
 import type { UiLanguage } from '../../i18n/context';
+import { fetchSiteSettings } from '../../api/site';
 
 export interface HeroSliderProps {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void;
@@ -22,17 +23,11 @@ interface SlideCopy {
  *  that used to say the same thing; slides 1 and 2 are new copy this task
  *  needed and `src/i18n/*` is off-limits to this track (file-ownership
  *  boundary), so it lives here, translated into all five portal languages. */
-//
 // Slide 0's primary is the wizard, not `auth_login`: the button says
 // "Ariza topshirish", and `/login` showed a signed-in citizen a form they did
 // not need and then dropped them on the dashboard instead of the application.
 // The adminka's `RequireAuth` decides on arrival whether a sign-in comes first
 // and brings them back to the wizard afterwards (`src/lib/cabinet.ts`).
-const SLIDE_ACTIONS: { primary: string; secondary: string }[] = [
-  { primary: 'applicant_wizard', secondary: 'calculator' },
-  { primary: 'verify', secondary: 'about' },
-  { primary: 'services', secondary: 'calculator' },
-];
 
 /** Slides 2 and 3 (index 1 and 2) — `design-canvas/Main.dc.html`'s
  *  `renderVals()` `slides` array, translated. Best-effort for `kaa`, matching
@@ -183,8 +178,17 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
   const [paused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
+  const [phone, setPhone] = useState<string | null>(null);
   const t = useT();
   const { uiLanguage } = useLanguage();
+
+  useEffect(() => {
+    let active = true;
+    fetchSiteSettings().then((res) => {
+      if (active && res) setPhone(res.contacts.phone);
+    });
+    return () => { active = false; };
+  }, []);
 
   // The preference can change while the page is open (a viewer flipping the
   // OS setting), and a carousel that only reads it once ignores that.
@@ -218,11 +222,10 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
       }
       : EXTRA_SLIDES[uiLanguage][slide - 1];
 
-  const actions = SLIDE_ACTIONS[slide];
 
   return (
     <section
-      className="relative overflow-hidden min-h-[84vh] py-20 sm:py-0 flex flex-col justify-center"
+      className="relative overflow-hidden min-h-[min(84vh,800px)] py-20 sm:py-0 flex flex-col justify-center"
 
 
       // Hover and keyboard focus both pause: a reader must never be moved
@@ -269,8 +272,9 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
         }}
       />
 
-      <div className="relative w-full max-w-7xl mx-auto flex-1 flex items-center px-4 sm:px-6 mt-10 sm:mt-0 pb-16 sm:pb-0">
-        <div className="max-w-xl lg:max-w-2xl">
+      <div className="relative w-full max-w-7xl mx-auto flex-1 flex items-center px-4 sm:px-6 pb-16 sm:pb-0">
+        
+        <div className="max-w-xl lg:max-w-2xl z-20 -mt-10 sm:-mt-24">
           {/* Animated content keying on slide index ensures smooth animations replay whenever text changes */}
           <div key={slide}>
             <div className="hero-badge-in inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-white/25 backdrop-blur-md">
@@ -296,19 +300,21 @@ export function HeroSlider({ onNavigate }: HeroSliderProps) {
             <div className="hero-fade-up mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: '.4s' }}>
               <button
                 type="button"
-                onClick={() => onNavigate?.(actions.primary)}
+                onClick={() => onNavigate?.('appeal_check')}
                 className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#2E7D4F] hover:bg-[#23653F] text-white text-sm font-bold shadow-[0_14px_34px_rgba(46,125,79,.5)] transition-colors cursor-pointer"
               >
-                <span>{copy.ctaPrimary}</span>
+                <span>{t('announcement.appealStatus')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => onNavigate?.(actions.secondary)}
-                className="inline-flex items-center h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                {copy.ctaSecondary}
-              </button>
+              {phone && (
+                <a
+                  href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-xl border border-white/40 text-white text-sm font-bold hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <Phone className="w-4 h-4 text-white/80" />
+                  <span>{phone}</span>
+                </a>
+              )}
             </div>
           </div>
 

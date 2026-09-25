@@ -111,7 +111,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
       onMouseLeave={() => setIsPaused(false)}
     >
       <div 
-        className="relative flex items-center justify-center min-h-[400px] sm:min-h-[440px] w-full"
+        className="relative flex items-center justify-center min-h-[380px] sm:min-h-[390px] w-full"
       >
         {items.map((item, idx) => {
           const { transform, opacity, zIndex, filter, transition, cursor } = getTransform(idx);
@@ -152,7 +152,7 @@ export const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
       </div>
 
       {/* Navigation Controls */}
-      <div className="flex items-center justify-center gap-4 mt-2 sm:mt-3 relative z-20">
+      <div className="flex items-center justify-center gap-4 -mt-2 sm:-mt-4 relative z-20">
         <button
           onClick={prevSlide}
           aria-label="Previous slide"
