@@ -186,7 +186,7 @@ export function SeasonStrip({ windows, inView = true }: SeasonStripProps) {
             {text.badge}
           </span>
           <h2 className="mt-4 font-serif text-3xl sm:text-4xl lg:text-[42px] leading-tight font-black text-[#0D301B] tracking-tight">
-            <Typewriter text={text.title} start={inView} />
+            <Typewriter key={text.title} text={text.title} start={inView} />
           </h2>
           <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#2C523A] font-medium max-w-2xl">{text.subtitle}</p>
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { RouteObject } from 'react-router';
-import { Navigate, Outlet, ScrollRestoration, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
+import { Navigate, Outlet, createBrowserRouter, useLocation, useNavigate, useOutletContext } from 'react-router';
 import { PublicLayout } from './components/layouts/PublicLayout';
 import { CABINET_PATHS, goToCabinet } from './lib/cabinet';
 import { CALCULATOR_ANCHOR } from './components/calculator/PriceCalculator';
@@ -89,6 +89,14 @@ const CABINET_ENTRIES: Record<string, string> = {
   applicant_wizard: CABINET_PATHS.wizard,
 };
 
+function scrollToPageTop() {
+  if (typeof window === 'undefined') return;
+
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
 function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -99,6 +107,15 @@ function Layout() {
   // twice again. It is fetched here, where both the chrome and the page can
   // be handed the same answer.
   const [siteSettings, setSiteSettings] = React.useState<SiteSettingsState>({ status: 'loading' });
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !('scrollRestoration' in window.history)) return;
+    const previous = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return () => {
+      window.history.scrollRestoration = previous;
+    };
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -129,29 +146,30 @@ function Layout() {
     if (page === 'verify') {
       const query = params?.query;
       navigate(typeof query === 'string' && query ? `/check?q=${encodeURIComponent(query)}` : '/check');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToPageTop();
       return;
     }
     const path = PAGE_TO_PATH[page];
     if (!path) return; // out of `landing`'s known screens — nothing to open
     navigate(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToPageTop();
   };
 
   const activeNav = location.pathname.startsWith('/news/')
     ? 'news_item'
     : (PATH_TO_PAGE[location.pathname] ?? 'home');
 
-  React.useEffect(() => {
-    if (!location.hash && typeof window !== 'undefined') {
-      window.scrollTo(0, 0);
-    }
-  }, [location.pathname]);
+  React.useLayoutEffect(() => {
+    if (location.hash || typeof window === 'undefined') return;
+
+    scrollToPageTop();
+  }, [location.key, location.pathname, location.search, location.hash]);
 
   return (
     <PublicLayout onNavigate={onNavigate} activeNav={activeNav} siteSettings={siteSettings}>
-      <ScrollRestoration />
-      <Outlet context={{ onNavigate, siteSettings } satisfies LandingOutletContext} />
+      <div key={location.pathname + location.search}>
+        <Outlet context={{ onNavigate, siteSettings } satisfies LandingOutletContext} />
+      </div>
     </PublicLayout>
   );
 }
