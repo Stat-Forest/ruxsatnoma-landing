@@ -471,4 +471,31 @@ describe('VerifyPage — one box for the permit number', () => {
       params: { query: { series: '\u0410', number: 123 } },
     });
   });
+
+  /**
+   * Stage 19 (query bounds, R4): `PERMIT_NUMBER_INPUT_MAX_LENGTH` (32) is
+   * comfortably above any real series+number pair, but the box should still
+   * carry it rather than accept anything typed.
+   */
+  it('caps the permit number box at 32 characters', () => {
+    renderVerify();
+
+    expect(screen.getByLabelText(/seriya va raqam/i)).toHaveAttribute('maxLength', '32');
+  });
+});
+
+describe('VerifyPage \u2014 application arm input caps', () => {
+  /**
+   * Stage 19 (query bounds, R4): the public check endpoint caps `number`/
+   * `phone` at 64 server-side. The box should stop a citizen at the same
+   * length instead of accepting more and failing only on submit.
+   */
+  it('caps the application number and phone inputs at 64 characters', async () => {
+    renderVerify();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: /ariza holati/i }));
+
+    expect(screen.getByLabelText(/ariza raqami/i)).toHaveAttribute('maxLength', '64');
+    expect(screen.getByLabelText(/telefon/i)).toHaveAttribute('maxLength', '64');
+  });
 });

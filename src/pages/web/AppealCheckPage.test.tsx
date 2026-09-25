@@ -99,6 +99,22 @@ describe('AppealCheckPage', () => {
   });
 });
 
+describe('AppealCheckPage — check form input caps', () => {
+  /**
+   * Stage 19 (query bounds, R4): the public check endpoints cap `number`/
+   * `phone` at 64 and `email` at 255 server-side. The box should stop a
+   * citizen at the same length instead of accepting more and failing only
+   * on submit.
+   */
+  it('caps the number, phone and email inputs at the server’s own limits', () => {
+    renderPage();
+
+    expect(checkField('appeal-number')).toHaveAttribute('maxLength', '64');
+    expect(checkField('appeal-phone')).toHaveAttribute('maxLength', '64');
+    expect(checkField('appeal-email')).toHaveAttribute('maxLength', '255');
+  });
+});
+
 // Every test above renders `<AppealCheckPage />` with no `<BrowserRouter>` /
 // route context at all — `useSearchParams()` throws outside a router, so a
 // regression that started mirroring phone/email into the URL (see the

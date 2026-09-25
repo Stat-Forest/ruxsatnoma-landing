@@ -22,6 +22,7 @@ import type { StatusType } from '../../components/ui/StatusBadge';
 import { Alert, Skeleton } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
 import { apiError } from '../../api/errors';
+import { CHECK_NUMBER_MAX_LENGTH, CHECK_PHONE_MAX_LENGTH, PERMIT_NUMBER_INPUT_MAX_LENGTH } from '../../api/limits';
 import type { components } from '../../api/schema';
 import { useT, useLanguage } from '../../i18n/useT';
 import { pickLocalized } from '../../lib/localized';
@@ -341,7 +342,7 @@ export const VerifyPage: React.FC = () => {
                         setPermitNoInput(e.target.value);
                         setPermitNoInvalid(false);
                       }}
-                      maxLength={32}
+                      maxLength={PERMIT_NUMBER_INPUT_MAX_LENGTH}
                       error={permitNoInvalid}
                       leftIcon={<Search className="w-4 h-4" />}
                       touchSize
@@ -394,6 +395,7 @@ export const VerifyPage: React.FC = () => {
                     placeholder={t('verify.application.numberPlaceholder')}
                     value={appNumberInput}
                     onChange={(e) => setAppNumberInput(e.target.value)}
+                    maxLength={CHECK_NUMBER_MAX_LENGTH}
                     leftIcon={<Hash className="w-4 h-4" />}
                     touchSize
                   />
@@ -406,6 +408,7 @@ export const VerifyPage: React.FC = () => {
                     placeholder={t('verify.application.phonePlaceholder')}
                     value={appPhoneInput}
                     onChange={(e) => setAppPhoneInput(e.target.value)}
+                    maxLength={CHECK_PHONE_MAX_LENGTH}
                     leftIcon={<Phone className="w-4 h-4" />}
                     touchSize
                   />

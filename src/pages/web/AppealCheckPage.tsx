@@ -18,6 +18,7 @@ import type { StatusType } from '../../components/ui/StatusBadge';
 import { Alert } from '../../components/ui/Feedback';
 import { api } from '../../api/client';
 import { apiError, formatApiError } from '../../api/errors';
+import { CHECK_EMAIL_MAX_LENGTH, CHECK_NUMBER_MAX_LENGTH, CHECK_PHONE_MAX_LENGTH } from '../../api/limits';
 import type { components } from '../../api/schema';
 import { useT } from '../../i18n/useT';
 
@@ -354,15 +355,29 @@ export const AppealCheckPage: React.FC = () => {
                 placeholder={t('appeal.form.numberPlaceholder')}
                 value={number}
                 onChange={(e) => setNumber(e.target.value)}
+                maxLength={CHECK_NUMBER_MAX_LENGTH}
                 leftIcon={<Search className="w-4 h-4" />}
                 touchSize
               />
             </FormField>
             <FormField label={t('appeal.form.phoneLabel')} htmlFor="appeal-phone">
-              <Input id="appeal-phone" value={phone} onChange={(e) => setPhone(e.target.value)} touchSize />
+              <Input
+                id="appeal-phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                maxLength={CHECK_PHONE_MAX_LENGTH}
+                touchSize
+              />
             </FormField>
             <FormField label={t('appeal.form.emailLabel')} htmlFor="appeal-email">
-              <Input id="appeal-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} touchSize />
+              <Input
+                id="appeal-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                maxLength={CHECK_EMAIL_MAX_LENGTH}
+                touchSize
+              />
             </FormField>
           </div>
           <Button type="submit" variant="primary" size="lg" isLoading={status === 'loading'}>
