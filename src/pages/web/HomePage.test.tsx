@@ -205,8 +205,7 @@ it('sends the quick-check strip to the verify page with what was typed', async (
     </MemoryRouter>,
   );
 
-  await userEvent.type(screen.getByPlaceholderText('Seriya'), 'AB');
-  await userEvent.type(screen.getByPlaceholderText(/Raqam/i), '000123');
+  await userEvent.type(screen.getByPlaceholderText(/AB 000123/i), 'AB 000123');
   await userEvent.click(screen.getByRole('button', { name: /^Tekshirish$/i }));
 
   expect(onNavigate).toHaveBeenCalledWith('verify', { query: 'AB 000123' });
